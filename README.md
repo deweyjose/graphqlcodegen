@@ -1,5 +1,3 @@
-# wayfair-dgs-codegen 
-
 This is port of the netflix codegen plugin for Gradle. Found [here](https://github.com/Netflix/dgs-codegen).
 
 COPIED FROM NETFLIX DOCUMENTATION.
