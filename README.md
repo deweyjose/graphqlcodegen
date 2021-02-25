@@ -51,6 +51,49 @@ Example
 </typeMapping>
 ```
 
+## subPackageNameClient
+
+- Type: string
+- Required: false
+- Default: client
+
+Example
+```xml
+<subPackageNameClient>client</subPackageNameClient>
+```
+
+## subPackageNameDatafetchers
+
+- Type: string
+- Required: false
+- Default: client
+
+Example
+```xml
+<subPackageNameDatafetchers>datafetchers</subPackageNameDatafetchers>
+```
+
+## subPackageNameTypes
+
+- Type: string
+- Required: false
+- Default: client
+
+Example
+```xml
+<subPackageNameTypes>types</subPackageNameTypes>
+```
+## generateBoxedTypes
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<generateBoxedTypes>false</generateBoxedTypes>
+```
+
 ## generateClient
 
 - Type: boolean

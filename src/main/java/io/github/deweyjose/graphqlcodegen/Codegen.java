@@ -1,4 +1,4 @@
-package dj.graphqlcodegen;
+package io.github.deweyjose.graphqlcodegen;
 
 import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
@@ -31,10 +31,10 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "subPackageNameClient", defaultValue = "client")
     private String subPackageNameClient;
 
-    @Parameter(property = "subPackageNameDatafetchers", defaultValue = "client")
+    @Parameter(property = "subPackageNameDatafetchers", defaultValue = "datafetchers")
     private String subPackageNameDatafetchers;
 
-    @Parameter(property = "subPackageNameTypes", defaultValue = "client")
+    @Parameter(property = "subPackageNameTypes", defaultValue = "types")
     private String subPackageNameTypes;
 
     @Parameter(property = "generateBoxedTypes", defaultValue = "false")
