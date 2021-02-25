@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.deweyjose</groupId>
@@ -12,11 +13,10 @@
     <url>https://github.com/deweyjose/graphqlcodegen</url>
 
     <scm>
-        <connection>scm:git:git://github.com/deweyjose/graphqlcodegen.git</connection>
-        <developerConnection>scm:git:ssh://github.com:deweyjose/graphqlcodegen.git</developerConnection>
-        <url>http://github.com/deweyjose/graphqlcodegen/tree/master</url>
-      <tag>1.0</tag>
-  </scm>
+        <connection>scm:git:git@github.com:deweyjose/graphqlcodegen.git</connection>
+        <url>scm:git:git@github.com:deweyjose/graphqlcodegen.git</url>
+        <developerConnection>scm:git:git@github.com:deweyjose/graphqlcodegen.git</developerConnection>
+    </scm>
 
     <build>
         <plugins>
