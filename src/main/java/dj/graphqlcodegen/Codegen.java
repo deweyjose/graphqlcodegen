@@ -28,7 +28,6 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "typeMapping")
     private Map typeMapping;
 
-    /* 4.1.3
     @Parameter(property = "subPackageNameClient", defaultValue = "client")
     private String subPackageNameClient;
 
@@ -40,7 +39,6 @@ public class Codegen extends AbstractMojo {
 
     @Parameter(property = "generateBoxedTypes", defaultValue = "false")
     private boolean generateBoxedTypes;
-     */
 
     @Parameter(property = "generateClient", defaultValue = "false")
     private boolean generateClient;
@@ -103,15 +101,11 @@ public class Codegen extends AbstractMojo {
                 exampleOutputDir.toPath(),
                 true,
                 packageName,
-                /* 4.1.3
                 subPackageNameClient,
                 subPackageNameDatafetchers,
                 subPackageNameTypes,
-                 */
                 Language.valueOf(getLanguage().toUpperCase()),
-                /* 4.1.3
                 generateBoxedTypes,
-                 */
                 generateClient,
                 typeMapping,
                 Arrays.stream(includeQueries).collect(Collectors.toSet()),
