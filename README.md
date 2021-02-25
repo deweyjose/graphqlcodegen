@@ -1,14 +1,8 @@
-# wayfair-dgs-codegen 
-
 This is port of the netflix codegen plugin for Gradle. Found [here](https://github.com/Netflix/dgs-codegen).
 
 COPIED FROM NETFLIX DOCUMENTATION.
 
 The DGS Code Generation plugin generates code for basic types and example data fetchers based on the your Domain Graph Service's graphql schema file during the project's build process. The plugin requires the path to schema files and the package name to use to generate the file. If no schema path is specified, it will look under src/resources/schema for any files with .graphqls extension. plugin generates code for basic types and example data fetchers based on the your Domain Graph Service's graphql schema file during the project's build process. The plugin requires the path to schema files and the package name to use to generate the file. If no schema path is specified, it will look under src/resources/schema for any files with .graphqls extension.
-
-# Roadmap
-1. Tests
-2. Integrate with 4.1.3. Currently rc-1. Not available on maven central. This unlocks boxed types, sub package names for types, client and datafetchers.
 
 # Options
 
