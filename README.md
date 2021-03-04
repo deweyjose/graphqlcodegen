@@ -173,6 +173,28 @@ Example
 <shortProjectionNames>false</shortProjectionNames>
 ```
 
+## generateDataTypes
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<generateDataTypes>false</generateDataTypes>
+```
+
+## maxProjectionDepth
+
+- Type: int
+- Required: false
+- Default: 10
+
+Example
+```xml
+<maxProjectionDepth>10</maxProjectionDepth>
+```
+
 # Usage
 
 Add the following to your pom files build/plugins section.
