@@ -61,6 +61,12 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "shortProjectionNames", defaultValue = "false")
     private boolean shortProjectionNames;
 
+    @Parameter(property = "generateDataTypes", defaultValue = "true")
+    private boolean generateDataTypes;
+
+    @Parameter(property = "maxProjectionDepth", defaultValue = "10")
+    private int maxProjectionDepth;
+
 
     private String getLanguage() {
         try {
@@ -111,7 +117,9 @@ public class Codegen extends AbstractMojo {
                 Arrays.stream(includeQueries).collect(Collectors.toSet()),
                 Arrays.stream(includeMutations).collect(Collectors.toSet()),
                 skipEntityQueries,
-                shortProjectionNames
+                shortProjectionNames,
+                generateDataTypes,
+                maxProjectionDepth
         );
 
 
