@@ -99,6 +99,17 @@ Example
 <generateClient>false</generateClient>
 ```
 
+## generateInterfaces
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<generateInterfaces>false</generateInterfaces>
+```
+
 ## outputDir
 
 - Type: string

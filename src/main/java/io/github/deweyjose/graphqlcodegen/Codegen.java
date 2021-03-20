@@ -43,6 +43,9 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "generateClient", defaultValue = "false")
     private boolean generateClient;
 
+    @Parameter(property = "generateInterfaces", defaultValue = "false")
+    private boolean generateInterfaces;
+
     @Parameter(property = "outputDir", defaultValue = "${project.basedir}/target/generated-sources")
     private File outputDir;
 
@@ -113,6 +116,7 @@ public class Codegen extends AbstractMojo {
                 Language.valueOf(getLanguage().toUpperCase()),
                 generateBoxedTypes,
                 generateClient,
+                generateInterfaces,
                 typeMapping,
                 Arrays.stream(includeQueries).collect(Collectors.toSet()),
                 Arrays.stream(includeMutations).collect(Collectors.toSet()),
@@ -121,7 +125,6 @@ public class Codegen extends AbstractMojo {
                 generateDataTypes,
                 maxProjectionDepth
         );
-
 
         getLog().info("Codegen config: " + config);
 
