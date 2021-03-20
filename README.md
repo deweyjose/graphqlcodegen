@@ -213,7 +213,7 @@ Add the following to your pom files build/plugins section.
 <plugin>
     <groupId>dg.graphqlcodegen</groupId>
 	<artifactId>dgs-codegen-maven-plugin</artifactId>
-	<version>1.1</version>
+	<version>1.7</version>
 	<executions>
 		<execution>
 			<goals>
