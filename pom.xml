@@ -5,7 +5,7 @@
     <groupId>io.github.deweyjose</groupId>
     <artifactId>graphqlcodegen-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>1.8-SNAPSHOT</version>
+    <version>1.8</version>
 
     <name>GraphQL Code Generator</name>
     <description>Maven port of the Netflix DGS GraphQL Codegen gradle build plugin</description>
@@ -15,7 +15,7 @@
         <connection>scm:git:git@github.com:deweyjose/graphqlcodegen.git</connection>
         <url>scm:git:git@github.com:deweyjose/graphqlcodegen.git</url>
         <developerConnection>scm:git:git@github.com:deweyjose/graphqlcodegen.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>graphqlcodegen-maven-plugin-1.8</tag>
     </scm>
 
     <build>
