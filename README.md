@@ -211,9 +211,9 @@ Example
 Add the following to your pom files build/plugins section.
 ```xml
 <plugin>
-    <groupId>dg.graphqlcodegen</groupId>
-	<artifactId>dgs-codegen-maven-plugin</artifactId>
-	<version>1.1</version>
+    <groupId>io.github.deweyjose</groupId>
+	<artifactId>graphqlcodegen-maven-plugin</artifactId>
+	<version>1.8</version>
 	<executions>
 		<execution>
 			<goals>
