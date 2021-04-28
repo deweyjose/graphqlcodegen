@@ -70,15 +70,9 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "maxProjectionDepth", defaultValue = "10")
     private int maxProjectionDepth;
 
+    @Parameter(property = "language", defaultValue = "java")
+    private String language;
 
-    private String getLanguage() {
-        try {
-            this.getClass().getClassLoader().loadClass("org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper");
-            return "KOTLIN";
-        } catch (ClassNotFoundException e) {
-            return "JAVA";
-        }
-    }
 
     private void verifySettings() {
         if (packageName == null) {
@@ -113,7 +107,7 @@ public class Codegen extends AbstractMojo {
                 subPackageNameClient,
                 subPackageNameDatafetchers,
                 subPackageNameTypes,
-                Language.valueOf(getLanguage().toUpperCase()),
+                Language.valueOf(language.toUpperCase()),
                 generateBoxedTypes,
                 generateClient,
                 generateInterfaces,
