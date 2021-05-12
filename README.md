@@ -206,6 +206,17 @@ Example
 <maxProjectionDepth>10</maxProjectionDepth>
 ```
 
+## language
+
+- Type: String
+- Required: false
+- Default: java
+
+Example
+```xml
+<language>kotlin</language>
+```
+
 # Usage
 
 Add the following to your pom files build/plugins section.
