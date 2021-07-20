@@ -73,6 +73,15 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "language", defaultValue = "java")
     private String language;
 
+    @Parameter(property = "omitNullInputFields", defaultValue = "false")
+    private boolean omitNullInputFields;
+
+    @Parameter(property = "kotlinAllFieldsOptional", defaultValue = "false")
+    private boolean kotlinAllFieldsOptional;
+
+    @Parameter(property = "snakeCaseConstantNames", defaultValue = "false")
+    private boolean snakeCaseConstantNames;
+
 
     private void verifySettings() {
         if (packageName == null) {
@@ -117,7 +126,10 @@ public class Codegen extends AbstractMojo {
                 skipEntityQueries,
                 shortProjectionNames,
                 generateDataTypes,
-                maxProjectionDepth
+                omitNullInputFields,
+                maxProjectionDepth,
+                kotlinAllFieldsOptional,
+                snakeCaseConstantNames
         );
 
         getLog().info("Codegen config: " + config);

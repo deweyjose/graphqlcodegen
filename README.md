@@ -217,6 +217,39 @@ Example
 <language>kotlin</language>
 ```
 
+## omitNullInputFields
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<omitNullInputFields>false</omitNullInputFields>
+```
+
+## kotlinAllFieldsOptional
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<kotlinAllFieldsOptional>false</kotlinAllFieldsOptional>
+```
+
+## snakeCaseConstantNames
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<snakeCaseConstantNames>false</snakeCaseConstantNames>
+```
+
 # Usage
 
 Add the following to your pom files build/plugins section.
