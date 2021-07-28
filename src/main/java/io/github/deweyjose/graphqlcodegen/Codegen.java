@@ -1,8 +1,12 @@
 package io.github.deweyjose.graphqlcodegen;
 
-import com.netflix.graphql.dgs.codegen.CodeGen;
-import com.netflix.graphql.dgs.codegen.CodeGenConfig;
-import com.netflix.graphql.dgs.codegen.Language;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -10,12 +14,9 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.netflix.graphql.dgs.codegen.CodeGen;
+import com.netflix.graphql.dgs.codegen.CodeGenConfig;
+import com.netflix.graphql.dgs.codegen.Language;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class Codegen extends AbstractMojo {
@@ -46,10 +47,10 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "generateInterfaces", defaultValue = "false")
     private boolean generateInterfaces;
 
-    @Parameter(property = "outputDir", defaultValue = "${project.basedir}/target/generated-sources")
+    @Parameter(property = "outputDir", defaultValue = "${project.build.directory}/generated-sources")
     private File outputDir;
 
-    @Parameter(property = "exampleOutputDir", defaultValue = "${project.basedir}/target/generated-examples")
+    @Parameter(property = "exampleOutputDir", defaultValue = "${project.build.directory}/generated-examples")
     private File exampleOutputDir;
 
     @Parameter(property = "includeQueries")
@@ -82,7 +83,6 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "snakeCaseConstantNames", defaultValue = "false")
     private boolean snakeCaseConstantNames;
 
-
     private void verifySettings() {
         if (packageName == null) {
             throw new RuntimeException("Please specify a packageName");
@@ -92,49 +92,33 @@ public class Codegen extends AbstractMojo {
             throw new RuntimeException("Duplicate entries in schemaPaths");
         }
 
-        for (int i = 0; i < schemaPaths.length; ++i) {
-            if (!schemaPaths[i].exists()) {
+        for (final File schemaPath : schemaPaths) {
+            if (!schemaPath.exists()) {
                 try {
-                    throw new RuntimeException("Schema File: " + schemaPaths[i].getCanonicalPath() + " does not exist!");
-                } catch (IOException e) {
+                    throw new RuntimeException("Schema File: " + schemaPath.getCanonicalPath() + " does not exist!");
+                } catch (final IOException e) {
                     e.printStackTrace();
                 }
             }
         }
     }
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         verifySettings();
 
-        CodeGenConfig config = new CodeGenConfig(
-                Collections.emptySet(),
-                Arrays.stream(schemaPaths).collect(Collectors.toSet()),
-                outputDir.toPath(),
-                exampleOutputDir.toPath(),
-                true,
-                packageName,
-                subPackageNameClient,
-                subPackageNameDatafetchers,
-                subPackageNameTypes,
-                Language.valueOf(language.toUpperCase()),
-                generateBoxedTypes,
-                generateClient,
-                generateInterfaces,
-                typeMapping,
-                Arrays.stream(includeQueries).collect(Collectors.toSet()),
-                Arrays.stream(includeMutations).collect(Collectors.toSet()),
-                skipEntityQueries,
-                shortProjectionNames,
-                generateDataTypes,
-                omitNullInputFields,
-                maxProjectionDepth,
-                kotlinAllFieldsOptional,
-                snakeCaseConstantNames
-        );
+        final CodeGenConfig config = new CodeGenConfig(Collections.emptySet(),
+                Arrays.stream(schemaPaths).collect(Collectors.toSet()), outputDir.toPath(), exampleOutputDir.toPath(),
+                true, packageName, subPackageNameClient, subPackageNameDatafetchers, subPackageNameTypes,
+                Language.valueOf(language.toUpperCase()), generateBoxedTypes, generateClient, generateInterfaces,
+                typeMapping, Arrays.stream(includeQueries).collect(Collectors.toSet()),
+                Arrays.stream(includeMutations).collect(Collectors.toSet()), skipEntityQueries, shortProjectionNames,
+                generateDataTypes, omitNullInputFields, maxProjectionDepth, kotlinAllFieldsOptional,
+                snakeCaseConstantNames);
 
         getLog().info("Codegen config: " + config);
 
-        CodeGen codeGen = new CodeGen(config);
+        final CodeGen codeGen = new CodeGen(config);
         codeGen.generate();
     }
 }
