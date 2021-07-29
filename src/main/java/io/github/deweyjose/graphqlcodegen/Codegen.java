@@ -20,6 +20,7 @@ import com.netflix.graphql.dgs.codegen.Language;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class Codegen extends AbstractMojo {
+
     @Parameter(property = "schemaPaths", defaultValue = "${project.build.resources}/schema")
     private File[] schemaPaths;
 
@@ -116,7 +117,7 @@ public class Codegen extends AbstractMojo {
                 generateDataTypes, omitNullInputFields, maxProjectionDepth, kotlinAllFieldsOptional,
                 snakeCaseConstantNames);
 
-        getLog().info("Codegen config: " + config);
+        getLog().info(String.format("Codegen config: %n%s", config));
 
         final CodeGen codeGen = new CodeGen(config);
         codeGen.generate();
