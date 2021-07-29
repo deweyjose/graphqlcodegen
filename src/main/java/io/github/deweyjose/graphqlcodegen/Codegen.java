@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -85,7 +86,7 @@ public class Codegen extends AbstractMojo {
     private boolean snakeCaseConstantNames;
 
     private void verifySettings() {
-        if (packageName == null) {
+        if (Objects.isNull(packageName)) {
             throw new RuntimeException("Please specify a packageName");
         }
 
@@ -108,13 +109,29 @@ public class Codegen extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         verifySettings();
 
-        final CodeGenConfig config = new CodeGenConfig(Collections.emptySet(),
-                Arrays.stream(schemaPaths).collect(Collectors.toSet()), outputDir.toPath(), exampleOutputDir.toPath(),
-                true, packageName, subPackageNameClient, subPackageNameDatafetchers, subPackageNameTypes,
-                Language.valueOf(language.toUpperCase()), generateBoxedTypes, generateClient, generateInterfaces,
-                typeMapping, Arrays.stream(includeQueries).collect(Collectors.toSet()),
-                Arrays.stream(includeMutations).collect(Collectors.toSet()), skipEntityQueries, shortProjectionNames,
-                generateDataTypes, omitNullInputFields, maxProjectionDepth, kotlinAllFieldsOptional,
+        final CodeGenConfig config = new CodeGenConfig(
+                Collections.emptySet(),
+                Arrays.stream(schemaPaths).collect(Collectors.toSet()), 
+                outputDir.toPath(), 
+                exampleOutputDir.toPath(),
+                true, 
+                packageName, 
+                subPackageNameClient, 
+                subPackageNameDatafetchers, 
+                subPackageNameTypes,
+                Language.valueOf(language.toUpperCase()), 
+                generateBoxedTypes, 
+                generateClient, 
+                generateInterfaces,
+                typeMapping, 
+                Arrays.stream(includeQueries).collect(Collectors.toSet()),
+                Arrays.stream(includeMutations).collect(Collectors.toSet()), 
+                skipEntityQueries, 
+                shortProjectionNames,
+                generateDataTypes, 
+                omitNullInputFields, 
+                maxProjectionDepth, 
+                kotlinAllFieldsOptional,
                 snakeCaseConstantNames);
 
         getLog().info(String.format("Codegen config: %n%s", config));
