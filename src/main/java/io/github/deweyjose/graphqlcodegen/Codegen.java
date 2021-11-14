@@ -28,9 +28,6 @@ public class Codegen extends AbstractMojo {
 	@Parameter(property = "packageName", defaultValue = "")
 	private String packageName;
 
-	@Parameter(property = "typeMapping")
-	private Map<String, String> typeMapping;
-
 	@Parameter(property = "subPackageNameClient", defaultValue = "client")
 	private String subPackageNameClient;
 
@@ -40,11 +37,20 @@ public class Codegen extends AbstractMojo {
 	@Parameter(property = "subPackageNameTypes", defaultValue = "types")
 	private String subPackageNameTypes;
 
+	@Parameter(property = "language", defaultValue = "java")
+	private String language;
+
+	@Parameter(property = "typeMapping")
+	private Map<String, String> typeMapping;
+
 	@Parameter(property = "generateBoxedTypes", defaultValue = "false")
 	private boolean generateBoxedTypes;
 
 	@Parameter(property = "generateClient", defaultValue = "false")
 	private boolean generateClient;
+
+	@Parameter(property = "generateDataTypes", defaultValue = "true")
+	private boolean generateDataTypes;
 
 	@Parameter(property = "generateInterfaces", defaultValue = "false")
 	private boolean generateInterfaces;
@@ -67,14 +73,8 @@ public class Codegen extends AbstractMojo {
 	@Parameter(property = "shortProjectionNames", defaultValue = "false")
 	private boolean shortProjectionNames;
 
-	@Parameter(property = "generateDataTypes", defaultValue = "true")
-	private boolean generateDataTypes;
-
 	@Parameter(property = "maxProjectionDepth", defaultValue = "10")
 	private int maxProjectionDepth;
-
-	@Parameter(property = "language", defaultValue = "java")
-	private String language;
 
 	@Parameter(property = "omitNullInputFields", defaultValue = "false")
 	private boolean omitNullInputFields;
