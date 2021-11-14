@@ -254,6 +254,42 @@ Example
 <snakeCaseConstantNames>false</snakeCaseConstantNames>
 ```
 
+## writeToFiles
+
+- Type: boolean
+- Required: false
+- Default: true
+
+Example
+```xml
+<writeToFiles>false</writeToFiles>
+```
+
+## includeSubscriptions
+
+- Type: array
+- Required: false
+- Default: []
+
+Example 
+```xml
+<includeSubscriptions>
+    <param>Subscriptions1</param>
+    <param>Subscriptions2</param>
+</includeSubscriptions>
+```
+
+## generateInterfaceSetters
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<generateInterfaceSetters>false</generateInterfaceSetters>
+```
+
 # Usage
 
 Add the following to your pom files build/plugins section.

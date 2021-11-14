@@ -85,6 +85,15 @@ public class Codegen extends AbstractMojo {
 	@Parameter(property = "snakeCaseConstantNames", defaultValue = "false")
 	private boolean snakeCaseConstantNames;
 
+	@Parameter(property = "writeToFiles", defaultValue = "true")
+	private boolean writeToFiles;
+
+	@Parameter(property = "includeSubscriptions")
+	private String[] includeSubscriptions;
+
+	@Parameter(property = "generateInterfaceSetters", defaultValue = "false")
+	private boolean generateInterfaceSetters;
+
 	private void verifySettings() {
 		if (Objects.isNull(packageName)) {
 			throw new RuntimeException("Please specify a packageName");
@@ -111,28 +120,30 @@ public class Codegen extends AbstractMojo {
 
 		final CodeGenConfig config = new CodeGenConfig(
 				Collections.emptySet(),
-				Arrays.stream(schemaPaths).collect(Collectors.toSet()),
-				outputDir.toPath(),
+				Arrays.stream(schemaPaths).collect(Collectors.toSet()), 
+				outputDir.toPath(), 
 				exampleOutputDir.toPath(),
-				true,
-				packageName,
-				subPackageNameClient,
-				subPackageNameDatafetchers,
+				writeToFiles, 
+				packageName, 
+				subPackageNameClient, 
+				subPackageNameDatafetchers, 
 				subPackageNameTypes,
-				Language.valueOf(language.toUpperCase()),
-				generateBoxedTypes,
-				generateClient,
+				Language.valueOf(language.toUpperCase()), 
+				generateBoxedTypes, 
+				generateClient, 
 				generateInterfaces,
-				typeMapping,
+				typeMapping, 
 				Arrays.stream(includeQueries).collect(Collectors.toSet()),
 				Arrays.stream(includeMutations).collect(Collectors.toSet()),
+				Arrays.stream(includeSubscriptions).collect(Collectors.toSet()), 
 				skipEntityQueries,
-				shortProjectionNames,
-				generateDataTypes,
-				omitNullInputFields,
+				shortProjectionNames, 
+				generateDataTypes, 
+				omitNullInputFields, 
 				maxProjectionDepth,
-				kotlinAllFieldsOptional,
-				snakeCaseConstantNames
+				kotlinAllFieldsOptional, 
+				snakeCaseConstantNames,
+				generateInterfaceSetters
 			);
 
 		getLog().info(String.format("Codegen config: %n%s", config));
