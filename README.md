@@ -4,6 +4,10 @@ COPIED FROM NETFLIX DOCUMENTATION.
 
 The DGS Code Generation plugin generates code for basic types and example data fetchers based on the your Domain Graph Service's graphql schema file during the project's build process. The plugin requires the path to schema files and the package name to use to generate the file. If no schema path is specified, it will look under src/resources/schema for any files with .graphqls extension. plugin generates code for basic types and example data fetchers based on the your Domain Graph Service's graphql schema file during the project's build process. The plugin requires the path to schema files and the package name to use to generate the file. If no schema path is specified, it will look under src/resources/schema for any files with .graphqls extension.
 
+# Example Repo
+
+https://github.com/deweyjose/graphqlcodegen-example
+
 # Options
 
 Options are configured in the `<configuration>` element of the dgs-codegen-maven-plugin plugin.
@@ -288,16 +292,12 @@ Example
 
 # Usage
 
-For a comple working example checkout this companion repo:
-
-https://github.com/deweyjose/graphqlcodegen-example
-
 Add the following to your pom files build/plugins section.
 ```xml
 <plugin>
     <groupId>io.github.deweyjose</groupId>
 	<artifactId>graphqlcodegen-maven-plugin</artifactId>
-	<version>1.15</version>
+	<version>1.14</version>
 	<executions>
 		<execution>
 			<goals>
