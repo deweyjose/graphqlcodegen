@@ -12,6 +12,16 @@ https://github.com/deweyjose/graphqlcodegen-example
 
 Options are configured in the `<configuration>` element of the dgs-codegen-maven-plugin plugin.
 
+## skip
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<skip>true</skip>
+```
 
 ## schemaPaths
 
