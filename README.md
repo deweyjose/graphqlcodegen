@@ -19,8 +19,15 @@ Options are configured in the `<configuration>` element of the dgs-codegen-maven
 - Default: false
 
 Example
+
 ```xml
 <skip>true</skip>
+```
+
+Or 
+
+```shell
+# mvn ... -Ddgs.codegen.skip=true 
 ```
 
 ## schemaPaths

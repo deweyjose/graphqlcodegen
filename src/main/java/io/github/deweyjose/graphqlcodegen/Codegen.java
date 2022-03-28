@@ -96,7 +96,7 @@ public class Codegen extends AbstractMojo {
 	@Parameter(property = "generateInterfaceSetters", defaultValue = "false")
 	private boolean generateInterfaceSetters;
 
-	@Parameter(property = "skip", defaultValue = "false", required = false)
+	@Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
 	private boolean skip;
 
 	private void verifySettings() {
@@ -111,7 +111,8 @@ public class Codegen extends AbstractMojo {
 		for (final File schemaPath : schemaPaths) {
 			if (!schemaPath.exists()) {
 				try {
-					throw new RuntimeException(format("Schema File: %s does not exist!", schemaPath.getCanonicalPath()));
+					throw new RuntimeException(
+							format("Schema File: %s does not exist!", schemaPath.getCanonicalPath()));
 				} catch (final IOException e) {
 					e.printStackTrace();
 				}
@@ -121,38 +122,39 @@ public class Codegen extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		if(!skip) {
+		if (!skip) {
 			verifySettings();
-	
+
 			final CodeGenConfig config = new CodeGenConfig(
-					emptySet(), 
+					emptySet(),
 					stream(schemaPaths).collect(toSet()),
-					outputDir.toPath(), 
-					exampleOutputDir.toPath(), 
-					writeToFiles, 
-					packageName, 
+					outputDir.toPath(),
+					exampleOutputDir.toPath(),
+					writeToFiles,
+					packageName,
 					subPackageNameClient,
-					subPackageNameDatafetchers, 
-					subPackageNameTypes, 
+					subPackageNameDatafetchers,
+					subPackageNameTypes,
 					Language.valueOf(language.toUpperCase()),
-					generateBoxedTypes, 
-					generateClient, 
-					generateInterfaces, 
+					generateBoxedTypes,
+					generateClient,
+					generateInterfaces,
 					typeMapping,
-					stream(includeQueries).collect(toSet()), 
+					stream(includeQueries).collect(toSet()),
 					stream(includeMutations).collect(toSet()),
-					stream(includeSubscriptions).collect(toSet()), 
-					skipEntityQueries, 
+					stream(includeSubscriptions).collect(toSet()),
+					skipEntityQueries,
 					shortProjectionNames,
-					generateDataTypes, 
-					omitNullInputFields, 
-					maxProjectionDepth, 
+					generateDataTypes,
+					omitNullInputFields,
+					maxProjectionDepth,
 					kotlinAllFieldsOptional,
-					snakeCaseConstantNames, 
-					generateInterfaceSetters);
-	
+					snakeCaseConstantNames,
+					generateInterfaceSetters
+				);
+
 			getLog().info(format("Codegen config: %n%s", config));
-	
+
 			final CodeGen codeGen = new CodeGen(config);
 			codeGen.generate();
 		}
