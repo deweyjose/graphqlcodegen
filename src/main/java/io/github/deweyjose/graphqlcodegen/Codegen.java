@@ -1,12 +1,14 @@
 package io.github.deweyjose.graphqlcodegen;
 
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
+import static java.util.Collections.emptySet;
+import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toSet;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -94,19 +96,23 @@ public class Codegen extends AbstractMojo {
 	@Parameter(property = "generateInterfaceSetters", defaultValue = "false")
 	private boolean generateInterfaceSetters;
 
+	@Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
+	private boolean skip;
+
 	private void verifySettings() {
-		if (Objects.isNull(packageName)) {
+		if (isNull(packageName)) {
 			throw new RuntimeException("Please specify a packageName");
 		}
 
-		if (schemaPaths.length != Arrays.stream(schemaPaths).collect(Collectors.toSet()).size()) {
+		if (schemaPaths.length != stream(schemaPaths).collect(toSet()).size()) {
 			throw new RuntimeException("Duplicate entries in schemaPaths");
 		}
 
 		for (final File schemaPath : schemaPaths) {
 			if (!schemaPath.exists()) {
 				try {
-					throw new RuntimeException("Schema File: " + schemaPath.getCanonicalPath() + " does not exist!");
+					throw new RuntimeException(
+							format("Schema File: %s does not exist!", schemaPath.getCanonicalPath()));
 				} catch (final IOException e) {
 					e.printStackTrace();
 				}
@@ -116,39 +122,41 @@ public class Codegen extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		verifySettings();
+		if (!skip) {
+			verifySettings();
 
-		final CodeGenConfig config = new CodeGenConfig(
-				Collections.emptySet(),
-				Arrays.stream(schemaPaths).collect(Collectors.toSet()), 
-				outputDir.toPath(), 
-				exampleOutputDir.toPath(),
-				writeToFiles, 
-				packageName, 
-				subPackageNameClient, 
-				subPackageNameDatafetchers, 
-				subPackageNameTypes,
-				Language.valueOf(language.toUpperCase()), 
-				generateBoxedTypes, 
-				generateClient, 
-				generateInterfaces,
-				typeMapping, 
-				Arrays.stream(includeQueries).collect(Collectors.toSet()),
-				Arrays.stream(includeMutations).collect(Collectors.toSet()),
-				Arrays.stream(includeSubscriptions).collect(Collectors.toSet()), 
-				skipEntityQueries,
-				shortProjectionNames, 
-				generateDataTypes, 
-				omitNullInputFields, 
-				maxProjectionDepth,
-				kotlinAllFieldsOptional, 
-				snakeCaseConstantNames,
-				generateInterfaceSetters
-			);
+			final CodeGenConfig config = new CodeGenConfig(
+					emptySet(),
+					stream(schemaPaths).collect(toSet()),
+					outputDir.toPath(),
+					exampleOutputDir.toPath(),
+					writeToFiles,
+					packageName,
+					subPackageNameClient,
+					subPackageNameDatafetchers,
+					subPackageNameTypes,
+					Language.valueOf(language.toUpperCase()),
+					generateBoxedTypes,
+					generateClient,
+					generateInterfaces,
+					typeMapping,
+					stream(includeQueries).collect(toSet()),
+					stream(includeMutations).collect(toSet()),
+					stream(includeSubscriptions).collect(toSet()),
+					skipEntityQueries,
+					shortProjectionNames,
+					generateDataTypes,
+					omitNullInputFields,
+					maxProjectionDepth,
+					kotlinAllFieldsOptional,
+					snakeCaseConstantNames,
+					generateInterfaceSetters
+				);
 
-		getLog().info(String.format("Codegen config: %n%s", config));
+			getLog().info(format("Codegen config: %n%s", config));
 
-		final CodeGen codeGen = new CodeGen(config);
-		codeGen.generate();
+			final CodeGen codeGen = new CodeGen(config);
+			codeGen.generate();
+		}
 	}
 }
