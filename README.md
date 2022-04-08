@@ -314,7 +314,7 @@ Add the following to your pom files build/plugins section.
 <plugin>
     <groupId>io.github.deweyjose</groupId>
 	<artifactId>graphqlcodegen-maven-plugin</artifactId>
-	<version>1.14</version>
+	<version>1.18</version>
 	<executions>
 		<execution>
 			<goals>
