@@ -1,5 +1,6 @@
 package io.github.deweyjose.graphqlcodegen;
 
+import static io.github.deweyjose.utils.ThrowingConsumer.throwingConsumerWrapper;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
@@ -7,8 +8,8 @@ import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -20,6 +21,8 @@ import org.apache.maven.plugins.annotations.Parameter;
 import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
 import com.netflix.graphql.dgs.codegen.Language;
+
+import io.github.deweyjose.utils.ThrowingConsumer;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class Codegen extends AbstractMojo {
@@ -99,6 +102,12 @@ public class Codegen extends AbstractMojo {
 	@Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
 	private boolean skip;
 
+	private final ThrowingConsumer<File, Exception> fileNotExist = file -> {
+		throw new RuntimeException(format("Schema File: %s does not exist!", file.getCanonicalPath()));
+	};
+
+	private final Predicate<File> notExist = file -> !file.exists();
+
 	private void verifySettings() {
 		if (isNull(packageName)) {
 			throw new RuntimeException("Please specify a packageName");
@@ -108,16 +117,7 @@ public class Codegen extends AbstractMojo {
 			throw new RuntimeException("Duplicate entries in schemaPaths");
 		}
 
-		for (final File schemaPath : schemaPaths) {
-			if (!schemaPath.exists()) {
-				try {
-					throw new RuntimeException(
-							format("Schema File: %s does not exist!", schemaPath.getCanonicalPath()));
-				} catch (final IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		stream(schemaPaths).filter(notExist).forEach(throwingConsumerWrapper(fileNotExist));
 	}
 
 	@Override
@@ -150,8 +150,7 @@ public class Codegen extends AbstractMojo {
 					maxProjectionDepth,
 					kotlinAllFieldsOptional,
 					snakeCaseConstantNames,
-					generateInterfaceSetters
-				);
+					generateInterfaceSetters);
 
 			getLog().info(format("Codegen config: %n%s", config));
 
