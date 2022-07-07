@@ -21,7 +21,7 @@ Options are configured in the `<configuration>` element of the dgs-codegen-maven
 Example
 
 ```xml
-<skip>true</skip>
+<dgs.codegen.skip>true</dgs.codegen.skip>
 ```
 
 Or 
