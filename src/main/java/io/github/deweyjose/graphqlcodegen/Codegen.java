@@ -56,6 +56,12 @@ public class Codegen extends AbstractMojo {
 
 	@Parameter(property = "generateInterfaces", defaultValue = "false")
 	private boolean generateInterfaces;
+	
+	@Parameter(property = "generateKotlinNullableClasses", defaultValue = "false")
+	private boolean generateKotlinNullableClasses;
+
+	@Parameter(property = "generateKotlinClosureProjections", defaultValue = "false")
+	private boolean generateKotlinClosureProjections;
 
 	@Parameter(property = "outputDir", defaultValue = "${project.build.directory}/generated-sources")
 	private File outputDir;
@@ -95,6 +101,12 @@ public class Codegen extends AbstractMojo {
 
 	@Parameter(property = "generateInterfaceSetters", defaultValue = "false")
 	private boolean generateInterfaceSetters;
+	
+	@Parameter(property = "javaGenerateAllConstructor", defaultValue = "false")
+	private boolean  javaGenerateAllConstructor;
+	
+	@Parameter(property = "implementSerializable", defaultValue = "false")
+	private boolean implementSerializable;
 
 	@Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
 	private boolean skip;
@@ -139,6 +151,8 @@ public class Codegen extends AbstractMojo {
 					generateBoxedTypes,
 					generateClient,
 					generateInterfaces,
+				    generateKotlinNullableClasses,
+				    generateKotlinClosureProjections,
 					typeMapping,
 					stream(includeQueries).collect(toSet()),
 					stream(includeMutations).collect(toSet()),
@@ -150,7 +164,9 @@ public class Codegen extends AbstractMojo {
 					maxProjectionDepth,
 					kotlinAllFieldsOptional,
 					snakeCaseConstantNames,
-					generateInterfaceSetters
+					generateInterfaceSetters,
+				    javaGenerateAllConstructor,
+				    implementSerializable
 				);
 
 			getLog().info(format("Codegen config: %n%s", config));

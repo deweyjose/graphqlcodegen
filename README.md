@@ -131,6 +131,28 @@ Example
 <generateInterfaces>false</generateInterfaces>
 ```
 
+## generateKotlinNullableClasses
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<generateKotlinNullableClasses>false</generateKotlinNullableClasses>
+```
+
+## generateKotlinClosureProjections
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<generateKotlinClosureProjections>false</generateKotlinClosureProjections>
+```
+
 ## outputDir
 
 - Type: string
@@ -305,6 +327,28 @@ Example
 Example
 ```xml
 <generateInterfaceSetters>false</generateInterfaceSetters>
+```
+
+## javaGenerateAllConstructor
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<javaGenerateAllConstructor>false</javaGenerateAllConstructor>
+```
+
+## implementSerializable
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<implementSerializable>false</implementSerializable>
 ```
 
 # Usage
