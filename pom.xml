@@ -5,7 +5,7 @@
 	<groupId>io.github.deweyjose</groupId>
 	<artifactId>graphqlcodegen-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-	<version>1.20</version>
+	<version>1.21-SNAPSHOT</version>
 
 	<name>GraphQL Code Generator</name>
 	<description>Maven port of the Netflix DGS GraphQL Codegen gradle build plugin</description>
@@ -105,6 +105,17 @@
 				<artifactId>maven-plugin-plugin</artifactId>
 				<version>${maven-plugin-plugin.version}</version>
 			</plugin>
+            <!-- <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <tagNameFormat>@{project.version}</tagNameFormat>
+                    <scmCommentPrefix>[skip ci] [maven-release-plugin]</scmCommentPrefix>
+                    <username>${OSSRH_USERNAME}</username>
+                    <password>${OSSRH_PASSWORD}</password>
+                    <detail>true</detail>
+                </configuration>
+            </plugin> -->
 		</plugins>
 	</build>
 
