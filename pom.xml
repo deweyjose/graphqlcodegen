@@ -176,4 +176,16 @@
 		</profile>
 	</profiles>
 
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/deweyjose/graphqlcodegen/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>GitHub</system>
+		<url>https://github.com/deweyjose/graphqlcodegen/actions/workflows</url>
+	</ciManagement>
+	<organization>
+		<name>Dewey Jose</name>
+		<url>https://github.com/deweyjose</url>
+	</organization>
 </project>
