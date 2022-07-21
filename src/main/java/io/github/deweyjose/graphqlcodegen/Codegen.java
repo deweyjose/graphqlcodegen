@@ -56,7 +56,7 @@ public class Codegen extends AbstractMojo {
 
 	@Parameter(property = "generateInterfaces", defaultValue = "false")
 	private boolean generateInterfaces;
-	
+
 	@Parameter(property = "generateKotlinNullableClasses", defaultValue = "false")
 	private boolean generateKotlinNullableClasses;
 
@@ -101,12 +101,15 @@ public class Codegen extends AbstractMojo {
 
 	@Parameter(property = "generateInterfaceSetters", defaultValue = "false")
 	private boolean generateInterfaceSetters;
-	
+
 	@Parameter(property = "javaGenerateAllConstructor", defaultValue = "false")
-	private boolean  javaGenerateAllConstructor;
-	
+	private boolean javaGenerateAllConstructor;
+
 	@Parameter(property = "implementSerializable", defaultValue = "false")
 	private boolean implementSerializable;
+	
+	@Parameter(property = "addGeneratedAnnotation", defaultValue = "false")
+	private boolean addGeneratedAnnotation;
 
 	@Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
 	private boolean skip;
@@ -136,7 +139,7 @@ public class Codegen extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (!skip) {
 			verifySettings();
-
+				    
 			final CodeGenConfig config = new CodeGenConfig(
 					emptySet(),
 					stream(schemaPaths).collect(toSet()),
@@ -166,7 +169,8 @@ public class Codegen extends AbstractMojo {
 					snakeCaseConstantNames,
 					generateInterfaceSetters,
 				    javaGenerateAllConstructor,
-				    implementSerializable
+				    implementSerializable,
+				    addGeneratedAnnotation
 				);
 
 			getLog().info(format("Codegen config: %n%s", config));
