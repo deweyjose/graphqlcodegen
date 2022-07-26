@@ -12,6 +12,17 @@ https://github.com/deweyjose/graphqlcodegen-example
 
 Options are configured in the `<configuration>` element of the dgs-codegen-maven-plugin plugin.
 
+## addGeneratedAnnotation
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+```xml
+<addGeneratedAnnotation>true</addGeneratedAnnotation>
+```
+
 ## skip
 
 - Type: boolean
