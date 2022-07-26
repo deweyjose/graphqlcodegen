@@ -369,7 +369,7 @@ Add the following to your pom files build/plugins section.
 <plugin>
     <groupId>io.github.deweyjose</groupId>
 	<artifactId>graphqlcodegen-maven-plugin</artifactId>
-	<version>1.19</version>
+	<version>1.20</version>
 	<executions>
 		<execution>
 			<goals>
@@ -382,6 +382,7 @@ Add the following to your pom files build/plugins section.
 			<param>src/main/resources/schema/schema.graphqls</param>
 		</schemaPaths>
 		<packageName>com.acme.[your_project].generated</packageName>
+		<addGeneratedAnnotation>true</addGeneratedAnnotation>
 	</configuration>
 </plugin>
 ```
