@@ -114,6 +114,15 @@ public class Codegen extends AbstractMojo {
 	@Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
 	private boolean skip;
 
+	@Parameter(property = "generateCustomAnnotations", defaultValue = "false")
+	private boolean generateCustomAnnotations;
+
+	@Parameter(property = "includeImports")
+	private Map<String, String> includeImports;
+
+	@Parameter(property = "includeEnumImports")
+	private Map<String, Map<String, String>> includeEnumImports;
+
 	private void verifySettings() {
 		if (isNull(packageName)) {
 			throw new RuntimeException("Please specify a packageName");
@@ -168,6 +177,9 @@ public class Codegen extends AbstractMojo {
 					kotlinAllFieldsOptional,
 					snakeCaseConstantNames,
 					generateInterfaceSetters,
+					includeImports,
+					includeEnumImports,
+					generateCustomAnnotations,
 				    javaGenerateAllConstructor,
 				    implementSerializable,
 				    addGeneratedAnnotation
