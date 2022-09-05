@@ -9,6 +9,7 @@ import static java.util.stream.Collectors.toSet;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -124,7 +125,7 @@ public class Codegen extends AbstractMojo {
 	private Map<String, String> includeImports;
 
 	@Parameter(property = "includeEnumImports")
-	private Map<String, Map<String, String>> includeEnumImports;
+	private Map<String, Properties> includeEnumImports;
 
 	private void verifySettings() {
 		if (isNull(packageName)) {
@@ -182,7 +183,13 @@ public class Codegen extends AbstractMojo {
 					snakeCaseConstantNames,
 					generateInterfaceSetters,
 					includeImports,
-					includeEnumImports,
+					includeEnumImports
+							.entrySet()
+							.stream()
+							.collect(Collectors.toMap(
+									entry -> entry.getKey(),
+									entry -> entry.getValue().getProperties()
+							)),
 					generateCustomAnnotations,
 					javaGenerateAllConstructor,
 					implementSerializable,
