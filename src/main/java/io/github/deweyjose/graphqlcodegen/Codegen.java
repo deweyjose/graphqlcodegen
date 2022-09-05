@@ -107,12 +107,24 @@ public class Codegen extends AbstractMojo {
 
 	@Parameter(property = "implementSerializable", defaultValue = "false")
 	private boolean implementSerializable;
-	
+
 	@Parameter(property = "addGeneratedAnnotation", defaultValue = "false")
 	private boolean addGeneratedAnnotation;
 
+	@Parameter(property = "addDeprecatedAnnotation", defaultValue = "false")
+	private boolean addDeprecatedAnnotation;
+
 	@Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
 	private boolean skip;
+
+	@Parameter(property = "generateCustomAnnotations", defaultValue = "false")
+	private boolean generateCustomAnnotations;
+
+	@Parameter(property = "includeImports")
+	private Map<String, String> includeImports;
+
+	@Parameter(property = "includeEnumImports")
+	private Map<String, Map<String, String>> includeEnumImports;
 
 	private void verifySettings() {
 		if (isNull(packageName)) {
@@ -139,7 +151,8 @@ public class Codegen extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (!skip) {
 			verifySettings();
-				    
+
+			// @formatter:off
 			final CodeGenConfig config = new CodeGenConfig(
 					emptySet(),
 					stream(schemaPaths).collect(toSet()),
@@ -154,8 +167,8 @@ public class Codegen extends AbstractMojo {
 					generateBoxedTypes,
 					generateClient,
 					generateInterfaces,
-				    generateKotlinNullableClasses,
-				    generateKotlinClosureProjections,
+					generateKotlinNullableClasses,
+					generateKotlinClosureProjections,
 					typeMapping,
 					stream(includeQueries).collect(toSet()),
 					stream(includeMutations).collect(toSet()),
@@ -168,10 +181,15 @@ public class Codegen extends AbstractMojo {
 					kotlinAllFieldsOptional,
 					snakeCaseConstantNames,
 					generateInterfaceSetters,
-				    javaGenerateAllConstructor,
-				    implementSerializable,
-				    addGeneratedAnnotation
+					includeImports,
+					includeEnumImports,
+					generateCustomAnnotations,
+					javaGenerateAllConstructor,
+					implementSerializable,
+					addGeneratedAnnotation,
+					addDeprecatedAnnotation
 				);
+			// @formatter:on
 
 			getLog().info(format("Codegen config: %n%s", config));
 
