@@ -66,6 +66,23 @@ Example
 </schemaPaths>
 ```
 
+## schemaJarFilesFromDependencies
+
+- Type: array
+- Required: false
+- Default: 
+- Official doc : https://netflix.github.io/dgs/generating-code-from-schema/#generating-code-from-external-schemas-in-jars 
+
+Example
+
+```xml
+
+<schemaJarFilesFromDependencies>
+    <param>com.netflix.graphql.dgs:some-dependency:1.0.0</param>
+    <param>com.netflix.graphql.dgs:some-dependency:X.X.X</param>
+</schemaJarFilesFromDependencies>
+```
+
 ## packageName
 
 - Type: string

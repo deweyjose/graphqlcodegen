@@ -4,12 +4,14 @@ import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -27,6 +29,9 @@ public class Codegen extends AbstractMojo {
 
 	@Parameter(property = "schemaPaths", defaultValue = "${project.build.resources}/schema")
 	private File[] schemaPaths;
+
+	@Parameter(property = "schemaJarFilesFromDependencies")
+	private File[] schemaJarFilesFromDependencies;
 
 	@Parameter(property = "packageName", defaultValue = "")
 	private String packageName;
@@ -157,6 +162,7 @@ public class Codegen extends AbstractMojo {
 			final CodeGenConfig config = new CodeGenConfig(
 					emptySet(),
 					stream(schemaPaths).collect(toSet()),
+					stream(schemaJarFilesFromDependencies).collect(toList()),
 					outputDir.toPath(),
 					exampleOutputDir.toPath(),
 					writeToFiles,
@@ -186,8 +192,8 @@ public class Codegen extends AbstractMojo {
 					includeEnumImports
 							.entrySet()
 							.stream()
-							.collect(Collectors.toMap(
-									entry -> entry.getKey(),
+							.collect(toMap(
+									Entry::getKey,
 									entry -> entry.getValue().getProperties()
 							)),
 					generateCustomAnnotations,
