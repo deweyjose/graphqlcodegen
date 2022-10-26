@@ -456,6 +456,17 @@ Example
 <generateCustomAnnotations>false</generateCustomAnnotations>
 ```
 
+## addDeprecatedAnnotation
+
+- Type: boolean
+- Required: false
+- Default: false
+
+```xml
+
+<addDeprecatedAnnotation>false</addDeprecatedAnnotation>
+```
+
 ## includeImports
 
 - Type: map<string, string>
