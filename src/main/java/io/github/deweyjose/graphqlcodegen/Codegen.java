@@ -130,11 +130,7 @@ public class Codegen extends AbstractMojo {
 	private Map<String, String> includeImports;
 
 	@Parameter(property = "includeEnumImports")
-<<<<<<< HEAD
-	private Map<String, Map<String, String>> includeEnumImports;
-=======
 	private Map<String, Properties> includeEnumImports;
->>>>>>> upstream/main
 
 	private void verifySettings() {
 		if (isNull(packageName)) {
