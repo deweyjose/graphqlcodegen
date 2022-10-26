@@ -4,11 +4,14 @@ import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -26,6 +29,9 @@ public class Codegen extends AbstractMojo {
 
 	@Parameter(property = "schemaPaths", defaultValue = "${project.build.resources}/schema")
 	private File[] schemaPaths;
+
+	@Parameter(property = "schemaJarFilesFromDependencies")
+	private File[] schemaJarFilesFromDependencies;
 
 	@Parameter(property = "packageName", defaultValue = "")
 	private String packageName;
@@ -107,9 +113,12 @@ public class Codegen extends AbstractMojo {
 
 	@Parameter(property = "implementSerializable", defaultValue = "false")
 	private boolean implementSerializable;
-	
+
 	@Parameter(property = "addGeneratedAnnotation", defaultValue = "false")
 	private boolean addGeneratedAnnotation;
+
+	@Parameter(property = "addDeprecatedAnnotation", defaultValue = "false")
+	private boolean addDeprecatedAnnotation;
 
 	@Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
 	private boolean skip;
@@ -121,7 +130,11 @@ public class Codegen extends AbstractMojo {
 	private Map<String, String> includeImports;
 
 	@Parameter(property = "includeEnumImports")
+<<<<<<< HEAD
 	private Map<String, Map<String, String>> includeEnumImports;
+=======
+	private Map<String, Properties> includeEnumImports;
+>>>>>>> upstream/main
 
 	private void verifySettings() {
 		if (isNull(packageName)) {
@@ -148,10 +161,12 @@ public class Codegen extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (!skip) {
 			verifySettings();
-				    
+
+			// @formatter:off
 			final CodeGenConfig config = new CodeGenConfig(
 					emptySet(),
 					stream(schemaPaths).collect(toSet()),
+					stream(schemaJarFilesFromDependencies).collect(toList()),
 					outputDir.toPath(),
 					exampleOutputDir.toPath(),
 					writeToFiles,
@@ -163,8 +178,8 @@ public class Codegen extends AbstractMojo {
 					generateBoxedTypes,
 					generateClient,
 					generateInterfaces,
-				    generateKotlinNullableClasses,
-				    generateKotlinClosureProjections,
+					generateKotlinNullableClasses,
+					generateKotlinClosureProjections,
 					typeMapping,
 					stream(includeQueries).collect(toSet()),
 					stream(includeMutations).collect(toSet()),
@@ -178,12 +193,20 @@ public class Codegen extends AbstractMojo {
 					snakeCaseConstantNames,
 					generateInterfaceSetters,
 					includeImports,
-					includeEnumImports,
+					includeEnumImports
+							.entrySet()
+							.stream()
+							.collect(toMap(
+									Entry::getKey,
+									entry -> entry.getValue().getProperties()
+							)),
 					generateCustomAnnotations,
-				    javaGenerateAllConstructor,
-				    implementSerializable,
-				    addGeneratedAnnotation
+					javaGenerateAllConstructor,
+					implementSerializable,
+					addGeneratedAnnotation,
+					addDeprecatedAnnotation
 				);
+			// @formatter:on
 
 			getLog().info(format("Codegen config: %n%s", config));
 
