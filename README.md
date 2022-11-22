@@ -501,6 +501,28 @@ Example
 </includeEnumImports>
 ```
 
+
+## includeClassImports
+Maps the custom annotation and class names to the class packages. Only used when generateCustomAnnotations is enabled.
+- Type
+- Required: false
+
+```xml
+<includeClassImports>
+    <foo>
+        <properties>
+            <bar>bla</bar>
+        </properties>
+    </foo>
+    <bar>
+        <properties>
+            <zoo>bar.bar</zoo>
+      
+            <zing>bla.bla</zing>
+        </properties>
+    </bar>
+</includeClassImports>
+```
 # Usage
 
 Add the following to your pom files build/plugins section.
