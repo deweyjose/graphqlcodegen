@@ -132,6 +132,9 @@ public class Codegen extends AbstractMojo {
 	@Parameter(property = "includeEnumImports")
 	private Map<String, Properties> includeEnumImports;
 
+	@Parameter(property = "includeClassImports")
+	private Map<String, Properties> includeClassImports;
+
 	private void verifySettings() {
 		if (isNull(packageName)) {
 			throw new RuntimeException("Please specify a packageName");
@@ -190,6 +193,13 @@ public class Codegen extends AbstractMojo {
 					generateInterfaceSetters,
 					includeImports,
 					includeEnumImports
+							.entrySet()
+							.stream()
+							.collect(toMap(
+									Entry::getKey,
+									entry -> entry.getValue().getProperties()
+							)),
+					includeClassImports
 							.entrySet()
 							.stream()
 							.collect(toMap(
