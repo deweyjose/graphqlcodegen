@@ -501,6 +501,28 @@ Example
 </includeEnumImports>
 ```
 
+## includeClassImports
+
+- Type: map<string,<string,string>>
+- Required: false
+
+```xml
+
+<includeClassImports>
+    <foo>
+        <properties>
+            <bar>bla</bar>
+        </properties>
+    </foo>
+    <bar>
+        <properties>
+            <zoo>bar.bar</zoo>
+            <zing>bla.bla</zing>
+        </properties>
+    </bar>
+</includeClassImports>
+```
+
 # Usage
 
 Add the following to your pom files build/plugins section.
