@@ -1,7 +1,25 @@
-This is port of the netflix codegen plugin for Gradle. Found [here](https://github.com/Netflix/dgs-codegen).
+# graphqlcodegen-maven-plugin
+This maven plugin is a port of the netflix codegen plugin for Gradle. Found [here](https://github.com/Netflix/dgs-codegen).
 
-COPIED FROM NETFLIX DOCUMENTATION.
+# Contributing
 
+### GitHub Issue
+Feel free to simply create a GitHub issue for requests to integrate with newer [releases](https://github.com/Netflix/dgs-codegen/releases) of the core DGS Codegen library.
+
+### PRs
+PRS are welcome as well. The level of difficulty across DGS Codgen updates varies. Sometimes releases change the [CodeGenConfig](https://github.com/Netflix/dgs-codegen/blob/master/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt#L443) constructor - when new 
+options are added for example. 
+
+Please make sure you run step 2 below to ensure your PR builds correctly. You may need to analyze the CodeGenConfig ctor parameters and add support for new options.
+Make sure to document any new options to the `Options` section below.  
+
+Process:
+1. bump the version in [pom.xml](pom.xml)
+2. run `mvn install` locally to ensure the project still builds
+   3. Adjust [CodeGen](src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) to support new options if needed.
+
+
+# Overview
 The DGS Code Generation plugin generates code for basic types and example data fetchers based on the your Domain Graph
 Service's graphql schema file during the project's build process. The plugin requires the path to schema files and the
 package name to use to generate the file. If no schema path is specified, it will look under src/resources/schema for
