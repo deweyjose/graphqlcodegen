@@ -108,6 +108,9 @@ public class Codegen extends AbstractMojo {
 	@Parameter(property = "generateInterfaceSetters", defaultValue = "false")
 	private boolean generateInterfaceSetters;
 
+	@Parameter(property = "generateInterfaceMethodsForInterfaceFields", defaultValue = "false")
+	private boolean generateInterfaceMethodsForInterfaceFields;
+
 	@Parameter(property = "javaGenerateAllConstructor", defaultValue = "false")
 	private boolean javaGenerateAllConstructor;
 
@@ -191,6 +194,7 @@ public class Codegen extends AbstractMojo {
 					kotlinAllFieldsOptional,
 					snakeCaseConstantNames,
 					generateInterfaceSetters,
+					generateInterfaceMethodsForInterfaceFields,
 					includeImports,
 					includeEnumImports
 							.entrySet()
