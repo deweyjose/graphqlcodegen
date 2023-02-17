@@ -416,7 +416,20 @@ Example
 
 ```xml
 
-<generateInterfaceSetters>false</generateInterfaceSetters>
+<generateInterfaceMethodsForInterfaceFields>false</generateInterfaceMethodsForInterfaceFields>
+```
+
+## generateInterfaceMethodsForInterfaceFields
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+
+```xml
+
+<generateInterfaceMethodsForInterfaceFields>false</generateInterfaceMethodsForInterfaceFields>
 ```
 
 ## javaGenerateAllConstructor
