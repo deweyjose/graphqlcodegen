@@ -54,8 +54,11 @@ public class Codegen extends AbstractMojo {
 	@Parameter(property = "generateBoxedTypes", defaultValue = "false")
 	private boolean generateBoxedTypes;
 
-	@Parameter(property = "generateClient", defaultValue = "false")
-	private boolean generateClient;
+	@Parameter(property = "generateClientApi", defaultValue = "false")
+	private boolean generateClientApi;
+
+	@Parameter(property = "generateClientApiV2", defaultValue = "false")
+	private boolean generateClientApiV2;
 
 	@Parameter(property = "generateDataTypes", defaultValue = "true")
 	private boolean generateDataTypes;
@@ -178,7 +181,8 @@ public class Codegen extends AbstractMojo {
 					subPackageNameTypes,
 					Language.valueOf(language.toUpperCase()),
 					generateBoxedTypes,
-					generateClient,
+					generateClientApi,
+					generateClientApiV2,
 					generateInterfaces,
 					generateKotlinNullableClasses,
 					generateKotlinClosureProjections,
