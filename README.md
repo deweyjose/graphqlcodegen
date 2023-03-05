@@ -179,7 +179,7 @@ Example
 <generateBoxedTypes>false</generateBoxedTypes>
 ```
 
-## generateClient
+## generateClientApi
 
 - Type: boolean
 - Required: false
@@ -189,7 +189,20 @@ Example
 
 ```xml
 
-<generateClient>false</generateClient>
+<generateClientApi>false</generateClientApi>
+```
+
+## generateClientApiV2
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+
+```xml
+
+<generateClientApiV2>false</generateClientApiV2>
 ```
 
 ## generateInterfaces
