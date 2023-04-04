@@ -1,37 +1,41 @@
 package io.github.deweyjose.graphqlcodegen;
 
-import static java.lang.String.format;
-import static java.util.Arrays.stream;
-import static java.util.Collections.emptySet;
-import static java.util.Objects.isNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.netflix.graphql.dgs.codegen.CodeGen;
+import com.netflix.graphql.dgs.codegen.CodeGenConfig;
+import com.netflix.graphql.dgs.codegen.Language;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
-import com.netflix.graphql.dgs.codegen.CodeGen;
-import com.netflix.graphql.dgs.codegen.CodeGenConfig;
-import com.netflix.graphql.dgs.codegen.Language;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
+import static java.util.Collections.emptySet;
+import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class Codegen extends AbstractMojo {
 
-	@Parameter(property = "schemaPaths", defaultValue = "${project.build.resources}/schema")
+	@Parameter(defaultValue = "${project}")
+	private MavenProject project;
+
+	@Parameter(property = "schemaPaths")
 	private File[] schemaPaths;
 
-	@Parameter(property = "schemaJarFilesFromDependencies")
-	private File[] schemaJarFilesFromDependencies;
+	@Parameter(alias = "schemaJarFilesFromDependencies", property = "schemaJarFilesFromDependencies")
+	private String[] schemaJarFilesFromDependencies;
+	private final List<File> schemaJarFilesFromDependenciesFiles = new ArrayList<>();
 
 	@Parameter(property = "packageName", defaultValue = "")
 	private String packageName;
@@ -146,8 +150,29 @@ public class Codegen extends AbstractMojo {
 			throw new RuntimeException("Please specify a packageName");
 		}
 
-		if (schemaPaths.length != stream(schemaPaths).collect(toSet()).size()) {
+		int size = stream(schemaPaths).collect(toSet()).size();
+		if (schemaPaths.length != size) {
+			stream(schemaPaths).forEach(s -> {
+				getLog().error("schemaPath: " + s.getPath());
+			});
 			throw new RuntimeException("Duplicate entries in schemaPaths");
+		}
+
+
+		for (String jarDep : schemaJarFilesFromDependencies) {
+			String jarDepClean = jarDep.trim();
+			if (jarDepClean.isEmpty())
+				continue;
+
+			Optional<Artifact> artifactOpt = findFromDependencies(jarDepClean);
+			if (artifactOpt.isPresent()) {
+				Artifact artifact = artifactOpt.get();
+				File file = artifact.getFile();
+				this.schemaJarFilesFromDependenciesFiles.add(file);
+			} else {
+				getLog().warn(String.format("Unable to find Artifact`%s`", jarDepClean));
+			}
+
 		}
 
 		for (final File schemaPath : schemaPaths) {
@@ -165,13 +190,14 @@ public class Codegen extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		if (!skip) {
+
 			verifySettings();
 
 			// @formatter:off
 			final CodeGenConfig config = new CodeGenConfig(
 					emptySet(),
 					stream(schemaPaths).collect(toSet()),
-					stream(schemaJarFilesFromDependencies).collect(toList()),
+					schemaJarFilesFromDependenciesFiles,
 					outputDir.toPath(),
 					exampleOutputDir.toPath(),
 					writeToFiles,
@@ -227,5 +253,18 @@ public class Codegen extends AbstractMojo {
 			final CodeGen codeGen = new CodeGen(config);
 			codeGen.generate();
 		}
+	}
+
+	private Optional<Artifact> findFromDependencies(String artifactRef) {
+		String cleanRef = artifactRef.trim();
+		Set<Artifact> dependencyArtifacts = project.getDependencyArtifacts();
+		for (Artifact artifact : dependencyArtifacts) {
+			String ref = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion();
+
+			if (ref.equals(cleanRef)) {
+				return Optional.of(artifact);
+			}
+		}
+		return Optional.empty();
 	}
 }
