@@ -245,7 +245,7 @@ public class Codegen extends AbstractMojo {
 					implementSerializable,
 					addGeneratedAnnotation,
 					addDeprecatedAnnotation
-			);
+				);
 			// @formatter:on
 
 			getLog().info(format("Codegen config: %n%s", config));
