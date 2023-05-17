@@ -36,6 +36,42 @@ https://github.com/deweyjose/graphqlcodegen-example
 
 Options are configured in the `<configuration>` element of the dgs-codegen-maven-plugin plugin.
 
+## subPackageNameDocs
+
+- Type: string
+- Required: false
+- Default: docs
+
+Example
+
+```xml
+<subPackageNameDocs>docs</subPackageNameDocs>
+```
+
+## generateDocs
+
+- Type: string
+- Required: false
+- Default: docs
+
+Example
+
+```xml
+<generateDocs>true</generateDocs>
+```
+
+## generatedDocsFolder
+
+- Type: string
+- Required: false
+- Default: ./generated-docs
+
+Example
+
+```xml
+<generatedDocsFolder>true</generatedDocsFolder>
+```
+
 ## addGeneratedAnnotation
 
 - Type: boolean
@@ -45,7 +81,6 @@ Options are configured in the `<configuration>` element of the dgs-codegen-maven
 Example
 
 ```xml
-
 <addGeneratedAnnotation>true</addGeneratedAnnotation>
 ```
 
@@ -58,7 +93,6 @@ Example
 Example
 
 ```xml
-
 <dgs.codegen.skip>true</dgs.codegen.skip>
 ```
 
@@ -77,7 +111,6 @@ Or
 Example
 
 ```xml
-
 <schemaPaths>
     <param>src/main/resources/schema/schema.graphqls1</param>
     <param>src/main/resources/schema/schema.graphqls2</param>
@@ -94,7 +127,6 @@ Example
 Example
 
 ```xml
-
 <schemaJarFilesFromDependencies>
     <param>com.netflix.graphql.dgs:some-dependency:1.0.0</param>
     <param>com.netflix.graphql.dgs:some-dependency:X.X.X</param>
@@ -109,7 +141,6 @@ Example
 Example
 
 ```xml
-
 <packageName>com.acme.se.generated</packageName>
 ```
 
@@ -121,7 +152,6 @@ Example
 Example
 
 ```xml
-
 <typeMapping>
     <Date>java.time.LocalDateTime</Date>
 </typeMapping>
@@ -136,7 +166,6 @@ Example
 Example
 
 ```xml
-
 <subPackageNameClient>client</subPackageNameClient>
 ```
 
@@ -149,7 +178,6 @@ Example
 Example
 
 ```xml
-
 <subPackageNameDatafetchers>datafetchers</subPackageNameDatafetchers>
 ```
 
@@ -162,7 +190,6 @@ Example
 Example
 
 ```xml
-
 <subPackageNameTypes>types</subPackageNameTypes>
 ```
 
@@ -175,7 +202,6 @@ Example
 Example
 
 ```xml
-
 <generateBoxedTypes>false</generateBoxedTypes>
 ```
 
@@ -188,7 +214,6 @@ Example
 Example
 
 ```xml
-
 <generateClientApi>false</generateClientApi>
 ```
 
@@ -201,7 +226,6 @@ Example
 Example
 
 ```xml
-
 <generateClientApiV2>false</generateClientApiV2>
 ```
 
@@ -214,7 +238,6 @@ Example
 Example
 
 ```xml
-
 <generateInterfaces>false</generateInterfaces>
 ```
 
@@ -227,7 +250,6 @@ Example
 Example
 
 ```xml
-
 <generateKotlinNullableClasses>false</generateKotlinNullableClasses>
 ```
 
@@ -240,7 +262,6 @@ Example
 Example
 
 ```xml
-
 <generateKotlinClosureProjections>false</generateKotlinClosureProjections>
 ```
 
@@ -253,7 +274,6 @@ Example
 Example:
 
 ```xml
-
 <outputDir>${project.build.directory}/generated-sources</outputDir>
 ```
 
@@ -266,7 +286,6 @@ Example:
 Example:
 
 ```xml
-
 <outputDir>${project.build.directory}/generated-examples</outputDir>
 ```     
 
@@ -280,7 +299,6 @@ Example:
 Example
 
 ```xml
-
 <includeQueries>
     <param>QueryFieldName1</param>
     <param>QueryFieldName2</param>
@@ -297,7 +315,6 @@ Example
 Example
 
 ```xml
-
 <includeMutations>
     <param>MutationFieldName1</param>
     <param>MutationFieldName1</param>
@@ -313,7 +330,6 @@ Example
 Example
 
 ```xml
-
 <skipEntityQueries>false</skipEntityQueries>
 ```
 
@@ -326,7 +342,6 @@ Example
 Example
 
 ```xml
-
 <shortProjectionNames>false</shortProjectionNames>
 ```
 
@@ -339,7 +354,6 @@ Example
 Example
 
 ```xml
-
 <generateDataTypes>false</generateDataTypes>
 ```
 
@@ -352,7 +366,6 @@ Example
 Example
 
 ```xml
-
 <maxProjectionDepth>10</maxProjectionDepth>
 ```
 
@@ -365,7 +378,6 @@ Example
 Example
 
 ```xml
-
 <language>kotlin</language>
 ```
 
@@ -378,7 +390,6 @@ Example
 Example
 
 ```xml
-
 <omitNullInputFields>false</omitNullInputFields>
 ```
 
@@ -391,7 +402,6 @@ Example
 Example
 
 ```xml
-
 <kotlinAllFieldsOptional>false</kotlinAllFieldsOptional>
 ```
 
@@ -404,7 +414,6 @@ Example
 Example
 
 ```xml
-
 <snakeCaseConstantNames>false</snakeCaseConstantNames>
 ```
 
@@ -417,7 +426,6 @@ Example
 Example
 
 ```xml
-
 <writeToFiles>false</writeToFiles>
 ```
 
@@ -430,7 +438,6 @@ Example
 Example
 
 ```xml
-
 <includeSubscriptions>
     <param>Subscriptions1</param>
     <param>Subscriptions2</param>
@@ -446,7 +453,6 @@ Example
 Example
 
 ```xml
-
 <generateInterfaceMethodsForInterfaceFields>false</generateInterfaceMethodsForInterfaceFields>
 ```
 
@@ -459,7 +465,6 @@ Example
 Example
 
 ```xml
-
 <generateInterfaceMethodsForInterfaceFields>false</generateInterfaceMethodsForInterfaceFields>
 ```
 
@@ -472,7 +477,6 @@ Example
 Example
 
 ```xml
-
 <javaGenerateAllConstructor>false</javaGenerateAllConstructor>
 ```
 
@@ -485,7 +489,6 @@ Example
 Example
 
 ```xml
-
 <implementSerializable>false</implementSerializable>
 ```
 
@@ -496,7 +499,6 @@ Example
 - Default: false
 
 ```xml
-
 <generateCustomAnnotations>false</generateCustomAnnotations>
 ```
 
@@ -507,7 +509,6 @@ Example
 - Default: false
 
 ```xml
-
 <addDeprecatedAnnotation>false</addDeprecatedAnnotation>
 ```
 
@@ -517,7 +518,6 @@ Example
 - Required: false
 
 ```xml
-
 <includeImports>
     <validator>com.test.validator</validator>
 </includeImports>
@@ -529,7 +529,6 @@ Example
 - Required: false
 
 ```xml
-
 <includeEnumImports>
     <foo>
         <properties>
@@ -572,7 +571,6 @@ Maps the custom annotation and class names to the class packages. Only used when
 Add the following to your pom files build/plugins section.
 
 ```xml
-
 <plugin>
     <groupId>io.github.deweyjose</groupId>
     <artifactId>graphqlcodegen-maven-plugin</artifactId>
@@ -597,7 +595,6 @@ Add the following to your pom files build/plugins section.
 You'll also need to add the generates-sources folder to the classpath:
 
 ```xml
-
 <plugin>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>build-helper-maven-plugin</artifactId>
