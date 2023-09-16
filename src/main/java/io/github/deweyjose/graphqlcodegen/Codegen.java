@@ -4,18 +4,14 @@ import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.isNull;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -165,13 +161,7 @@ public class Codegen extends AbstractMojo {
 			throw new RuntimeException("Please specify a packageName");
 		}
 
-		final int size = stream(schemaPaths).collect(toSet()).size();
-		if (schemaPaths.length != size) {
-			stream(schemaPaths).forEach(s -> {
-				getLog().error("schemaPath: " + s.getPath());
-			});
-			throw new RuntimeException("Duplicate entries in schemaPaths");
-		}
+		FileReducer.verifySchemaPaths(Arrays.stream(schemaPaths).collect(toList()));
 
 		for (final String jarDep : schemaJarFilesFromDependencies) {
 			final String jarDepClean = jarDep.trim();

@@ -5,7 +5,7 @@
 	<groupId>io.github.deweyjose</groupId>
 	<artifactId>graphqlcodegen-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
-	<version>1.40</version>
+	<version>1.41</version>
 
 	<name>GraphQL Code Generator</name>
 	<description>Maven port of the Netflix DGS GraphQL Codegen gradle build plugin</description>
@@ -45,6 +45,7 @@
 		<maven-release-plugin.version>3.0.0-M4</maven-release-plugin.version>
 		<maven-scm-provider-gitexe.version>1.11.2</maven-scm-provider-gitexe.version>
 		<nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
+    <junit.version>5.9.2</junit.version>
 	</properties>
 
 	<dependencies>
@@ -69,6 +70,18 @@
 			<artifactId>graphql-dgs-codegen-core</artifactId>
 			<version>${graphql-dgs-codegen-core.version}</version>
 		</dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
 	</dependencies>
 
 	<distributionManagement>
