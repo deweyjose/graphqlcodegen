@@ -208,63 +208,63 @@ public class Codegen extends AbstractMojo {
 
 			verifySettings();
 
-		// @formatter:off
-      final CodeGenConfig config = new CodeGenConfig(
-        emptySet(),
-        stream(schemaPaths).collect(toSet()),
-        schemaJarFilesFromDependenciesFiles,
-        outputDir.toPath(),
-        exampleOutputDir.toPath(),
-        writeToFiles,
-        packageName,
-        subPackageNameClient,
-        subPackageNameDatafetchers,
-        subPackageNameTypes,
-        subPackageNameDocs,
-        Language.valueOf(language.toUpperCase()),
-        generateBoxedTypes,
-        generateClientApi,
-        generateClientApiV2,
-        generateInterfaces,
-        generateKotlinNullableClasses,
-        generateKotlinClosureProjections,
-        typeMapping,
-        stream(includeQueries).collect(toSet()),
-        stream(includeMutations).collect(toSet()),
-        stream(includeSubscriptions).collect(toSet()),
-        skipEntityQueries,
-        shortProjectionNames,
-        generateDataTypes,
-        omitNullInputFields,
-        maxProjectionDepth,
-        kotlinAllFieldsOptional,
-        snakeCaseConstantNames,
-        generateInterfaceSetters,
-        generateInterfaceMethodsForInterfaceFields,
-        generateDocs,
-        Paths.get(generatedDocsFolder),
-        includeImports,
-        includeEnumImports
-          .entrySet()
-          .stream()
-          .collect(toMap(
-            Entry::getKey,
-            entry -> entry.getValue().getProperties()
-          )),
-        includeClassImports
-          .entrySet()
-          .stream()
-          .collect(toMap(
-            Entry::getKey,
-            entry -> entry.getValue().getProperties()
-          )),
-        generateCustomAnnotations,
-        javaGenerateAllConstructor,
-        implementSerializable,
-        addGeneratedAnnotation,
-        addDeprecatedAnnotation
-      );
-      // @formatter:on
+			// @formatter:off
+			final CodeGenConfig config = new CodeGenConfig(
+				emptySet(),
+				stream(schemaPaths).collect(toSet()),
+				schemaJarFilesFromDependenciesFiles,
+				outputDir.toPath(),
+				exampleOutputDir.toPath(),
+				writeToFiles,
+				packageName,
+				subPackageNameClient,
+				subPackageNameDatafetchers,
+				subPackageNameTypes,
+				subPackageNameDocs,
+				Language.valueOf(language.toUpperCase()),
+				generateBoxedTypes,
+				generateClientApi,
+				generateClientApiV2,
+				generateInterfaces,
+				generateKotlinNullableClasses,
+				generateKotlinClosureProjections,
+				typeMapping,
+				stream(includeQueries).collect(toSet()),
+				stream(includeMutations).collect(toSet()),
+				stream(includeSubscriptions).collect(toSet()),
+				skipEntityQueries,
+				shortProjectionNames,
+				generateDataTypes,
+				omitNullInputFields,
+				maxProjectionDepth,
+				kotlinAllFieldsOptional,
+				snakeCaseConstantNames,
+				generateInterfaceSetters,
+				generateInterfaceMethodsForInterfaceFields,
+				generateDocs,
+				Paths.get(generatedDocsFolder),
+				includeImports,
+				includeEnumImports
+					.entrySet()
+					.stream()
+					.collect(toMap(
+						Entry::getKey,
+						entry -> entry.getValue().getProperties()
+					)),
+				includeClassImports
+					.entrySet()
+					.stream()
+					.collect(toMap(
+						Entry::getKey,
+						entry -> entry.getValue().getProperties()
+					)),
+				generateCustomAnnotations,
+				javaGenerateAllConstructor,
+				implementSerializable,
+				addGeneratedAnnotation,
+				addDeprecatedAnnotation
+			);
+      		// @formatter:on
 
 			getLog().info(format("Codegen config: %n%s", config));
 
@@ -273,11 +273,13 @@ public class Codegen extends AbstractMojo {
 		}
 	}
 
-	private Optional<Artifact> findFromDependencies(String artifactRef) {
+	private Optional<Artifact> findFromDependencies(final String artifactRef) {
 		final String cleanRef = artifactRef.trim();
 		final Set<Artifact> dependencyArtifacts = project.getDependencyArtifacts();
+
 		for (final Artifact artifact : dependencyArtifacts) {
-			final String ref = artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getVersion();
+			final String ref = format("%s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(),
+					artifact.getVersion());
 
 			if (ref.equals(cleanRef)) {
 				return Optional.of(artifact);
