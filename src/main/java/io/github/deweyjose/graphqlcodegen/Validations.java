@@ -8,18 +8,16 @@ public class Validations {
   /**
    * We sort the input files by their paths to ensure a consistent order for processing.
    *
-   * We maintain three sets:
-   *   validatedFiles to store the files that pass all checks,
+   * We maintain two sets:
    *   encounteredDirectories to keep track of encountered directories
    *   encounteredPaths to keep track of encountered paths.
    *
    * We iterate through the sorted files and perform the following checks:
-   *   Directory overlap: Skip files that are in directories already encountered.
-   *   Duplicate files: Skip files that are duplicates.
-   *   Ancestry in already added directories: Skip files that have ancestry in directories already encountered.
-   *
-   * Files that pass all checks are added to the validatedFiles set, and the corresponding
-   * directories and paths are updated in the encountered sets.
+   *   Directory overlap: throw an exception if duplicate directories are configured.
+   *   Duplicate files: throw an exception if duplicate files are configured.
+   *   Ancestry in already added directories:
+   *    if files exist in configured directories or subdirectories of configured directories
+   *    throw an exception
    * @param files
    */
   public static void verifySchemaPaths(Collection<File> files) {
@@ -35,34 +33,27 @@ public class Validations {
 
       // Check for directory overlap
       File parent = file.getParentFile();
-      if (parent != null && encounteredDirectories.contains(parent)) {
-        throw new IllegalArgumentException(
-          String.format("Overlap detected: %s contains %s", parent.getPath(), file.getPath())
-        );
-      }
-
-      // Check for duplicate files
-      if (encounteredPaths.contains(path)) {
-        continue; // Skip this file, it's a duplicate
-      }
 
       // Check for ancestry in already added directories
       while (parent != null) {
         if (encounteredDirectories.contains(parent)) {
           throw new IllegalArgumentException(
-            String.format("Overlap detected: %s contains %s", parent.getPath(), file.getPath())
+            String.format("Overlap configured: %s contains %s", parent.getPath(), file.getPath())
           );
         }
         parent = parent.getParentFile();
-
-        if (parent != null && parent.equals(file)) {
-          break; // Avoid an infinite loop by checking if the parent is the same as the file
-        }
       }
 
       // Update the encountered sets
       if (file.isDirectory()) {
         encounteredDirectories.add(file);
+      }
+
+      // keep it simple, never allow duplicate configuration
+      if (encounteredPaths.contains(path)) {
+        throw new IllegalArgumentException(
+          String.format("Duplicate path configured: %s", path)
+        );
       }
       encounteredPaths.add(path);
     }

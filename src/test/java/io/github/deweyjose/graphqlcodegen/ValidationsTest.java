@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-class FileReducerTest {
+class ValidationsTest {
 
   @ParameterizedTest
   @MethodSource("happyPathFileListProvider")
@@ -34,7 +34,7 @@ class FileReducerTest {
    * @return File
    */
   private static File getFile(String path) {
-    return new File(FileReducerTest.class.getClassLoader().getResource(path).getFile());
+    return new File(ValidationsTest.class.getClassLoader().getResource(path).getFile());
   }
 
   /**
@@ -75,11 +75,19 @@ class FileReducerTest {
       )),
       Arguments.of(Arrays.asList(
         getFile("schema"),
+        getFile("schema")
+      )),
+      Arguments.of(Arrays.asList(
+        getFile("schema"),
         getFile("schema/bar/sink/kitchen.graphqls")
       )),
       Arguments.of(Arrays.asList(
         getFile("schema/bar/sink/kitchen.graphqls"),
         getFile("schema/bar")
+      )),
+      Arguments.of(Arrays.asList(
+        getFile("schema/bar/sink/kitchen.graphqls"),
+        getFile("schema/bar/sink/kitchen.graphqls")
       ))
     );
   }
