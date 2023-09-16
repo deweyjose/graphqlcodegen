@@ -1,8 +1,6 @@
 package io.github.deweyjose.graphqlcodegen;
 
-import junit.framework.Assert;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -17,7 +15,7 @@ class FileReducerTest {
   @ParameterizedTest
   @MethodSource("happyPathFileListProvider")
   void testHappyPaths(List<File> paths) {
-    Assertions.assertTrue(FileReducer.verifySchemaPaths(paths).containsAll(paths));
+    Assertions.assertDoesNotThrow(() -> Validations.verifySchemaPaths(paths));
   }
 
   @ParameterizedTest
@@ -25,7 +23,7 @@ class FileReducerTest {
   void testDirectoryOverlap(List<File> paths) {
     Assertions.assertThrows(
       IllegalArgumentException.class,
-      () -> FileReducer.verifySchemaPaths(paths),
+      () -> Validations.verifySchemaPaths(paths),
       "should not succeed"
     );
   }

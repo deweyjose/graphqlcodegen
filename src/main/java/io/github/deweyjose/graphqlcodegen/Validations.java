@@ -3,7 +3,7 @@ package io.github.deweyjose.graphqlcodegen;
 import java.io.File;
 import java.util.*;
 
-public class FileReducer {
+public class Validations {
 
   /**
    * We sort the input files by their paths to ensure a consistent order for processing.
@@ -22,12 +22,11 @@ public class FileReducer {
    * directories and paths are updated in the encountered sets.
    * @param files
    */
-  public static Set<File> verifySchemaPaths(Collection<File> files) {
+  public static void verifySchemaPaths(Collection<File> files) {
     // Sort the input files to ensure consistent order
     List<File> sortedFiles = new ArrayList<>(files);
     sortedFiles.sort(Comparator.comparing(File::getPath));
 
-    Set<File> validatedFiles = new HashSet<>();
     Set<File> encounteredDirectories = new HashSet<>();
     Set<String> encounteredPaths = new HashSet<>();
 
@@ -61,16 +60,11 @@ public class FileReducer {
         }
       }
 
-      // This file passed all checks, add it to the validated files
-      validatedFiles.add(file);
-
       // Update the encountered sets
       if (file.isDirectory()) {
         encounteredDirectories.add(file);
       }
       encounteredPaths.add(path);
     }
-
-    return validatedFiles;
   }
 }

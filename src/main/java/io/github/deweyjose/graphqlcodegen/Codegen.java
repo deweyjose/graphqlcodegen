@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -161,7 +160,7 @@ public class Codegen extends AbstractMojo {
 			throw new RuntimeException("Please specify a packageName");
 		}
 
-		FileReducer.verifySchemaPaths(Arrays.stream(schemaPaths).collect(toList()));
+		Validations.verifySchemaPaths(Arrays.stream(schemaPaths).collect(toList()));
 
 		for (final String jarDep : schemaJarFilesFromDependencies) {
 			final String jarDepClean = jarDep.trim();
