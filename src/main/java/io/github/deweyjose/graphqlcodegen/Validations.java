@@ -49,12 +49,6 @@ public class Validations {
         encounteredDirectories.add(file);
       }
 
-      // keep it simple, never allow duplicate configuration
-      if (encounteredPaths.contains(path)) {
-        throw new IllegalArgumentException(
-          String.format("Duplicate path configured: %s", path)
-        );
-      }
       encounteredPaths.add(path);
     }
   }

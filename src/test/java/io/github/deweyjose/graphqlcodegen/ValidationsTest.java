@@ -57,6 +57,14 @@ class ValidationsTest {
       Arguments.of(Arrays.asList(
         getFile("schema/bar/sink/kitchen.graphqls"),
         getFile("schema/foo/it.graphqls")
+      )),
+      Arguments.of(Arrays.asList(
+        getFile("schema"),
+        getFile("schema")
+      )),
+      Arguments.of(Arrays.asList(
+        getFile("schema/bar/sink/kitchen.graphqls"),
+        getFile("schema/bar/sink/kitchen.graphqls")
       ))
     );
   }
@@ -75,19 +83,11 @@ class ValidationsTest {
       )),
       Arguments.of(Arrays.asList(
         getFile("schema"),
-        getFile("schema")
-      )),
-      Arguments.of(Arrays.asList(
-        getFile("schema"),
         getFile("schema/bar/sink/kitchen.graphqls")
       )),
       Arguments.of(Arrays.asList(
         getFile("schema/bar/sink/kitchen.graphqls"),
         getFile("schema/bar")
-      )),
-      Arguments.of(Arrays.asList(
-        getFile("schema/bar/sink/kitchen.graphqls"),
-        getFile("schema/bar/sink/kitchen.graphqls")
       ))
     );
   }
