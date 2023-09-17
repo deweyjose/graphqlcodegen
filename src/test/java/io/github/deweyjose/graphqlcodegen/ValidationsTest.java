@@ -78,6 +78,13 @@ class ValidationsTest {
   private static Stream<Arguments> overlappingFileListProvider() {
     return Stream.of(
       Arguments.of(Arrays.asList(
+        new File("schema"),
+        new File("schema/bars")
+      )),
+      Arguments.of(Arrays.asList(
+        new File("schema/a.graphqls")
+      )),
+      Arguments.of(Arrays.asList(
         getFile("schema"),
         getFile("schema/bar")
       )),

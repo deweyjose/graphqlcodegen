@@ -178,17 +178,6 @@ public class Codegen extends AbstractMojo {
 			}
 
 		}
-
-		for (final File schemaPath : schemaPaths) {
-			if (!schemaPath.exists()) {
-				try {
-					throw new RuntimeException(
-							format("Schema File: %s does not exist!", schemaPath.getCanonicalPath()));
-				} catch (final IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	@Override
@@ -196,6 +185,7 @@ public class Codegen extends AbstractMojo {
 		if (!skip) {
 
 			verifySettings();
+
 
 			// @formatter:off
 			final CodeGenConfig config = new CodeGenConfig(

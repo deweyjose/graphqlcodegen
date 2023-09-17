@@ -29,6 +29,10 @@ public class Validations {
     Set<String> encounteredPaths = new HashSet<>();
 
     for (File file : sortedFiles) {
+      if (!file.exists()) {
+        throw new IllegalArgumentException("Configured path %s does not exist" + file.getPath());
+      }
+
       String path = file.getPath();
 
       // Check for directory overlap
