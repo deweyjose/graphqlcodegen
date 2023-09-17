@@ -1,8 +1,8 @@
 package io.github.deweyjose.graphqlcodegen;
 
-import java.util.Map;
-
 import org.apache.maven.plugins.annotations.Parameter;
+
+import java.util.Map;
 
 public class Properties {
 	@Parameter
