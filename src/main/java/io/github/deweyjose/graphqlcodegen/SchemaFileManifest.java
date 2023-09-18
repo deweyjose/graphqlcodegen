@@ -44,7 +44,7 @@ public class SchemaFileManifest {
   /**
    * Computes the Set of files that have changed or are new
    * and need to trigger code generation.
-   * @return Set<File>
+   * @return Set
    */
   public Set<File> getChangedFiles() {
     Set<File> changed = new HashSet<>();
@@ -112,7 +112,7 @@ public class SchemaFileManifest {
   /**
    * Traverse the directory structure collecting .graphql(s) files.
    * @param directory
-   * @return Set<File>
+   * @return Set
    */
   public static Set<File> findGraphQLSFiles(File directory) {
     Set<File> result = new HashSet<>();
