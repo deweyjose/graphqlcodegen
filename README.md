@@ -7,11 +7,11 @@ This maven plugin is a port of the netflix codegen plugin for Gradle. Found [her
 Feel free to simply create a GitHub issue for requests to integrate with newer [releases](https://github.com/Netflix/dgs-codegen/releases) of the core DGS Codegen library.
 
 ### PRs
-PRS are welcome as well. The level of difficulty across DGS Codgen updates varies. Sometimes releases change the [CodeGenConfig](https://github.com/Netflix/dgs-codegen/blob/master/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt#L443) constructor - when new 
-options are added for example. 
+PRS are welcome as well. The level of difficulty across DGS Codgen updates varies. Sometimes releases change the [CodeGenConfig](https://github.com/Netflix/dgs-codegen/blob/master/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt#L443) constructor - when new
+options are added for example.
 
 Please make sure you run step 2 below to ensure your PR builds correctly. You may need to analyze the CodeGenConfig ctor parameters and add support for new options.
-Make sure to document any new options to the `Options` section below.  
+Make sure to document any new options to the `Options` section below.
 
 Process:
 1. bump the version in [pom.xml](pom.xml)
@@ -35,6 +35,21 @@ https://github.com/deweyjose/graphqlcodegen-example
 # Options
 
 Options are configured in the `<configuration>` element of the dgs-codegen-maven-plugin plugin.
+
+## onlyGenerateChanged
+
+This options enables the plugin to limit code generation to only schema files that have changed.
+Today this only works with schemaPaths.
+
+This only works for `<schemaPaths>`.  A subsequent release for schema compilation via dependencies will be release soon.
+
+- Type: boolean
+- Required: false
+- Default: true
+
+```xml
+<onlyGenerateChanged>true</onlyGenerateChanged>
+```
 
 ## subPackageNameDocs
 
@@ -99,7 +114,7 @@ Example
 Or
 
 ```shell
-# mvn ... -Ddgs.codegen.skip=true 
+# mvn ... -Ddgs.codegen.skip=true
 ```
 
 ## schemaPaths
@@ -121,8 +136,8 @@ Example
 
 - Type: array
 - Required: false
-- Default: 
-- Official doc : https://netflix.github.io/dgs/generating-code-from-schema/#generating-code-from-external-schemas-in-jars 
+- Default:
+- Official doc : https://netflix.github.io/dgs/generating-code-from-schema/#generating-code-from-external-schemas-in-jars
 
 Example
 
@@ -287,7 +302,7 @@ Example:
 
 ```xml
 <outputDir>${project.build.directory}/generated-examples</outputDir>
-```     
+```
 
 ## includeQueries
 
@@ -560,7 +575,7 @@ Maps the custom annotation and class names to the class packages. Only used when
     <bar>
         <properties>
             <zoo>bar.bar</zoo>
-      
+
             <zing>bla.bla</zing>
         </properties>
     </bar>

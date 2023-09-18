@@ -3,7 +3,19 @@ package io.github.deweyjose.graphqlcodegen;
 import java.io.File;
 import java.util.*;
 
+import static java.util.Objects.isNull;
+
 public class Validations {
+
+  /**
+   * Ensures the package name isn't null.
+   * @param name
+   */
+  public static void verifyPackageName(String name) {
+    if (isNull(name)) {
+      throw new IllegalArgumentException("Please specify a packageName");
+    }
+  }
 
   /**
    * We sort the input files by their paths to ensure a consistent order for processing.
@@ -29,6 +41,10 @@ public class Validations {
     Set<String> encounteredPaths = new HashSet<>();
 
     for (File file : sortedFiles) {
+      if (!file.exists()) {
+        throw new IllegalArgumentException("Configured path %s does not exist" + file.getPath());
+      }
+
       String path = file.getPath();
 
       // Check for directory overlap
