@@ -1,6 +1,7 @@
 package io.github.deweyjose.graphqlcodegen;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -11,6 +12,20 @@ import java.util.List;
 import java.util.stream.Stream;
 
 class ValidationsTest {
+
+  @Test
+  void testNullPackageName() {
+    Assertions.assertThrows(
+      IllegalArgumentException.class,
+      () -> Validations.verifyPackageName(null),
+      "should fail"
+    );
+  }
+
+  @Test
+  void testValidPackageName() {
+    Assertions.assertDoesNotThrow(() -> Validations.verifyPackageName("foo"));
+  }
 
   @ParameterizedTest
   @MethodSource("happyPathFileListProvider")
