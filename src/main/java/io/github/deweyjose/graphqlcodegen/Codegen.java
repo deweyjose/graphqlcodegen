@@ -284,4 +284,6 @@ public class Codegen extends AbstractMojo {
 			}
 		}
 	}
+
 }
+
