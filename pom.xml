@@ -34,7 +34,7 @@
   </scm>
 
   <properties>
-    <graphql-dgs-codegen-core.version>6.1.0</graphql-dgs-codegen-core.version>
+    <graphql-dgs-codegen-core.version>6.1.1</graphql-dgs-codegen-core.version>
     <java.version>1.8</java.version>
     <junit.version>5.10.0</junit.version>
     <lombok.version>1.18.30</lombok.version>
