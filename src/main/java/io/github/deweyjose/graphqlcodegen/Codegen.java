@@ -154,6 +154,9 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "onlyGenerateChanged", defaultValue = "true")
     private boolean onlyGenerateChanged;
 
+    @Parameter(property = "generateIsGetterForPrimitiveBooleanFields", defaultValue = "false")
+    private boolean generateIsGetterForPrimitiveBooleanFields;
+
     private void verifySettings() {
         Validations.verifyPackageName(packageName);
         Validations.verifySchemaPaths(Arrays.stream(schemaPaths).collect(toList()));
@@ -206,7 +209,50 @@ public class Codegen extends AbstractMojo {
                 return;
             }
 
-            final CodeGenConfig config = new CodeGenConfig(emptySet(), schemaPaths, DependencySchemaExtractor.extract(project, schemaJarFilesFromDependencies), outputDir.toPath(), exampleOutputDir.toPath(), writeToFiles, packageName, subPackageNameClient, subPackageNameDatafetchers, subPackageNameTypes, subPackageNameDocs, Language.valueOf(language.toUpperCase()), generateBoxedTypes, generateClientApi, generateClientApiV2, generateInterfaces, generateKotlinNullableClasses, generateKotlinClosureProjections, typeMapping, stream(includeQueries).collect(toSet()), stream(includeMutations).collect(toSet()), stream(includeSubscriptions).collect(toSet()), skipEntityQueries, shortProjectionNames, generateDataTypes, omitNullInputFields, maxProjectionDepth, kotlinAllFieldsOptional, snakeCaseConstantNames, generateInterfaceSetters, generateInterfaceMethodsForInterfaceFields, generateDocs, Paths.get(generatedDocsFolder), includeImports, includeEnumImports.entrySet().stream().collect(toMap(Entry::getKey, entry -> entry.getValue().getProperties())), includeClassImports.entrySet().stream().collect(toMap(Entry::getKey, entry -> entry.getValue().getProperties())), generateCustomAnnotations, javaGenerateAllConstructor, implementSerializable, addGeneratedAnnotation, addDeprecatedAnnotation);
+            final CodeGenConfig config = new CodeGenConfig(
+                emptySet(),
+                schemaPaths,
+                DependencySchemaExtractor.extract(project, schemaJarFilesFromDependencies),
+                outputDir.toPath(),
+                exampleOutputDir.toPath(),
+                writeToFiles,
+                packageName,
+                subPackageNameClient,
+                subPackageNameDatafetchers,
+                subPackageNameTypes,
+                subPackageNameDocs,
+                Language.valueOf(language.toUpperCase()),
+                generateBoxedTypes,
+                generateIsGetterForPrimitiveBooleanFields,
+                generateClientApi,
+                generateClientApiV2,
+                generateInterfaces,
+                generateKotlinNullableClasses,
+                generateKotlinClosureProjections,
+                typeMapping,
+                stream(includeQueries).collect(toSet()),
+                stream(includeMutations).collect(toSet()),
+                stream(includeSubscriptions).collect(toSet()),
+                skipEntityQueries,
+                shortProjectionNames,
+                generateDataTypes,
+                omitNullInputFields,
+                maxProjectionDepth,
+                kotlinAllFieldsOptional,
+                snakeCaseConstantNames,
+                generateInterfaceSetters,
+                generateInterfaceMethodsForInterfaceFields,
+                generateDocs,
+                Paths.get(generatedDocsFolder),
+                includeImports,
+                includeEnumImports.entrySet().stream().collect(toMap(Entry::getKey, entry -> entry.getValue().getProperties())),
+                includeClassImports.entrySet().stream().collect(toMap(Entry::getKey, entry -> entry.getValue().getProperties())),
+                generateCustomAnnotations,
+                javaGenerateAllConstructor,
+                implementSerializable,
+                addGeneratedAnnotation,
+                addDeprecatedAnnotation
+            );
 
             getLog().info(format("Codegen config: %n%s", config));
 
