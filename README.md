@@ -581,6 +581,21 @@ Maps the custom annotation and class names to the class packages. Only used when
     </bar>
 </includeClassImports>
 ```
+
+
+## generateIsGetterForPrimitiveBooleanFields
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+
+```xml
+<generateIsGetterForPrimitiveBooleanFields>false</generateIsGetterForPrimitiveBooleanFields>
+```
+
+
 # Usage
 
 Add the following to your pom files build/plugins section.
