@@ -34,6 +34,7 @@
     </scm>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <graphql-dgs-codegen-core.version>6.1.1</graphql-dgs-codegen-core.version>
         <java.version>1.8</java.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
