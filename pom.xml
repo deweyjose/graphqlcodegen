@@ -36,7 +36,7 @@
     <properties>
         <graphql-dgs-codegen-core.version>6.1.1</graphql-dgs-codegen-core.version>
         <java.version>1.8</java.version>
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
         <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
         <maven-plugin-plugin.version>3.10.2</maven-plugin-plugin.version>
