@@ -38,7 +38,7 @@
     <java.version>1.8</java.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
-    <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
+    <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
     <maven-plugin-plugin.version>3.10.2</maven-plugin-plugin.version>
     <maven-plugin-api.version>3.8.1</maven-plugin-api.version>
     <maven-plugin-annotations.version>3.6.1</maven-plugin-annotations.version>
