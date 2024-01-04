@@ -84,3 +84,5 @@ nb-configuration.xml
 .DS_Store
 
 release.sh
+
+.tool-versions
