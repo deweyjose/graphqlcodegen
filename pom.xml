@@ -6,7 +6,7 @@
     <groupId>io.github.deweyjose</groupId>
     <artifactId>graphqlcodegen-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>1.51.2</version>
+    <version>1.51.3</version>
 
     <name>GraphQL Code Generator</name>
     <description>Maven port of the Netflix DGS GraphQL Codegen gradle build plugin</description>
@@ -35,7 +35,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <graphql-dgs-codegen-core.version>6.1.2</graphql-dgs-codegen-core.version>
+        <graphql-dgs-codegen-core.version>6.1.3</graphql-dgs-codegen-core.version>
         <java.version>1.8</java.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
