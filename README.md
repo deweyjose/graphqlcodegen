@@ -176,6 +176,8 @@ Example
 Provide typeMapping as properties file(s) that is accessible as a compile-time-classpath resource
 Key-Value pairs in the properties file will be added to `typeMapping` Map when it is not already present in it
 
+When a same GraphQL type is present in both `typeMapping` and also in `typeMappingPropertiesFiles`, value in `typeMapping` will be used (and the value from `typeMappingPropertiesFiles` *will* be ignored)
+
 - Type: Array
 - Required: false
 
