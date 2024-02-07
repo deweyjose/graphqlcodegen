@@ -172,6 +172,22 @@ Example
 </typeMapping>
 ```
 
+## typeMappingPropertiesFiles
+Provide typeMapping as properties file(s) that is accessible as a compile-time-classpath resource
+Key-Value pairs in the properties file will be added to `typeMapping` Map when it is not already present in it
+
+- Type: Array
+- Required: false
+
+Example
+
+```xml
+<typeMappingPropertiesFiles>
+    <typeMappingPropertiesFile>commontypes-typeMapping.properties</typeMappingPropertiesFile>
+    <typeMappingPropertiesFile>someother-commontypes-typeMapping.properties</typeMappingPropertiesFile>
+</typeMappingPropertiesFiles>
+```
+
 ## subPackageNameClient
 
 - Type: string

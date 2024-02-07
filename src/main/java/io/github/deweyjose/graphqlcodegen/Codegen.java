@@ -7,12 +7,17 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -22,7 +27,8 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.*;
 
-@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES,
+    requiresDependencyResolution = ResolutionScope.COMPILE)
 public class Codegen extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}")
@@ -54,6 +60,18 @@ public class Codegen extends AbstractMojo {
 
     @Parameter(property = "typeMapping")
     private Map<String, String> typeMapping;
+
+    /**
+     * Provide the typeMapping as properties file(s)
+     * that is accessible as a compile-time-classpath resource
+     * Values in the properties file will be added to `typeMapping` Map
+     * when it is not already present
+     */
+    @Parameter(property = "typeMappingPropertiesFiles")
+    private String [] typeMappingPropertiesFiles;
+
+    @Parameter(defaultValue = "${project.compileClasspathElements}", required = true, readonly = true)
+    private List<String> compileClasspathElements;
 
     @Parameter(property = "generateBoxedTypes", defaultValue = "false")
     private boolean generateBoxedTypes;
@@ -209,6 +227,29 @@ public class Codegen extends AbstractMojo {
                 return;
             }
 
+            if (typeMappingPropertiesFiles!=null && typeMappingPropertiesFiles.length > 0) {
+                java.util.Properties typeMappingProperties = new java.util.Properties();
+                for (String typeMappingPropertiesFile: typeMappingPropertiesFiles) {
+                    CustomUrlClassLoader classLoader = new CustomUrlClassLoader(compileClasspathElements);
+                    //Read typeMapping Properties file
+                    InputStream typeMappingStream = classLoader.getResourceAsStream(typeMappingPropertiesFile);
+                    try {
+                        typeMappingProperties.load(typeMappingStream);
+                    } catch (IOException e) {
+                        getLog().error(e);
+                        return;
+                    }
+                }
+                //Set key-value from this properties object to typeMapping Map
+                //only when it is not already present in the Map
+                if (typeMapping == null) {
+                    typeMapping = new HashMap<>();
+                }
+                typeMappingProperties.forEach((k, v) -> {
+                    typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v));
+                });
+            }
+
             final CodeGenConfig config = new CodeGenConfig(
                 emptySet(),
                 schemaPaths,
@@ -268,4 +309,5 @@ public class Codegen extends AbstractMojo {
             }
         }
     }
+
 }
