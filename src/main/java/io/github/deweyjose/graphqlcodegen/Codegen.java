@@ -227,7 +227,6 @@ public class Codegen extends AbstractMojo {
             }
 
             if (typeMappingPropertiesFiles!=null && typeMappingPropertiesFiles.length > 0) {
-                getLog().error(Arrays.toString(typeMappingPropertiesFiles));
                 Set<Artifact> dependencies = project.getArtifacts();
                 java.util.Properties typeMappingProperties = new java.util.Properties();
                 for (Artifact dependency : dependencies) {
