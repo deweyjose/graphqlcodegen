@@ -3,26 +3,34 @@ package io.github.deweyjose.graphqlcodegen;
 import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
 import com.netflix.graphql.dgs.codegen.Language;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.*;
 
-@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES,
+    requiresDependencyResolution = ResolutionScope.COMPILE)
 public class Codegen extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}")
@@ -54,6 +62,15 @@ public class Codegen extends AbstractMojo {
 
     @Parameter(property = "typeMapping")
     private Map<String, String> typeMapping;
+
+    /**
+     * Provide the typeMapping as properties file(s)
+     * that is accessible as a compile-time-classpath resource
+     * Values in the properties file will be added to `typeMapping` Map
+     * when it is not already present
+     */
+    @Parameter(property = "typeMappingPropertiesFiles")
+    private String [] typeMappingPropertiesFiles;
 
     @Parameter(property = "generateBoxedTypes", defaultValue = "false")
     private boolean generateBoxedTypes;
@@ -209,6 +226,25 @@ public class Codegen extends AbstractMojo {
                 return;
             }
 
+            if (typeMappingPropertiesFiles!=null && typeMappingPropertiesFiles.length > 0) {
+                Set<Artifact> dependencies = project.getArtifacts();
+                java.util.Properties typeMappingProperties = new java.util.Properties();
+                for (Artifact dependency : dependencies) {
+                    File artifactFile = dependency.getFile();
+                    if (artifactFile != null && artifactFile.isFile()) {
+                        loadPropertiesFile(typeMappingProperties, artifactFile, typeMappingPropertiesFiles);
+                    }
+                }
+                //Set key-value from this properties object to typeMapping Map
+                //only when it is not already present in the Map
+                if (typeMapping == null) {
+                    typeMapping = new HashMap<>();
+                }
+                typeMappingProperties.forEach((k, v) -> {
+                    typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v));
+                });
+            }
+
             final CodeGenConfig config = new CodeGenConfig(
                 emptySet(),
                 schemaPaths,
@@ -268,4 +304,29 @@ public class Codegen extends AbstractMojo {
             }
         }
     }
+
+    /**
+     *
+     * @param typeMappingProperties: Java Properties where typeMapping will be loaded into
+     * @param artifactFile: Artifact file
+     * @param typeMappingPropertiesFiles: Input: Classpath location of typeMapping properties file
+     * @return
+     */
+    private void loadPropertiesFile(java.util.Properties typeMappingProperties,
+                                                    File artifactFile, String [] typeMappingPropertiesFiles) {
+        try (JarFile jarFile = new JarFile(artifactFile)) {
+            for (String file : typeMappingPropertiesFiles) {
+                ZipEntry entry = jarFile.getEntry(file);
+                if (entry!=null) {
+                    try (InputStream inputStream = jarFile.getInputStream(entry)) {
+                        // load the data into the typeMappingProperties
+                        typeMappingProperties.load(inputStream);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            getLog().error(e);
+        }
+    }
+
 }
