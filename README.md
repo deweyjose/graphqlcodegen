@@ -136,8 +136,9 @@ Example
 
 - Type: array
 - Required: false
-- Default:
-- Official doc : https://netflix.github.io/dgs/generating-code-from-schema/#generating-code-from-external-schemas-in-jars
+- Default: []
+- Official doc : https://netflix.github.io/dgs/generating-code-from-schema/#generating-code-from-external-schemas-in-jars.
+- Please note that `.graphql(s)` files must exist under the `META-INF` folder in the external jar file.
 
 Example
 

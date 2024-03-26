@@ -15,12 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
@@ -221,7 +217,7 @@ public class Codegen extends AbstractMojo {
                 getLog().info(String.format("changed schema files: %s", schemaPaths));
             }
 
-            if (schemaPaths.isEmpty()) {
+            if (schemaPaths.isEmpty() && schemaJarFilesFromDependencies.length < 1) {
                 getLog().info("no files to generate");
                 return;
             }
@@ -290,7 +286,7 @@ public class Codegen extends AbstractMojo {
                 addDeprecatedAnnotation
             );
 
-            getLog().info(format("Codegen config: %n%s", config));
+            getLog().info(format("Codegen config: \n%s", config));
 
             final CodeGen codeGen = new CodeGen(config);
             codeGen.generate();
