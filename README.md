@@ -20,13 +20,10 @@ Process:
 
 
 # Overview
-The DGS Code Generation plugin generates code for basic types and example data fetchers based on the your Domain Graph
-Service's graphql schema file during the project's build process. The plugin requires the path to schema files and the
-package name to use to generate the file. If no schema path is specified, it will look under src/resources/schema for
-any files with .graphqls extension. plugin generates code for basic types and example data fetchers based on the your
-Domain Graph Service's graphql schema file during the project's build process. The plugin requires the path to schema
-files and the package name to use to generate the file. If no schema path is specified, it will look under
-src/resources/schema for any files with .graphqls extension.
+The DGS Code Generation plugin generates code for basic types and example data fetchers based on your Domain Graph
+Service's graphql schema file during the project's build process. The plugin requires the designated `packageName` for file generation.
+If no schema path is specified, it will look under src/resources/schema for
+any files with .graphqls extension.
 
 # Example Repo
 
