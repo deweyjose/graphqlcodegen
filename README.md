@@ -7,7 +7,7 @@ This maven plugin is a port of the netflix codegen plugin for Gradle. Found [her
 Feel free to simply create a GitHub issue for requests to integrate with newer [releases](https://github.com/Netflix/dgs-codegen/releases) of the core DGS Codegen library.
 
 ### PRs
-PRS are welcome as well. The level of difficulty across DGS Codgen updates varies. Typically we add new pluing options and update the [CodeGenConfig](https://github.com/Netflix/dgs-codegen/blob/master/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt#L443) constructor - when new
+PRS are welcome as well. The level of difficulty across DGS Codgen updates varies. Typically we add new plugin options and update the [CodeGenConfig](https://github.com/Netflix/dgs-codegen/blob/master/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt#L443) constructor - when new
 options are added to the Codegen core library.
 
 Please make sure you run step 2 below to ensure your PR builds correctly. You may need to analyze the CodeGenConfig ctor parameters and add support for new options.
