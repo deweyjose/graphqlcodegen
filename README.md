@@ -482,12 +482,12 @@ Example
 
 - Type: boolean
 - Required: false
-- Default: false
+- Default: true
 
 Example
 
 ```xml
-<generateInterfaceMethodsForInterfaceFields>false</generateInterfaceMethodsForInterfaceFields>
+<generateInterfaceSetters>false</generateInterfaceSetters>
 ```
 
 ## generateInterfaceMethodsForInterfaceFields
