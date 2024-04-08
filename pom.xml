@@ -45,7 +45,7 @@
         <maven-plugin-annotations.version>3.11.0</maven-plugin-annotations.version>
         <maven-project.version>2.2.1</maven-project.version>
         <maven-release-plugin.version>3.0.0-M4</maven-release-plugin.version>
-        <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
         <maven-scm-provider-gitexe.version>1.11.2</maven-scm-provider-gitexe.version>
         <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
