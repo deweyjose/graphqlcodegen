@@ -209,7 +209,7 @@ public class Codegen extends AbstractMojo {
 
             Set<File> schemaPaths = getSchemaPaths();
 
-            SchemaFileManifest manifest = new SchemaFileManifest(new File(outputDir, "schema-manifest.props"));
+            SchemaFileManifest manifest = new SchemaFileManifest(new File(outputDir, "schema-manifest.props"), project.getBasedir());
 
             if (onlyGenerateChanged) {
                 manifest.setFiles(new HashSet<>(schemaPaths));
