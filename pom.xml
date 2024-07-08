@@ -51,7 +51,7 @@
         <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
         <junit.version>5.10.2</junit.version>
          <lombok.version>1.18.32</lombok.version>
-        <kotlinpoet-jvm.version>1.16.0</kotlinpoet-jvm.version>
+        <kotlinpoet-jvm.version>1.18.0</kotlinpoet-jvm.version>
     </properties>
 
     <dependencies>
