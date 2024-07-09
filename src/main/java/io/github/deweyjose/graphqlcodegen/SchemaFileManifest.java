@@ -125,6 +125,10 @@ public class SchemaFileManifest {
             manifest.setProperty(relativizeToProject(file), generateChecksum(file));
         }
 
+        if (!manifestPath.exists()) {
+            manifestPath.getParentFile().mkdirs();
+        }
+
         try (FileOutputStream fos = new FileOutputStream(manifestPath)) {
             manifest.store(fos, "Schema Manifest");
             fos.flush();

@@ -95,6 +95,9 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "exampleOutputDir", defaultValue = "${project.build.directory}/generated-examples")
     private File exampleOutputDir;
 
+    @Parameter(property = "schemaManifestOutputDir", defaultValue = "${project.build.directory}/graphqlcodegen")
+    private File schemaManifestOutputDir;
+
     @Parameter(property = "includeQueries")
     private String[] includeQueries;
 
@@ -209,7 +212,7 @@ public class Codegen extends AbstractMojo {
 
             Set<File> schemaPaths = getSchemaPaths();
 
-            SchemaFileManifest manifest = new SchemaFileManifest(new File(outputDir, "schema-manifest.props"), project.getBasedir());
+            SchemaFileManifest manifest = new SchemaFileManifest(new File(schemaManifestOutputDir, "schema-manifest.props"), project.getBasedir());
 
             if (onlyGenerateChanged) {
                 manifest.setFiles(new HashSet<>(schemaPaths));
