@@ -645,7 +645,6 @@ Add the following to your pom files build/plugins section.
             <param>src/main/resources/schema/schema.graphqls</param>
         </schemaPaths>
         <packageName>com.acme.[your_project].generated</packageName>
-        <addGeneratedAnnotation>true</addGeneratedAnnotation>
     </configuration>
 </plugin>
 ```
