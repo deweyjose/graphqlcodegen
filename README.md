@@ -300,7 +300,7 @@ Example
 
 - Type: string
 - Required: false
-- Default: `${project.basedir}/target/generated-sources`
+- Default: `${project.build.directory}/generated-sources`
 
 Example:
 
@@ -312,12 +312,24 @@ Example:
 
 - Type: string
 - Required: false
-- Default: `${project.basedir}/target/generated-examples`
+- Default: `${project.build.directory}/generated-examples`
 
 Example:
 
 ```xml
-<outputDir>${project.build.directory}/generated-examples</outputDir>
+<exampleOutputDir>${project.build.directory}/generated-examples</exampleOutputDir>
+```
+
+## schemaManifestOutputDir
+
+- Type: string
+- Required: false
+- Default: `${project.build.directory}/graphqlcodegen`
+
+Example:
+
+```xml
+<schemaManifestOutputDir>${project.build.directory}/graphqlcodegen</schemaManifestOutputDir>
 ```
 
 ## includeQueries
@@ -633,7 +645,6 @@ Add the following to your pom files build/plugins section.
             <param>src/main/resources/schema/schema.graphqls</param>
         </schemaPaths>
         <packageName>com.acme.[your_project].generated</packageName>
-        <addGeneratedAnnotation>true</addGeneratedAnnotation>
     </configuration>
 </plugin>
 ```

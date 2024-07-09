@@ -2,6 +2,8 @@ package io.github.deweyjose.graphqlcodegen;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import nu.studer.java.util.OrderedProperties;
+import nu.studer.java.util.OrderedProperties.OrderedPropertiesBuilder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,14 +13,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 
 @Slf4j
 public class SchemaFileManifest {
     private Set<File> files;
-    private final Properties manifest;
     private final File manifestPath;
+    private final File projectPath;
 
     /**
      * Manifest constructor loads the properties file into memory.
@@ -27,27 +28,17 @@ public class SchemaFileManifest {
      *
      * @param files
      * @param manifestPath
+     * @param projectPath
      */
-    public SchemaFileManifest(Set<File> files, File manifestPath) {
+    public SchemaFileManifest(Set<File> files, File manifestPath, File projectPath) {
         this.files = files;
         this.manifestPath = manifestPath;
-        manifest = loadManifest(manifestPath);
+        this.projectPath = projectPath;
     }
 
-    public SchemaFileManifest(File manifestPath) {
+    public SchemaFileManifest(File manifestPath, File projectPath) {
         this.manifestPath = manifestPath;
-        manifest = loadManifest(manifestPath);
-    }
-
-    @SneakyThrows
-    public static Properties loadManifest(File manifestPath) {
-        Properties properties = new Properties();
-        if (manifestPath.exists()) {
-            try (FileInputStream fis = new FileInputStream(manifestPath)) {
-                properties.load(fis);
-            }
-        }
-        return properties;
+        this.projectPath = projectPath;
     }
 
     @SneakyThrows
@@ -105,8 +96,9 @@ public class SchemaFileManifest {
      */
     public Set<File> getChangedFiles() {
         Set<File> changed = new HashSet<>();
+        OrderedProperties manifest = loadManifest();
         for (File file : files) {
-            String oldChecksum = manifest.getProperty(file.getPath());
+            String oldChecksum = manifest.getProperty(relativizeToProject(file));
             if (oldChecksum == null) {
                 log.info("{} is new, will generate code", file.getName());
             } else if (!oldChecksum.equals(generateChecksum(file))) {
@@ -126,14 +118,37 @@ public class SchemaFileManifest {
      */
     @SneakyThrows
     public void syncManifest() {
-        manifest.clear();
+        OrderedProperties manifest = new OrderedPropertiesBuilder()
+                .withSuppressDateInComment(true)
+                .build();
         for (File file : files) {
-            manifest.put(file.getPath(), generateChecksum(file));
+            manifest.setProperty(relativizeToProject(file), generateChecksum(file));
+        }
+
+        if (!manifestPath.exists()) {
+            manifestPath.getParentFile().mkdirs();
         }
 
         try (FileOutputStream fos = new FileOutputStream(manifestPath)) {
             manifest.store(fos, "Schema Manifest");
             fos.flush();
         }
+    }
+
+    @SneakyThrows
+    private OrderedProperties loadManifest() {
+        OrderedProperties properties = new OrderedPropertiesBuilder()
+                .withSuppressDateInComment(true)
+                .build();
+        if (manifestPath.exists()) {
+            try (FileInputStream fis = new FileInputStream(manifestPath)) {
+                properties.load(fis);
+            }
+        }
+        return properties;
+    }
+
+    private String relativizeToProject(File file) {
+        return projectPath.toPath().relativize(file.toPath()).toString();
     }
 }

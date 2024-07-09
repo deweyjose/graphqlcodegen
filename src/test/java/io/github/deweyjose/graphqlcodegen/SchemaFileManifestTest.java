@@ -52,21 +52,21 @@ class SchemaFileManifestTest {
     File foo = getFile("schema/foo.graphqls");
 
     Properties properties = new Properties();
-    properties.put(bar.getPath(), "7cada13b5b8770e46f7a69e8856abdb9");
-    properties.put(foo.getPath(), "61bbd2d58c22dfb3c664829ad116f7e9");
+    properties.put(tempFolder.relativize(bar.toPath()).toString(), "7cada13b5b8770e46f7a69e8856abdb9");
+    properties.put(tempFolder.relativize(foo.toPath()).toString(), "61bbd2d58c22dfb3c664829ad116f7e9");
 
     File manifest = tempFolder.resolve("manifest.props").toFile();
     try (FileOutputStream fis = new FileOutputStream(manifest)) {
       properties.store(fis, "Schema Manifest");
     }
 
-    SchemaFileManifest sfm = new SchemaFileManifest(new HashSet<>(Arrays.asList(foo, bar)), manifest);
+    SchemaFileManifest sfm = new SchemaFileManifest(new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
 
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
 
     sfm.syncManifest();
 
-    sfm = new SchemaFileManifest(new HashSet<>(Arrays.asList(foo, bar)), manifest);
+    sfm = new SchemaFileManifest(new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
 
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
   }
@@ -79,18 +79,18 @@ class SchemaFileManifestTest {
     File foo = getFile("schema/foo.graphqls");
     File manifest = tempFolder.resolve("manifest.props").toFile();
 
-    SchemaFileManifest sfm = new SchemaFileManifest(new HashSet<>(Arrays.asList(foo, bar)), manifest);
+    SchemaFileManifest sfm = new SchemaFileManifest(new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
 
     Assertions.assertTrue(sfm.getChangedFiles().contains(foo));
 
     sfm.syncManifest();
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
 
-    sfm = new SchemaFileManifest(new HashSet<>(Arrays.asList(foo, bar)), manifest);
+    sfm = new SchemaFileManifest(new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
     sfm.syncManifest();
 
-    sfm = new SchemaFileManifest(new HashSet<>(Arrays.asList(foo, bar)), manifest);
+    sfm = new SchemaFileManifest(new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
   }
 
