@@ -170,6 +170,9 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "onlyGenerateChanged", defaultValue = "true")
     private boolean onlyGenerateChanged;
 
+    @Parameter(property = "disableDatesInGeneratedAnnotation", defaultValue = "false")
+    private boolean disableDatesInGeneratedAnnotation;
+
     @Parameter(property = "generateIsGetterForPrimitiveBooleanFields", defaultValue = "false")
     private boolean generateIsGetterForPrimitiveBooleanFields;
 
@@ -244,6 +247,7 @@ public class Codegen extends AbstractMojo {
                 });
             }
 
+
             final CodeGenConfig config = new CodeGenConfig(
                 emptySet(),
                 schemaPaths,
@@ -286,6 +290,7 @@ public class Codegen extends AbstractMojo {
                 javaGenerateAllConstructor,
                 implementSerializable,
                 addGeneratedAnnotation,
+                disableDatesInGeneratedAnnotation,
                 addDeprecatedAnnotation
             );
 

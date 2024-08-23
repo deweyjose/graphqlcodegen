@@ -623,6 +623,17 @@ Example
 <generateIsGetterForPrimitiveBooleanFields>false</generateIsGetterForPrimitiveBooleanFields>
 ```
 
+## disableDatesInGeneratedAnnotation
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+
+```xml
+<disableDatesInGeneratedAnnotation>true</disableDatesInGeneratedAnnotation>
+```
 
 # Usage
 
