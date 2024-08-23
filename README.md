@@ -118,7 +118,7 @@ Or
 
 - Type: array
 - Required: false
-- Default: `${project.build.resources}/schema`
+- Default: `${project.resource}/src/main/resources/schema`
 
 Example
 
