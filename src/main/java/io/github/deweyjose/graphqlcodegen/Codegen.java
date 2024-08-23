@@ -32,7 +32,7 @@ public class Codegen extends AbstractMojo {
     @Parameter(defaultValue = "${project}")
     private MavenProject project;
 
-    @Parameter(property = "schemaPaths")
+    @Parameter(property = "schemaPaths", defaultValue = "${project.resource}/src/main/resources/schema")
     private File[] schemaPaths;
 
     @Parameter(alias = "schemaJarFilesFromDependencies", property = "schemaJarFilesFromDependencies")
