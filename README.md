@@ -118,7 +118,7 @@ Or
 
 - Type: array
 - Required: false
-- Default: `${project.resource}/src/main/resources/schema`
+- Default: `${project.basedir}/src/main/resources/schema`
 
 Example
 
