@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
@@ -228,24 +229,33 @@ public class Codegen extends AbstractMojo {
                 return;
             }
 
-            if (typeMappingPropertiesFiles!=null && typeMappingPropertiesFiles.length > 0) {
+            java.util.Properties typeMappingProperties = new java.util.Properties();
+            Set<String> loadedFiles = new HashSet<>();
+
+            if (typeMappingPropertiesFiles != null && typeMappingPropertiesFiles.length > 0) {
                 Set<Artifact> dependencies = project.getArtifacts();
-                java.util.Properties typeMappingProperties = new java.util.Properties();
                 for (Artifact dependency : dependencies) {
                     File artifactFile = dependency.getFile();
                     if (artifactFile != null && artifactFile.isFile()) {
-                        loadPropertiesFile(typeMappingProperties, artifactFile, typeMappingPropertiesFiles);
+                        for (String file : typeMappingPropertiesFiles) {
+                            if (loadedFiles.add(file)) {
+                                loadPropertiesFile(typeMappingProperties, artifactFile, new String[]{file});
+                            }
+                        }
                     }
                 }
-                //Set key-value from this properties object to typeMapping Map
-                //only when it is not already present in the Map
-                if (typeMapping == null) {
-                    typeMapping = new HashMap<>();
-                }
-                typeMappingProperties.forEach((k, v) -> {
-                    typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v));
-                });
             }
+
+            searchAndLoadPropertiesFiles(typeMappingProperties, loadedFiles);
+
+            // Set key-value from this properties object to typeMapping Map
+            // only when it is not already present in the Map
+            if (typeMapping == null) {
+                typeMapping = new HashMap<>();
+            }
+            typeMappingProperties.forEach((k, v) -> {
+                typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v));
+            });
 
 
             final CodeGenConfig config = new CodeGenConfig(
@@ -330,6 +340,33 @@ public class Codegen extends AbstractMojo {
             }
         } catch (IOException e) {
             getLog().error(e);
+        }
+    }
+
+    /**
+     * Searches and Scan aloads properties files with pattern "*-typemapping.properties" from
+     * compile-time classpath into the provided typeMappingProperties.
+     *
+     * @param typeMappingProperties Properties object to which the properties will be loaded.
+     * @param loadedFiles Set of already loaded files to avoid duplicates.
+     */
+    private void searchAndLoadPropertiesFiles(java.util.Properties typeMappingProperties, Set<String> loadedFiles) {
+        Set<Artifact> dependencies = project.getArtifacts();
+        for (Artifact dependency : dependencies) {
+            File artifactFile = dependency.getFile();
+            if (artifactFile != null && artifactFile.isFile()) {
+                try (JarFile jarFile = new JarFile(artifactFile)) {
+                    Enumeration<JarEntry> entries = jarFile.entries();
+                    while (entries.hasMoreElements()) {
+                        JarEntry entry = entries.nextElement();
+                        if (entry.getName().endsWith("-typemapping.properties") && loadedFiles.add(entry.getName())) {
+                            loadPropertiesFile(typeMappingProperties, artifactFile, new String[]{entry.getName()});
+                        }
+                    }
+                } catch (IOException e) {
+                    getLog().error(format("Error processing artifact file: %s", artifactFile.getName()), e);
+                }
+            }
         }
     }
 
