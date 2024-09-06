@@ -19,6 +19,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
 import static java.lang.String.format;
@@ -177,6 +179,9 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "generateIsGetterForPrimitiveBooleanFields", defaultValue = "false")
     private boolean generateIsGetterForPrimitiveBooleanFields;
 
+    @Parameter(property = "propertiesFilePattern", defaultValue = ".*-typemapping\\.properties$")
+    private String propertiesFilePattern;
+
     private void verifySettings() {
         Validations.verifyPackageName(packageName);
         Validations.verifySchemaPaths(Arrays.stream(schemaPaths).collect(toList()));
@@ -332,29 +337,31 @@ public class Codegen extends AbstractMojo {
      * @param knownFiles Array of known file names to load.
      */
     private void loadPropertiesFromArtifacts(java.util.Properties typeMappingProperties, String[] knownFiles) {
-        Set<String> loadedFiles = new HashSet<>();
         Set<Artifact> dependencies = project.getArtifacts();
-
+        Pattern pattern = Pattern.compile(propertiesFilePattern);
         for (Artifact dependency : dependencies) {
             File artifactFile = dependency.getFile();
             if (artifactFile != null && artifactFile.isFile()) {
                 try (JarFile jarFile = new JarFile(artifactFile)) {
                     // Load known files
-                    if (knownFiles != null) {
+                    if (knownFiles != null && knownFiles.length > 0) {
                         for (String file : knownFiles) {
-                            if (loadedFiles.add(file)) {
-                                loadPropertiesFile(typeMappingProperties, artifactFile, file);
-                            }
+                            loadPropertiesFile(typeMappingProperties, artifactFile, file);
                         }
                     }
-
-                    // Load files matching the pattern
-                    Enumeration<JarEntry> entries = jarFile.entries();
-                    while (entries.hasMoreElements()) {
-                        JarEntry entry = entries.nextElement();
-                        String entryName = entry.getName();
-                        if (entryName.endsWith("-typemapping.properties") && loadedFiles.add(entryName)) {
-                            loadPropertiesFile(typeMappingProperties, artifactFile, entryName);
+                    else {
+                        // Load files matching the pattern
+                        Enumeration<JarEntry> entries = jarFile.entries();
+                        while (entries.hasMoreElements()) {
+                            JarEntry entry = entries.nextElement();
+                            String entryName = entry.getName();
+                            Matcher matcher = pattern.matcher(entryName);
+                            boolean fileMatchFound = matcher.find();
+                            if (fileMatchFound) {
+                                loadPropertiesFile(typeMappingProperties,
+                                                   artifactFile,
+                                                   entryName);
+                            }
                         }
                     }
                 } catch (IOException e) {
@@ -363,5 +370,4 @@ public class Codegen extends AbstractMojo {
             }
         }
     }
-
 }
