@@ -635,6 +635,18 @@ Example
 <disableDatesInGeneratedAnnotation>true</disableDatesInGeneratedAnnotation>
 ```
 
+## propertiesFilePattern
+
+- Type: String
+- Required: false
+- Default: .*-typemapping\.properties$
+
+Example
+
+```xml
+<propertiesFilePattern>.*mapping.txt$</propertiesFilePattern>
+```
+
 # Usage
 
 Add the following to your pom files build/plugins section.
