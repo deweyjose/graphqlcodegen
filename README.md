@@ -636,7 +636,7 @@ Example
 ```
 
 ## propertiesFilePattern
-
+This properties file pattern is used to scan and fetch type mapping properties in the classpath. This configuration will be used only when typeMappingPropertiesFiles are not specified.
 - Type: String
 - Required: false
 - Default: .*-typemapping\.properties$
