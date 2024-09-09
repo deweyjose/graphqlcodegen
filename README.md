@@ -644,7 +644,7 @@ This properties file pattern is used to scan and fetch type mapping properties i
 Example
 
 ```xml
-<propertiesFilePattern>.*mapping.txt$</propertiesFilePattern>
+<propertiesFilePattern>.*mapping.properties$</propertiesFilePattern>
 ```
 
 # Usage
