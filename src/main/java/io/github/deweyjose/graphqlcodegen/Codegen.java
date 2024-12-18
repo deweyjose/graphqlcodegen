@@ -13,6 +13,7 @@ import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.*;
@@ -234,9 +235,22 @@ public class Codegen extends AbstractMojo {
                 for (Artifact dependency : dependencies) {
                     File artifactFile = dependency.getFile();
                     if (artifactFile != null && artifactFile.isFile()) {
-                        loadPropertiesFile(typeMappingProperties, artifactFile, typeMappingPropertiesFiles);
+                        loadPropertiesFileFromJar(typeMappingProperties, artifactFile, typeMappingPropertiesFiles);
                     }
                 }
+
+                // Now load non-jar PropertiesFile
+                for ( String typeMappingPropertiesFile : typeMappingPropertiesFiles) {
+                   File propertiesFile = new File( typeMappingPropertiesFile );
+                   if( propertiesFile.exists() && !propertiesFile.isDirectory()) {
+                      try ( FileInputStream input = new FileInputStream( propertiesFile )) {
+                         typeMappingProperties.load( input );
+                      } catch (IOException e) {
+                         getLog().error(e);
+                      }
+                   }
+                }
+
                 //Set key-value from this properties object to typeMapping Map
                 //only when it is not already present in the Map
                 if (typeMapping == null) {
@@ -316,7 +330,7 @@ public class Codegen extends AbstractMojo {
      * @param typeMappingPropertiesFiles: Input: Classpath location of typeMapping properties file
      * @return
      */
-    private void loadPropertiesFile(java.util.Properties typeMappingProperties,
+    private void loadPropertiesFileFromJar(java.util.Properties typeMappingProperties,
                                                     File artifactFile, String [] typeMappingPropertiesFiles) {
         try (JarFile jarFile = new JarFile(artifactFile)) {
             for (String file : typeMappingPropertiesFiles) {
