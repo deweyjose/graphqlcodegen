@@ -6,7 +6,7 @@
     <groupId>io.github.deweyjose</groupId>
     <artifactId>graphqlcodegen-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <version>1.61.5</version>
+    <version>1.61.6-SNAPSHOT</version>
 
     <name>GraphQL Code Generator</name>
     <description>Maven port of the Netflix DGS GraphQL Codegen gradle build plugin</description>
@@ -52,6 +52,7 @@
         <junit.version>5.11.0</junit.version>
         <lombok.version>1.18.34</lombok.version>
         <kotlinpoet-jvm.version>1.18.1</kotlinpoet-jvm.version>
+        <spotless.version>2.43.0</spotless.version>
     </properties>
 
     <dependencies>
@@ -146,6 +147,24 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>${maven-plugin-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <java>
+                        <googleJavaFormat/>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
