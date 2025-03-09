@@ -1,16 +1,13 @@
 package io.github.deweyjose.graphqlcodegen;
 
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.*;
+
 import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
 import com.netflix.graphql.dgs.codegen.Language;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.project.MavenProject;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,11 +16,13 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
-
-import static java.lang.String.format;
-import static java.util.Arrays.stream;
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.*;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.MavenProject;
 
 @Mojo(
     name = "generate",

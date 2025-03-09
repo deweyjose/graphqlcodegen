@@ -21,3 +21,6 @@ jobs:
           cache: maven
       - name: Build/Test with Maven
         run: ./mvnw -B -ntp verify
+      - name: Run Spotless
+        if: matrix.job == 'spotless'
+        run: ./mvnw spotless:check
