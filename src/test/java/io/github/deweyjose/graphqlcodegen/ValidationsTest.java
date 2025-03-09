@@ -1,25 +1,21 @@
 package io.github.deweyjose.graphqlcodegen;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
-
 class ValidationsTest {
 
   @Test
   void testNullPackageName() {
     Assertions.assertThrows(
-      IllegalArgumentException.class,
-      () -> Validations.verifyPackageName(null),
-      "should fail"
-    );
+        IllegalArgumentException.class, () -> Validations.verifyPackageName(null), "should fail");
   }
 
   @Test
@@ -37,14 +33,14 @@ class ValidationsTest {
   @MethodSource("overlappingFileListProvider")
   void testDirectoryOverlap(List<File> paths) {
     Assertions.assertThrows(
-      IllegalArgumentException.class,
-      () -> Validations.verifySchemaPaths(paths),
-      "should not succeed"
-    );
+        IllegalArgumentException.class,
+        () -> Validations.verifySchemaPaths(paths),
+        "should not succeed");
   }
 
   /**
    * wrapper for resource File objects
+   *
    * @param path
    * @return File
    */
@@ -54,63 +50,38 @@ class ValidationsTest {
 
   /**
    * A set of scenarios with no overlapping ancestry.
+   *
    * @return
    */
   private static Stream<Arguments> happyPathFileListProvider() {
     return Stream.of(
-      Arguments.of(Arrays.asList(
-        getFile("schema")
-      )),
-      Arguments.of(Arrays.asList(
-        getFile("schema/bar"),
-        getFile("schema/foo")
-      )),
-      Arguments.of(Arrays.asList(
-        getFile("schema/bar/sink/kitchen.graphqls"),
-        getFile("schema/foo")
-      )),
-      Arguments.of(Arrays.asList(
-        getFile("schema/bar/sink/kitchen.graphqls"),
-        getFile("schema/foo/it.graphqls")
-      )),
-      Arguments.of(Arrays.asList(
-        getFile("schema"),
-        getFile("schema")
-      )),
-      Arguments.of(Arrays.asList(
-        getFile("schema/bar/sink/kitchen.graphqls"),
-        getFile("schema/bar/sink/kitchen.graphqls")
-      ))
-    );
+        Arguments.of(Arrays.asList(getFile("schema"))),
+        Arguments.of(Arrays.asList(getFile("schema/bar"), getFile("schema/foo"))),
+        Arguments.of(
+            Arrays.asList(getFile("schema/bar/sink/kitchen.graphqls"), getFile("schema/foo"))),
+        Arguments.of(
+            Arrays.asList(
+                getFile("schema/bar/sink/kitchen.graphqls"), getFile("schema/foo/it.graphqls"))),
+        Arguments.of(Arrays.asList(getFile("schema"), getFile("schema"))),
+        Arguments.of(
+            Arrays.asList(
+                getFile("schema/bar/sink/kitchen.graphqls"),
+                getFile("schema/bar/sink/kitchen.graphqls"))));
   }
 
   /**
-   * A set of overlapping file scenarios.
-   * Each should fail in accordance with DGS
-   * inclusion behavior for parent directories.
+   * A set of overlapping file scenarios. Each should fail in accordance with DGS inclusion behavior
+   * for parent directories.
+   *
    * @return
    */
   private static Stream<Arguments> overlappingFileListProvider() {
     return Stream.of(
-      Arguments.of(Arrays.asList(
-        new File("schema"),
-        new File("schema/bars")
-      )),
-      Arguments.of(Arrays.asList(
-        new File("schema/a.graphqls")
-      )),
-      Arguments.of(Arrays.asList(
-        getFile("schema"),
-        getFile("schema/bar")
-      )),
-      Arguments.of(Arrays.asList(
-        getFile("schema"),
-        getFile("schema/bar/sink/kitchen.graphqls")
-      )),
-      Arguments.of(Arrays.asList(
-        getFile("schema/bar/sink/kitchen.graphqls"),
-        getFile("schema/bar")
-      ))
-    );
+        Arguments.of(Arrays.asList(new File("schema"), new File("schema/bars"))),
+        Arguments.of(Arrays.asList(new File("schema/a.graphqls"))),
+        Arguments.of(Arrays.asList(getFile("schema"), getFile("schema/bar"))),
+        Arguments.of(Arrays.asList(getFile("schema"), getFile("schema/bar/sink/kitchen.graphqls"))),
+        Arguments.of(
+            Arrays.asList(getFile("schema/bar/sink/kitchen.graphqls"), getFile("schema/bar"))));
   }
 }
