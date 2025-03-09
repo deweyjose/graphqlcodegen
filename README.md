@@ -1,28 +1,41 @@
 # graphqlcodegen-maven-plugin
-This maven plugin is a port of the netflix codegen plugin for Gradle. Found [here](https://github.com/Netflix/dgs-codegen).
+
+This maven plugin is a port of the netflix codegen plugin for Gradle.
+Found [here](https://github.com/Netflix/dgs-codegen).
 
 # Contributing
 
 ### GitHub Issue
-Feel free to simply create a GitHub issue for requests to integrate with newer [releases](https://github.com/Netflix/dgs-codegen/releases) of the core DGS Codegen library.
+
+Feel free to simply create a GitHub issue for requests to integrate with
+newer [releases](https://github.com/Netflix/dgs-codegen/releases) of the core DGS Codegen library.
 
 ### PRs
-PRS are welcome as well. The level of difficulty across DGS Codgen updates varies. Typically we add new plugin options and update the [CodeGenConfig](https://github.com/Netflix/dgs-codegen/blob/master/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt#L443) constructor - when new
+
+PRS are welcome as well. The level of difficulty across DGS Codgen updates varies. Typically we add
+new plugin options and update
+the [CodeGenConfig](https://github.com/Netflix/dgs-codegen/blob/master/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt#L443)
+constructor - when new
 options are added to the Codegen core library.
 
-Please make sure you run step 2 below to ensure your PR builds correctly. You may need to analyze the CodeGenConfig ctor parameters and add support for new options.
+Please make sure you run step 2 below to ensure your PR builds correctly. You may need to analyze
+the CodeGenConfig ctor parameters and add support for new options.
 Make sure to document any new options to the `Options` section below.
 
 Process:
+
 1. bump the version in [pom.xml](pom.xml)
 2. run `mvn install` locally to ensure the project still builds
 3. run `mvn spotless:apply` if there are any code style/formating violations
-4. Adjust [CodeGen](src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) to support new options if needed.
-
+4. Adjust [CodeGen](src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) to support new
+   options if needed.
 
 # Overview
-The DGS Code Generation plugin generates code for basic types and example data fetchers based on your Domain Graph
-Service's graphql schema file during the project's build process. The plugin requires the designated `packageName` for file generation.
+
+The DGS Code Generation plugin generates code for basic types and example data fetchers based on
+your Domain Graph
+Service's graphql schema file during the project's build process. The plugin requires the
+designated `packageName` for file generation.
 If no `schemaPath` is specified, it will look in the src/main/resources/schema folder for
 any files with .graphqls extension.
 
@@ -39,13 +52,15 @@ Options are configured in the `<configuration>` element of the dgs-codegen-maven
 This options enables the plugin to limit code generation to only schema files that have changed.
 Today this only works with schemaPaths.
 
-This only works for `<schemaPaths>`.  A subsequent release for schema compilation via dependencies will be release soon.
+This only works for `<schemaPaths>`. A subsequent release for schema compilation via dependencies
+will be release soon.
 
 - Type: boolean
 - Required: false
 - Default: true
 
 ```xml
+
 <onlyGenerateChanged>true</onlyGenerateChanged>
 ```
 
@@ -58,6 +73,7 @@ This only works for `<schemaPaths>`.  A subsequent release for schema compilatio
 Example
 
 ```xml
+
 <subPackageNameDocs>docs</subPackageNameDocs>
 ```
 
@@ -70,6 +86,7 @@ Example
 Example
 
 ```xml
+
 <generateDocs>true</generateDocs>
 ```
 
@@ -82,6 +99,7 @@ Example
 Example
 
 ```xml
+
 <generatedDocsFolder>true</generatedDocsFolder>
 ```
 
@@ -94,6 +112,7 @@ Example
 Example
 
 ```xml
+
 <addGeneratedAnnotation>true</addGeneratedAnnotation>
 ```
 
@@ -106,6 +125,7 @@ Example
 Example
 
 ```xml
+
 <dgs.codegen.skip>true</dgs.codegen.skip>
 ```
 
@@ -117,6 +137,12 @@ Or
 
 ## schemaPaths
 
+A list of schema file or directory paths.
+
+Directory paths: Only files with `.graphql` or `.graphqls` will be considered.
+
+Default value is `${project.basedir}/src/main/resources/schema`.
+
 - Type: array
 - Required: false
 - Default: `${project.basedir}/src/main/resources/schema`
@@ -124,9 +150,11 @@ Or
 Example
 
 ```xml
+
 <schemaPaths>
-    <param>src/main/resources/schema/schema.graphqls1</param>
-    <param>src/main/resources/schema/schema.graphqls2</param>
+  <param>src/main/resources/schema/schema.graphqls1</param>
+  <param>src/main/resources/schema/schema.graphqls2</param>
+  <param>src/main/resources/someDirWithSchema</param>
 </schemaPaths>
 ```
 
@@ -135,15 +163,18 @@ Example
 - Type: array
 - Required: false
 - Default: []
-- Official doc : https://netflix.github.io/dgs/generating-code-from-schema/#generating-code-from-external-schemas-in-jars.
-- Please note that `.graphql(s)` files must exist under the `META-INF` folder in the external jar file.
+- Official
+  doc : https://netflix.github.io/dgs/generating-code-from-schema/#generating-code-from-external-schemas-in-jars.
+- Please note that `.graphql(s)` files must exist under the `META-INF` folder in the external jar
+  file.
 
 Example
 
 ```xml
+
 <schemaJarFilesFromDependencies>
-    <param>com.netflix.graphql.dgs:some-dependency:1.0.0</param>
-    <param>com.netflix.graphql.dgs:some-dependency:X.X.X</param>
+  <param>com.netflix.graphql.dgs:some-dependency:1.0.0</param>
+  <param>com.netflix.graphql.dgs:some-dependency:X.X.X</param>
 </schemaJarFilesFromDependencies>
 ```
 
@@ -155,6 +186,7 @@ Example
 Example
 
 ```xml
+
 <packageName>com.acme.se.generated</packageName>
 ```
 
@@ -166,16 +198,21 @@ Example
 Example
 
 ```xml
+
 <typeMapping>
-    <Date>java.time.LocalDateTime</Date>
+  <Date>java.time.LocalDateTime</Date>
 </typeMapping>
 ```
 
 ## typeMappingPropertiesFiles
-Provide typeMapping as properties file(s) that is accessible as a compile-time-classpath resource
-Key-Value pairs in the properties file will be added to `typeMapping` Map when it is not already present in it
 
-When a same GraphQL type is present in both `typeMapping` and also in `typeMappingPropertiesFiles`, value in `typeMapping` will be used (and the value from `typeMappingPropertiesFiles` *will* be ignored)
+Provide typeMapping as properties file(s) that is accessible as a compile-time-classpath resource
+Key-Value pairs in the properties file will be added to `typeMapping` Map when it is not already
+present in it
+
+When a same GraphQL type is present in both `typeMapping` and also in `typeMappingPropertiesFiles`,
+value in `typeMapping` will be used (and the value from `typeMappingPropertiesFiles` *will* be
+ignored)
 
 - Type: Array
 - Required: false
@@ -183,9 +220,11 @@ When a same GraphQL type is present in both `typeMapping` and also in `typeMappi
 Example
 
 ```xml
+
 <typeMappingPropertiesFiles>
-    <typeMappingPropertiesFile>commontypes-typeMapping.properties</typeMappingPropertiesFile>
-    <typeMappingPropertiesFile>someother-commontypes-typeMapping.properties</typeMappingPropertiesFile>
+  <typeMappingPropertiesFile>commontypes-typeMapping.properties</typeMappingPropertiesFile>
+  <typeMappingPropertiesFile>someother-commontypes-typeMapping.properties
+  </typeMappingPropertiesFile>
 </typeMappingPropertiesFiles>
 ```
 
@@ -198,6 +237,7 @@ Example
 Example
 
 ```xml
+
 <subPackageNameClient>client</subPackageNameClient>
 ```
 
@@ -210,6 +250,7 @@ Example
 Example
 
 ```xml
+
 <subPackageNameDatafetchers>datafetchers</subPackageNameDatafetchers>
 ```
 
@@ -222,6 +263,7 @@ Example
 Example
 
 ```xml
+
 <subPackageNameTypes>types</subPackageNameTypes>
 ```
 
@@ -234,6 +276,7 @@ Example
 Example
 
 ```xml
+
 <generateBoxedTypes>false</generateBoxedTypes>
 ```
 
@@ -246,6 +289,7 @@ Example
 Example
 
 ```xml
+
 <generateClientApi>false</generateClientApi>
 ```
 
@@ -258,6 +302,7 @@ Example
 Example
 
 ```xml
+
 <generateClientApiV2>false</generateClientApiV2>
 ```
 
@@ -270,6 +315,7 @@ Example
 Example
 
 ```xml
+
 <generateInterfaces>false</generateInterfaces>
 ```
 
@@ -282,6 +328,7 @@ Example
 Example
 
 ```xml
+
 <generateKotlinNullableClasses>false</generateKotlinNullableClasses>
 ```
 
@@ -294,6 +341,7 @@ Example
 Example
 
 ```xml
+
 <generateKotlinClosureProjections>false</generateKotlinClosureProjections>
 ```
 
@@ -306,6 +354,7 @@ Example
 Example:
 
 ```xml
+
 <outputDir>${project.build.directory}/generated-sources</outputDir>
 ```
 
@@ -318,6 +367,7 @@ Example:
 Example:
 
 ```xml
+
 <exampleOutputDir>${project.build.directory}/generated-examples</exampleOutputDir>
 ```
 
@@ -330,12 +380,14 @@ Example:
 Example:
 
 ```xml
+
 <schemaManifestOutputDir>${project.build.directory}/graphqlcodegen</schemaManifestOutputDir>
 ```
 
 ## includeQueries
 
-- Description: Limit generation to specified set of queries. Used in conjunction with `generateClient`.
+- Description: Limit generation to specified set of queries. Used in conjunction
+  with `generateClient`.
 - Type: array
 - Required: false
 - Default: []
@@ -343,15 +395,17 @@ Example:
 Example
 
 ```xml
+
 <includeQueries>
-    <param>QueryFieldName1</param>
-    <param>QueryFieldName2</param>
+  <param>QueryFieldName1</param>
+  <param>QueryFieldName2</param>
 </includeQueries>
 ```
 
 ## includeMutations
 
-- Description: Limit generation to specified set of mutations. Used in conjunction with `generateClient`.
+- Description: Limit generation to specified set of mutations. Used in conjunction
+  with `generateClient`.
 - Type: array
 - Required: false
 - Default: []
@@ -359,9 +413,10 @@ Example
 Example
 
 ```xml
+
 <includeMutations>
-    <param>MutationFieldName1</param>
-    <param>MutationFieldName1</param>
+  <param>MutationFieldName1</param>
+  <param>MutationFieldName1</param>
 </includeMutations>
 ```
 
@@ -374,6 +429,7 @@ Example
 Example
 
 ```xml
+
 <skipEntityQueries>false</skipEntityQueries>
 ```
 
@@ -386,6 +442,7 @@ Example
 Example
 
 ```xml
+
 <shortProjectionNames>false</shortProjectionNames>
 ```
 
@@ -398,6 +455,7 @@ Example
 Example
 
 ```xml
+
 <generateDataTypes>false</generateDataTypes>
 ```
 
@@ -410,6 +468,7 @@ Example
 Example
 
 ```xml
+
 <maxProjectionDepth>10</maxProjectionDepth>
 ```
 
@@ -422,6 +481,7 @@ Example
 Example
 
 ```xml
+
 <language>kotlin</language>
 ```
 
@@ -434,6 +494,7 @@ Example
 Example
 
 ```xml
+
 <omitNullInputFields>false</omitNullInputFields>
 ```
 
@@ -446,6 +507,7 @@ Example
 Example
 
 ```xml
+
 <kotlinAllFieldsOptional>false</kotlinAllFieldsOptional>
 ```
 
@@ -458,6 +520,7 @@ Example
 Example
 
 ```xml
+
 <snakeCaseConstantNames>false</snakeCaseConstantNames>
 ```
 
@@ -470,6 +533,7 @@ Example
 Example
 
 ```xml
+
 <writeToFiles>false</writeToFiles>
 ```
 
@@ -482,9 +546,10 @@ Example
 Example
 
 ```xml
+
 <includeSubscriptions>
-    <param>Subscriptions1</param>
-    <param>Subscriptions2</param>
+  <param>Subscriptions1</param>
+  <param>Subscriptions2</param>
 </includeSubscriptions>
 ```
 
@@ -497,6 +562,7 @@ Example
 Example
 
 ```xml
+
 <generateInterfaceSetters>false</generateInterfaceSetters>
 ```
 
@@ -509,6 +575,7 @@ Example
 Example
 
 ```xml
+
 <generateInterfaceMethodsForInterfaceFields>false</generateInterfaceMethodsForInterfaceFields>
 ```
 
@@ -521,6 +588,7 @@ Example
 Example
 
 ```xml
+
 <javaGenerateAllConstructor>false</javaGenerateAllConstructor>
 ```
 
@@ -533,6 +601,7 @@ Example
 Example
 
 ```xml
+
 <implementSerializable>false</implementSerializable>
 ```
 
@@ -543,6 +612,7 @@ Example
 - Default: false
 
 ```xml
+
 <generateCustomAnnotations>false</generateCustomAnnotations>
 ```
 
@@ -553,6 +623,7 @@ Example
 - Default: false
 
 ```xml
+
 <addDeprecatedAnnotation>false</addDeprecatedAnnotation>
 ```
 
@@ -562,8 +633,9 @@ Example
 - Required: false
 
 ```xml
+
 <includeImports>
-    <validator>com.test.validator</validator>
+  <validator>com.test.validator</validator>
 </includeImports>
 ```
 
@@ -573,44 +645,47 @@ Example
 - Required: false
 
 ```xml
+
 <includeEnumImports>
-    <foo>
-        <properties>
-            <bar>bla</bar>
-        </properties>
-    </foo>
-    <bar>
-        <properties>
-            <zoo>bar.bar</zoo>
-            <zing>bla.bla</zing>
-        </properties>
-    </bar>
+  <foo>
+    <properties>
+      <bar>bla</bar>
+    </properties>
+  </foo>
+  <bar>
+    <properties>
+      <zoo>bar.bar</zoo>
+      <zing>bla.bla</zing>
+    </properties>
+  </bar>
 </includeEnumImports>
 ```
 
-
 ## includeClassImports
-Maps the custom annotation and class names to the class packages. Only used when generateCustomAnnotations is enabled.
+
+Maps the custom annotation and class names to the class packages. Only used when
+generateCustomAnnotations is enabled.
+
 - Type
 - Required: false
 
 ```xml
-<includeClassImports>
-    <foo>
-        <properties>
-            <bar>bla</bar>
-        </properties>
-    </foo>
-    <bar>
-        <properties>
-            <zoo>bar.bar</zoo>
 
-            <zing>bla.bla</zing>
-        </properties>
-    </bar>
+<includeClassImports>
+  <foo>
+    <properties>
+      <bar>bla</bar>
+    </properties>
+  </foo>
+  <bar>
+    <properties>
+      <zoo>bar.bar</zoo>
+
+      <zing>bla.bla</zing>
+    </properties>
+  </bar>
 </includeClassImports>
 ```
-
 
 ## generateIsGetterForPrimitiveBooleanFields
 
@@ -621,6 +696,7 @@ Maps the custom annotation and class names to the class packages. Only used when
 Example
 
 ```xml
+
 <generateIsGetterForPrimitiveBooleanFields>false</generateIsGetterForPrimitiveBooleanFields>
 ```
 
@@ -633,6 +709,7 @@ Example
 Example
 
 ```xml
+
 <disableDatesInGeneratedAnnotation>true</disableDatesInGeneratedAnnotation>
 ```
 
@@ -641,45 +718,47 @@ Example
 Add the following to your pom files build/plugins section.
 
 ```xml
+
 <plugin>
-    <groupId>io.github.deweyjose</groupId>
-    <artifactId>graphqlcodegen-maven-plugin</artifactId>
-    <version>1.24</version>
-    <executions>
-        <execution>
-            <goals>
-                <goal>generate</goal>
-            </goals>
-        </execution>
-    </executions>
-    <configuration>
-        <schemaPaths>
-            <param>src/main/resources/schema/schema.graphqls</param>
-        </schemaPaths>
-        <packageName>com.acme.[your_project].generated</packageName>
-    </configuration>
+  <groupId>io.github.deweyjose</groupId>
+  <artifactId>graphqlcodegen-maven-plugin</artifactId>
+  <version>1.24</version>
+  <executions>
+    <execution>
+      <goals>
+        <goal>generate</goal>
+      </goals>
+    </execution>
+  </executions>
+  <configuration>
+    <schemaPaths>
+      <param>src/main/resources/schema/schema.graphqls</param>
+    </schemaPaths>
+    <packageName>com.acme.[your_project].generated</packageName>
+  </configuration>
 </plugin>
 ```
 
 You'll also need to add the generates-sources folder to the classpath:
 
 ```xml
+
 <plugin>
-    <groupId>org.codehaus.mojo</groupId>
-    <artifactId>build-helper-maven-plugin</artifactId>
-    <executions>
-        <execution>
-            <phase>generate-sources</phase>
-            <goals>
-                <goal>add-source</goal>
-            </goals>
-            <configuration>
-                <sources>
-                    <source>${project.build.directory}/generated-sources</source>
-                </sources>
-            </configuration>
-        </execution>
-    </executions>
+  <groupId>org.codehaus.mojo</groupId>
+  <artifactId>build-helper-maven-plugin</artifactId>
+  <executions>
+    <execution>
+      <phase>generate-sources</phase>
+      <goals>
+        <goal>add-source</goal>
+      </goals>
+      <configuration>
+        <sources>
+          <source>${project.build.directory}/generated-sources</source>
+        </sources>
+      </configuration>
+    </execution>
+  </executions>
 </plugin>
 ```
 
@@ -687,7 +766,10 @@ You'll also need to add the generates-sources folder to the classpath:
 
 COPIED FROM NETFLIX DOCUMENTATION.
 
-The generated types are available as part of the packageName.types package under build/generated. These are
-automatically added to your project's sources. The generated example data fetchers are available under
-build/generated-examples. Note that these are NOT added to your project's sources and serve mainly as a basic
+The generated types are available as part of the packageName.types package under build/generated.
+These are
+automatically added to your project's sources. The generated example data fetchers are available
+under
+build/generated-examples. Note that these are NOT added to your project's sources and serve mainly
+as a basic
 boilerplate code requiring further customization.

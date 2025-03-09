@@ -186,17 +186,12 @@ public class Codegen extends AbstractMojo {
   @Parameter(property = "generateIsGetterForPrimitiveBooleanFields", defaultValue = "false")
   private boolean generateIsGetterForPrimitiveBooleanFields;
 
-  private void verifySettings() {
-    Validations.verifyPackageName(packageName);
-    // Validations.verifySchemaPaths(Arrays.stream(schemaPaths).collect(toList()));
-  }
-
   /**
    * Helper function that computes schema paths to generate.
    *
    * @return
    */
-  private Set<File> getSchemaPaths() {
+  private Set<File> expandSchemaPaths() {
     if (onlyGenerateChanged) {
       Set<File> configuredSchemaPaths = stream(schemaPaths).collect(toSet());
       Set<File> expandedSchemaPaths = new HashSet<>();
@@ -221,21 +216,30 @@ public class Codegen extends AbstractMojo {
   public void execute() {
     if (!skip) {
 
-      verifySettings();
+      Validations.verifyPackageName(packageName);
 
-      Set<File> schemaPaths = getSchemaPaths();
+      Set<File> fullSchemaPaths = expandSchemaPaths();
+
+      if (fullSchemaPaths.isEmpty() && schemaJarFilesFromDependencies.length < 1) {
+        getLog()
+            .error(
+                "No schema files found and no schemaJarFilesFromDependencies specified. "
+                    + "Refer to documentation for schemaPaths and schemaJarFilesFromDependencies. ");
+        throw new IllegalArgumentException(
+            "No schema files found. Please check your configuration.");
+      }
 
       SchemaFileManifest manifest =
           new SchemaFileManifest(
               new File(schemaManifestOutputDir, "schema-manifest.props"), project.getBasedir());
 
       if (onlyGenerateChanged) {
-        manifest.setFiles(new HashSet<>(schemaPaths));
-        schemaPaths.retainAll(manifest.getChangedFiles());
-        getLog().info(String.format("changed schema files: %s", schemaPaths));
+        manifest.setFiles(new HashSet<>(fullSchemaPaths));
+        fullSchemaPaths.retainAll(manifest.getChangedFiles());
+        getLog().info(String.format("changed schema files: %s", fullSchemaPaths));
       }
 
-      if (schemaPaths.isEmpty() && schemaJarFilesFromDependencies.length < 1) {
+      if (fullSchemaPaths.isEmpty() && schemaJarFilesFromDependencies.length < 1) {
         getLog().info("no files to generate");
         return;
       }
@@ -263,7 +267,7 @@ public class Codegen extends AbstractMojo {
       final CodeGenConfig config =
           new CodeGenConfig(
               emptySet(),
-              schemaPaths,
+              fullSchemaPaths,
               DependencySchemaExtractor.extract(project, schemaJarFilesFromDependencies),
               outputDir.toPath(),
               exampleOutputDir.toPath(),
