@@ -3,6 +3,7 @@ package io.github.deweyjose.graphqlcodegen;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
+import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
@@ -216,18 +217,11 @@ public class Codegen extends AbstractMojo {
   public void execute() {
     if (!skip) {
 
-      Validations.verifyPackageName(packageName);
+      verifyPackageName();
 
       Set<File> fullSchemaPaths = expandSchemaPaths();
 
-      if (fullSchemaPaths.isEmpty() && schemaJarFilesFromDependencies.length < 1) {
-        getLog()
-            .error(
-                "No schema files found and no schemaJarFilesFromDependencies specified. "
-                    + "Refer to documentation for schemaPaths and schemaJarFilesFromDependencies. ");
-        throw new IllegalArgumentException(
-            "No schema files found. Please check your configuration.");
-      }
+      verifySchemaFiles(fullSchemaPaths);
 
       SchemaFileManifest manifest =
           new SchemaFileManifest(
@@ -354,6 +348,22 @@ public class Codegen extends AbstractMojo {
       }
     } catch (IOException e) {
       getLog().error(e);
+    }
+  }
+
+  public void verifyPackageName() {
+    if (isNull(packageName)) {
+      throw new IllegalArgumentException("Please specify a packageName");
+    }
+  }
+
+  public void verifySchemaFiles(Set<File> fullSchemaPaths) {
+    if (fullSchemaPaths.isEmpty() && schemaJarFilesFromDependencies.length < 1) {
+      getLog()
+          .error(
+              "No schema files found and no schemaJarFilesFromDependencies specified. "
+                  + "Refer to documentation for schemaPaths and schemaJarFilesFromDependencies. ");
+      throw new IllegalArgumentException("No schema files found. Please check your configuration.");
     }
   }
 }

@@ -117,7 +117,7 @@ class SchemaFileManifestTest {
    * @return File
    */
   private static File getFile(String path) {
-    return new File(ValidationsTest.class.getClassLoader().getResource(path).getFile());
+    return new File(SchemaFileManifestTest.class.getClassLoader().getResource(path).getFile());
   }
 
   private static Stream<Arguments> checksumProvider() {
