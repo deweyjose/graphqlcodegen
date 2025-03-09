@@ -17,7 +17,10 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
 import static java.lang.String.format;
@@ -176,6 +179,9 @@ public class Codegen extends AbstractMojo {
     @Parameter(property = "generateIsGetterForPrimitiveBooleanFields", defaultValue = "false")
     private boolean generateIsGetterForPrimitiveBooleanFields;
 
+    @Parameter(property = "propertiesFilePattern", defaultValue = ".*-typemapping\\.properties$")
+    private String propertiesFilePattern;
+
     private void verifySettings() {
         Validations.verifyPackageName(packageName);
         Validations.verifySchemaPaths(Arrays.stream(schemaPaths).collect(toList()));
@@ -228,24 +234,17 @@ public class Codegen extends AbstractMojo {
                 return;
             }
 
-            if (typeMappingPropertiesFiles!=null && typeMappingPropertiesFiles.length > 0) {
-                Set<Artifact> dependencies = project.getArtifacts();
-                java.util.Properties typeMappingProperties = new java.util.Properties();
-                for (Artifact dependency : dependencies) {
-                    File artifactFile = dependency.getFile();
-                    if (artifactFile != null && artifactFile.isFile()) {
-                        loadPropertiesFile(typeMappingProperties, artifactFile, typeMappingPropertiesFiles);
-                    }
-                }
-                //Set key-value from this properties object to typeMapping Map
-                //only when it is not already present in the Map
-                if (typeMapping == null) {
-                    typeMapping = new HashMap<>();
-                }
-                typeMappingProperties.forEach((k, v) -> {
-                    typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v));
-                });
+            java.util.Properties typeMappingProperties = new java.util.Properties();
+            loadPropertiesFromArtifacts(typeMappingProperties, typeMappingPropertiesFiles);
+
+            // Set key-value from this properties object to typeMapping Map
+            // only when it is not already present in the Map
+            if (typeMapping == null) {
+                typeMapping = new HashMap<>();
             }
+            typeMappingProperties.forEach((k, v) -> {
+                typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v));
+            });
 
 
             final CodeGenConfig config = new CodeGenConfig(
@@ -310,22 +309,20 @@ public class Codegen extends AbstractMojo {
     }
 
     /**
+     * Loads properties from a single typeMappingPropertiesFile within an artifact file.
      *
-     * @param typeMappingProperties: Java Properties where typeMapping will be loaded into
-     * @param artifactFile: Artifact file
-     * @param typeMappingPropertiesFiles: Input: Classpath location of typeMapping properties file
-     * @return
+     * @param typeMappingProperties Properties object where typeMapping will be loaded into
+     * @param artifactFile Artifact file
+     * @param typeMappingPropertiesFile Classpath location of typeMapping properties file
      */
     private void loadPropertiesFile(java.util.Properties typeMappingProperties,
-                                                    File artifactFile, String [] typeMappingPropertiesFiles) {
+                                    File artifactFile, String typeMappingPropertiesFile) {
         try (JarFile jarFile = new JarFile(artifactFile)) {
-            for (String file : typeMappingPropertiesFiles) {
-                ZipEntry entry = jarFile.getEntry(file);
-                if (entry!=null) {
-                    try (InputStream inputStream = jarFile.getInputStream(entry)) {
-                        // load the data into the typeMappingProperties
-                        typeMappingProperties.load(inputStream);
-                    }
+            ZipEntry entry = jarFile.getEntry(typeMappingPropertiesFile);
+            if (entry != null) {
+                try (InputStream inputStream = jarFile.getInputStream(entry)) {
+                    // load the data into the typeMappingProperties
+                    typeMappingProperties.load(inputStream);
                 }
             }
         } catch (IOException e) {
@@ -333,4 +330,44 @@ public class Codegen extends AbstractMojo {
         }
     }
 
+    /**
+     * Loads properties from known files and files matching the pattern from artifacts.
+     *
+     * @param typeMappingProperties Properties object to which the properties will be loaded.
+     * @param knownFiles Array of known file names to load.
+     */
+    private void loadPropertiesFromArtifacts(java.util.Properties typeMappingProperties, String[] knownFiles) {
+        Set<Artifact> dependencies = project.getArtifacts();
+        Pattern pattern = Pattern.compile(propertiesFilePattern);
+        for (Artifact dependency : dependencies) {
+            File artifactFile = dependency.getFile();
+            if (artifactFile != null && artifactFile.isFile()) {
+                try (JarFile jarFile = new JarFile(artifactFile)) {
+                    // Load known files
+                    if (knownFiles != null && knownFiles.length > 0) {
+                        for (String file : knownFiles) {
+                            loadPropertiesFile(typeMappingProperties, artifactFile, file);
+                        }
+                    }
+                    else {
+                        // Load files matching the pattern
+                        Enumeration<JarEntry> entries = jarFile.entries();
+                        while (entries.hasMoreElements()) {
+                            JarEntry entry = entries.nextElement();
+                            String entryName = entry.getName();
+                            Matcher matcher = pattern.matcher(entryName);
+                            boolean fileMatchFound = matcher.find();
+                            if (fileMatchFound) {
+                                loadPropertiesFile(typeMappingProperties,
+                                                   artifactFile,
+                                                   entryName);
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    getLog().error(format("Error processing artifact file: %s", artifactFile.getName()), e);
+                }
+            }
+        }
+    }
 }
