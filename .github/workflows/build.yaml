@@ -10,6 +10,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+        matrix:
+            job: [ test, spotless ]
 
     steps:
       - uses: actions/checkout@v4
@@ -20,6 +23,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build/Test with Maven
+        if: matrix.job == 'test'
         run: ./mvnw -B -ntp verify
       - name: Run Spotless
         if: matrix.job == 'spotless'
