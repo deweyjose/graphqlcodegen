@@ -326,8 +326,8 @@ public class Codegen extends AbstractMojo {
   }
 
   /**
-   * @param typeMappingProperties:      Java Properties where typeMapping will be loaded into
-   * @param artifactFile:               Artifact file
+   * @param typeMappingProperties: Java Properties where typeMapping will be loaded into
+   * @param artifactFile: Artifact file
    * @param typeMappingPropertiesFiles: Input: Classpath location of typeMapping properties file
    * @return
    */
