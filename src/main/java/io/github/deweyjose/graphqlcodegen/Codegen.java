@@ -3,7 +3,6 @@ package io.github.deweyjose.graphqlcodegen;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
@@ -14,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -190,7 +188,7 @@ public class Codegen extends AbstractMojo {
 
   private void verifySettings() {
     Validations.verifyPackageName(packageName);
-    Validations.verifySchemaPaths(Arrays.stream(schemaPaths).collect(toList()));
+    // Validations.verifySchemaPaths(Arrays.stream(schemaPaths).collect(toList()));
   }
 
   /**
