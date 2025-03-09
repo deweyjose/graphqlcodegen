@@ -3,7 +3,9 @@ package io.github.deweyjose.graphqlcodegen;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
@@ -12,8 +14,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import org.apache.maven.artifact.Artifact;
@@ -320,8 +326,8 @@ public class Codegen extends AbstractMojo {
   }
 
   /**
-   * @param typeMappingProperties: Java Properties where typeMapping will be loaded into
-   * @param artifactFile: Artifact file
+   * @param typeMappingProperties:      Java Properties where typeMapping will be loaded into
+   * @param artifactFile:               Artifact file
    * @param typeMappingPropertiesFiles: Input: Classpath location of typeMapping properties file
    * @return
    */
@@ -334,6 +340,11 @@ public class Codegen extends AbstractMojo {
         ZipEntry entry = jarFile.getEntry(file);
         if (entry != null) {
           try (InputStream inputStream = jarFile.getInputStream(entry)) {
+            getLog()
+                .info(
+                    String.format(
+                        "Loading typeMapping from %s in artifact %s",
+                        file, artifactFile.getAbsolutePath()));
             // load the data into the typeMappingProperties
             typeMappingProperties.load(inputStream);
           }
