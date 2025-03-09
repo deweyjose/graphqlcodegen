@@ -3,7 +3,12 @@ package io.github.deweyjose.graphqlcodegen;
 import static java.util.Objects.isNull;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Validations {
 
@@ -41,7 +46,8 @@ public class Validations {
 
     for (File file : sortedFiles) {
       if (!file.exists()) {
-        throw new IllegalArgumentException("Configured path %s does not exist" + file.getPath());
+        throw new IllegalArgumentException(
+            "Configured path \"" + file.getPath() + "\" does not exist");
       }
 
       String path = file.getPath();
