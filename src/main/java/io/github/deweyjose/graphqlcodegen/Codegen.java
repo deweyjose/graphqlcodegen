@@ -31,7 +31,7 @@ import org.apache.maven.project.MavenProject;
 public class Codegen extends AbstractMojo {
 
   @Parameter(defaultValue = "${project}")
-  private MavenProject project;
+                private MavenProject project;
 
   @Parameter(
       property = "schemaPaths",
