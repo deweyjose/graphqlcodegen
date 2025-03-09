@@ -16,7 +16,8 @@ Make sure to document any new options to the `Options` section below.
 Process:
 1. bump the version in [pom.xml](pom.xml)
 2. run `mvn install` locally to ensure the project still builds
-3. Adjust [CodeGen](src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) to support new options if needed.
+3. run `mvn spotless:apply` if there are any code style/formating violations
+4. Adjust [CodeGen](src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) to support new options if needed.
 
 
 # Overview
