@@ -53,7 +53,7 @@
     <junit.version>5.12.0</junit.version>
     <lombok.version>1.18.34</lombok.version>
     <kotlinpoet-jvm.version>1.18.1</kotlinpoet-jvm.version>
-    <spotless.version>2.43.0</spotless.version>
+    <spotless.version>2.44.3</spotless.version>
   </properties>
 
   <dependencies>
