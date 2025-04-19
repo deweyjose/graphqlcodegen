@@ -38,10 +38,8 @@ public class Codegen extends AbstractMojo {
   @Parameter(defaultValue = "${project}")
   private MavenProject project;
 
-  @Parameter(
-      property = "schemaPaths",
-      defaultValue = "${project.basedir}/src/main/resources/schema")
-  private File[] schemaPaths;
+  @Parameter(property = "schemas", defaultValue = "${project.basedir}/src/main/resources/schema")
+  private File[] schemas;
 
   @Parameter(alias = "schemaJarFilesFromDependencies", property = "schemaJarFilesFromDependencies")
   private String[] schemaJarFilesFromDependencies;
@@ -81,8 +79,8 @@ public class Codegen extends AbstractMojo {
   @Parameter(property = "generateClientApi", defaultValue = "false")
   private boolean generateClientApi;
 
-  @Parameter(property = "generateClientApiV2", defaultValue = "false")
-  private boolean generateClientApiV2;
+  @Parameter(property = "generateClientApiv2", defaultValue = "false")
+  private boolean generateClientApiv2;
 
   @Parameter(property = "generateDataTypes", defaultValue = "true")
   private boolean generateDataTypes;
@@ -100,9 +98,9 @@ public class Codegen extends AbstractMojo {
   private File outputDir;
 
   @Parameter(
-      property = "exampleOutputDir",
+      property = "examplesOutputDir",
       defaultValue = "${project.build.directory}/generated-examples")
-  private File exampleOutputDir;
+  private File examplesOutputDir;
 
   @Parameter(
       property = "schemaManifestOutputDir",
@@ -194,7 +192,7 @@ public class Codegen extends AbstractMojo {
    */
   private Set<File> expandSchemaPaths() {
     if (onlyGenerateChanged) {
-      Set<File> configuredSchemaPaths = stream(schemaPaths).collect(toSet());
+      Set<File> configuredSchemaPaths = stream(schemas).collect(toSet());
       Set<File> expandedSchemaPaths = new HashSet<>();
 
       // expand any directories into graphql file paths
@@ -209,7 +207,7 @@ public class Codegen extends AbstractMojo {
       getLog().info(String.format("expanded schema paths: %s", expandedSchemaPaths));
       return expandedSchemaPaths;
     } else {
-      return stream(schemaPaths).collect(toSet());
+      return stream(schemas).collect(toSet());
     }
   }
 
@@ -264,7 +262,7 @@ public class Codegen extends AbstractMojo {
               fullSchemaPaths,
               DependencySchemaExtractor.extract(project, schemaJarFilesFromDependencies),
               outputDir.toPath(),
-              exampleOutputDir.toPath(),
+              examplesOutputDir.toPath(),
               writeToFiles,
               packageName,
               subPackageNameClient,
@@ -275,7 +273,7 @@ public class Codegen extends AbstractMojo {
               generateBoxedTypes,
               generateIsGetterForPrimitiveBooleanFields,
               generateClientApi,
-              generateClientApiV2,
+              generateClientApiv2,
               generateInterfaces,
               generateKotlinNullableClasses,
               generateKotlinClosureProjections,
@@ -362,7 +360,7 @@ public class Codegen extends AbstractMojo {
       getLog()
           .error(
               "No schema files found and no schemaJarFilesFromDependencies specified. "
-                  + "Refer to documentation for schemaPaths and schemaJarFilesFromDependencies. ");
+                  + "Refer to documentation for schemas and schemaJarFilesFromDependencies. ");
       throw new IllegalArgumentException("No schema files found. Please check your configuration.");
     }
   }
