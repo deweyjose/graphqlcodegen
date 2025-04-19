@@ -36,7 +36,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <graphql-dgs-codegen-core.version>7.0.3</graphql-dgs-codegen-core.version>
+    <graphql-dgs-codegen-core.version>8.0.2</graphql-dgs-codegen-core.version>
     <java.version>17</java.version>
     <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
     <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
