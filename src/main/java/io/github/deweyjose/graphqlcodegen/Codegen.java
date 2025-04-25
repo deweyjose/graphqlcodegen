@@ -81,8 +81,8 @@ public class Codegen extends AbstractMojo {
   @Parameter(property = "generateClientApi", defaultValue = "false")
   private boolean generateClientApi;
 
-  @Parameter(property = "generateClientApiV2", defaultValue = "false")
-  private boolean generateClientApiV2;
+  @Parameter(property = "generateClientApiv2", defaultValue = "false")
+  private boolean generateClientApiv2;
 
   @Parameter(property = "generateDataTypes", defaultValue = "true")
   private boolean generateDataTypes;
@@ -100,9 +100,9 @@ public class Codegen extends AbstractMojo {
   private File outputDir;
 
   @Parameter(
-      property = "exampleOutputDir",
+      property = "examplesOutputDir",
       defaultValue = "${project.build.directory}/generated-examples")
-  private File exampleOutputDir;
+  private File examplesOutputDir;
 
   @Parameter(
       property = "schemaManifestOutputDir",
@@ -162,6 +162,9 @@ public class Codegen extends AbstractMojo {
 
   @Parameter(property = "addDeprecatedAnnotation", defaultValue = "false")
   private boolean addDeprecatedAnnotation;
+
+  @Parameter(property = "trackInputFieldSet", defaultValue = "false")
+  private boolean trackInputFieldSet;
 
   @Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
   private boolean skip;
@@ -264,7 +267,7 @@ public class Codegen extends AbstractMojo {
               fullSchemaPaths,
               DependencySchemaExtractor.extract(project, schemaJarFilesFromDependencies),
               outputDir.toPath(),
-              exampleOutputDir.toPath(),
+              examplesOutputDir.toPath(),
               writeToFiles,
               packageName,
               subPackageNameClient,
@@ -275,7 +278,7 @@ public class Codegen extends AbstractMojo {
               generateBoxedTypes,
               generateIsGetterForPrimitiveBooleanFields,
               generateClientApi,
-              generateClientApiV2,
+              generateClientApiv2,
               generateInterfaces,
               generateKotlinNullableClasses,
               generateKotlinClosureProjections,
@@ -304,7 +307,8 @@ public class Codegen extends AbstractMojo {
               implementSerializable,
               addGeneratedAnnotation,
               disableDatesInGeneratedAnnotation,
-              addDeprecatedAnnotation);
+              addDeprecatedAnnotation,
+              trackInputFieldSet);
 
       getLog().info(format("Codegen config: \n%s", config));
 
@@ -362,7 +366,7 @@ public class Codegen extends AbstractMojo {
       getLog()
           .error(
               "No schema files found and no schemaJarFilesFromDependencies specified. "
-                  + "Refer to documentation for schemaPaths and schemaJarFilesFromDependencies. ");
+                  + "Refer to documentation for schemas and schemaJarFilesFromDependencies. ");
       throw new IllegalArgumentException("No schema files found. Please check your configuration.");
     }
   }
