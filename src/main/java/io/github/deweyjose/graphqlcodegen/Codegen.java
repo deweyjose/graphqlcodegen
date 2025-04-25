@@ -38,8 +38,10 @@ public class Codegen extends AbstractMojo {
   @Parameter(defaultValue = "${project}")
   private MavenProject project;
 
-  @Parameter(property = "schemas", defaultValue = "${project.basedir}/src/main/resources/schema")
-  private File[] schemas;
+  @Parameter(
+      property = "schemaPaths",
+      defaultValue = "${project.basedir}/src/main/resources/schema")
+  private File[] schemaPaths;
 
   @Parameter(alias = "schemaJarFilesFromDependencies", property = "schemaJarFilesFromDependencies")
   private String[] schemaJarFilesFromDependencies;
@@ -161,6 +163,9 @@ public class Codegen extends AbstractMojo {
   @Parameter(property = "addDeprecatedAnnotation", defaultValue = "false")
   private boolean addDeprecatedAnnotation;
 
+  @Parameter(property = "trackInputFieldSet", defaultValue = "false")
+  private boolean trackInputFieldSet;
+
   @Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
   private boolean skip;
 
@@ -192,7 +197,7 @@ public class Codegen extends AbstractMojo {
    */
   private Set<File> expandSchemaPaths() {
     if (onlyGenerateChanged) {
-      Set<File> configuredSchemaPaths = stream(schemas).collect(toSet());
+      Set<File> configuredSchemaPaths = stream(schemaPaths).collect(toSet());
       Set<File> expandedSchemaPaths = new HashSet<>();
 
       // expand any directories into graphql file paths
@@ -207,7 +212,7 @@ public class Codegen extends AbstractMojo {
       getLog().info(String.format("expanded schema paths: %s", expandedSchemaPaths));
       return expandedSchemaPaths;
     } else {
-      return stream(schemas).collect(toSet());
+      return stream(schemaPaths).collect(toSet());
     }
   }
 
@@ -302,7 +307,8 @@ public class Codegen extends AbstractMojo {
               implementSerializable,
               addGeneratedAnnotation,
               disableDatesInGeneratedAnnotation,
-              addDeprecatedAnnotation);
+              addDeprecatedAnnotation,
+              trackInputFieldSet);
 
       getLog().info(format("Codegen config: \n%s", config));
 
