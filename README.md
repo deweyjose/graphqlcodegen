@@ -622,9 +622,25 @@ Example
 - Required: false
 - Default: false
 
+Example
+
 ```xml
 
-<addDeprecatedAnnotation>false</addDeprecatedAnnotation>
+<addDeprecatedAnnotation>true</addDeprecatedAnnotation>
+```
+
+## trackInputFieldSet
+
+Generate has[FieldName] methods keeping track of what fields are explicitly set on input types. This is useful for distinguishing between fields that were explicitly set to null versus fields that were never set.
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+
+```xml
+<trackInputFieldSet>true</trackInputFieldSet>
 ```
 
 ## includeImports
