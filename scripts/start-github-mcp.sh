@@ -1,0 +1,1 @@
+docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN=$GITHUB_GRAPHQL_CODEGEN_PAT ghcr.io/github/github-mcp-server
