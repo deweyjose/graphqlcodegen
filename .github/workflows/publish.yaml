@@ -35,8 +35,8 @@ jobs:
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-      - name: Publish graphqlcodegen-plugin to Apache Maven Central
-        run: ./mvnw -Prelease deploy -pl graphqlcodegen-plugin -am
+      - name: Publish graphqlcodegen-maven-plugin to Apache Maven Central
+        run: ./mvnw -Prelease deploy -pl graphqlcodegen-maven-plugin -am
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
