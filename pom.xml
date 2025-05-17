@@ -14,7 +14,7 @@
   <url>https://github.com/deweyjose/graphqlcodegen</url>
 
   <modules>
-    <module>graphqlcodegen-plugin</module>
+    <module>graphqlcodegen-maven-plugin</module>
     <module>paramcodegen-plugin</module>
   </modules>
 

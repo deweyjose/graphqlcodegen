@@ -1,5 +1,0 @@
-type Actor {
-  id: Int!
-  name: String!
-  yob: Int!
-}
