@@ -7,7 +7,7 @@
   <groupId>io.github.deweyjose</groupId>
   <artifactId>graphqlcodegen-parent</artifactId>
   <packaging>pom</packaging>
-  <version>3.0.0</version>
+  <version>3.0.1</version>
 
   <name>GraphQL Code Generator Parent</name>
   <description>Maven port of the Netflix DGS GraphQL Codegen gradle build plugin</description>
