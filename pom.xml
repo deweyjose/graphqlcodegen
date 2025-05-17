@@ -15,7 +15,7 @@
 
   <modules>
     <module>graphqlcodegen-maven-plugin</module>
-    <module>paramcodegen-plugin</module>
+    <module>graphqlcodegen-param-plugin</module>
   </modules>
 
   <licenses>

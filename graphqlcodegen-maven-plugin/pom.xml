@@ -20,7 +20,7 @@
   <dependencies>
     <dependency>
       <groupId>io.github.deweyjose</groupId>
-      <artifactId>paramcodegen-plugin</artifactId>
+      <artifactId>graphqlcodegen-param-plugin</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -75,7 +75,7 @@
     <plugins>
       <plugin>
         <groupId>io.github.deweyjose</groupId>
-        <artifactId>paramcodegen-plugin</artifactId>
+        <artifactId>graphqlcodegen-param-plugin</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <executions>
           <execution>
