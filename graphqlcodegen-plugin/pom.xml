@@ -76,7 +76,7 @@
       <plugin>
         <groupId>io.github.deweyjose</groupId>
         <artifactId>paramcodegen-plugin</artifactId>
-        <version>${project.version}</version>
+        <version>0.0.1-SNAPSHOT</version>
         <executions>
           <execution>
             <id>generate-params</id>
