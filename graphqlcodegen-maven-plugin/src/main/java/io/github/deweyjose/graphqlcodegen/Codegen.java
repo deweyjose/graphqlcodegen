@@ -1,26 +1,19 @@
 package io.github.deweyjose.graphqlcodegen;
 
-import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
-import static java.util.Objects.isNull;
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
-import com.netflix.graphql.dgs.codegen.CodeGen;
-import com.netflix.graphql.dgs.codegen.CodeGenConfig;
 import com.netflix.graphql.dgs.codegen.Language;
+import io.github.deweyjose.graphqlcodegen.models.CustomParameters;
+import io.github.deweyjose.graphqlcodegen.models.DgsParameters;
+import io.github.deweyjose.graphqlcodegen.models.ExecutionRequest;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -190,184 +183,75 @@ public class Codegen extends AbstractMojo {
   @Parameter(property = "generateIsGetterForPrimitiveBooleanFields", defaultValue = "false")
   private boolean generateIsGetterForPrimitiveBooleanFields;
 
-  /**
-   * Helper function that computes schema paths to generate.
-   *
-   * @return
-   */
-  private Set<File> expandSchemaPaths() {
-    if (onlyGenerateChanged) {
-      Set<File> configuredSchemaPaths = stream(schemaPaths).collect(toSet());
-      Set<File> expandedSchemaPaths = new HashSet<>();
-
-      // expand any directories into graphql file paths
-      for (File path : configuredSchemaPaths) {
-        if (path.isFile()) {
-          expandedSchemaPaths.add(path);
-        } else {
-          expandedSchemaPaths.addAll(SchemaFileManifest.findGraphQLSFiles(path));
-        }
-      }
-
-      getLog().info(String.format("expanded schema paths: %s", expandedSchemaPaths));
-      return expandedSchemaPaths;
-    } else {
-      return stream(schemaPaths).collect(toSet());
-    }
-  }
-
   @Override
   public void execute() {
-    if (!skip) {
-
-      verifyPackageName();
-
-      Set<File> fullSchemaPaths = expandSchemaPaths();
-
-      verifySchemaFiles(fullSchemaPaths);
-
-      SchemaFileManifest manifest =
-          new SchemaFileManifest(
-              new File(schemaManifestOutputDir, "schema-manifest.props"), project.getBasedir());
-
-      if (onlyGenerateChanged) {
-        manifest.setFiles(new HashSet<>(fullSchemaPaths));
-        fullSchemaPaths.retainAll(manifest.getChangedFiles());
-        getLog().info(String.format("changed schema files: %s", fullSchemaPaths));
-      }
-
-      if (fullSchemaPaths.isEmpty() && schemaJarFilesFromDependencies.length < 1) {
-        getLog().info("no files to generate");
-        return;
-      }
-
-      if (typeMappingPropertiesFiles != null && typeMappingPropertiesFiles.length > 0) {
-        Set<Artifact> dependencies = project.getArtifacts();
-        java.util.Properties typeMappingProperties = new java.util.Properties();
-        for (Artifact dependency : dependencies) {
-          File artifactFile = dependency.getFile();
-          if (artifactFile != null && artifactFile.isFile()) {
-            loadPropertiesFile(typeMappingProperties, artifactFile, typeMappingPropertiesFiles);
-          }
-        }
-        // Set key-value from this properties object to typeMapping Map
-        // only when it is not already present in the Map
-        if (typeMapping == null) {
-          typeMapping = new HashMap<>();
-        }
-        typeMappingProperties.forEach(
-            (k, v) -> {
-              typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v));
-            });
-      }
-
-      final CodeGenConfig config =
-          new CodeGenConfig(
-              emptySet(),
-              fullSchemaPaths,
-              DependencySchemaExtractor.extract(project, schemaJarFilesFromDependencies),
-              outputDir.toPath(),
-              examplesOutputDir.toPath(),
-              writeToFiles,
-              packageName,
-              subPackageNameClient,
-              subPackageNameDatafetchers,
-              subPackageNameTypes,
-              subPackageNameDocs,
-              Language.valueOf(language.toUpperCase()),
-              generateBoxedTypes,
-              generateIsGetterForPrimitiveBooleanFields,
-              generateClientApi,
-              generateClientApiv2,
-              generateInterfaces,
-              generateKotlinNullableClasses,
-              generateKotlinClosureProjections,
-              typeMapping,
-              stream(includeQueries).collect(toSet()),
-              stream(includeMutations).collect(toSet()),
-              stream(includeSubscriptions).collect(toSet()),
-              skipEntityQueries,
-              shortProjectionNames,
-              generateDataTypes,
-              omitNullInputFields,
-              maxProjectionDepth,
-              kotlinAllFieldsOptional,
-              snakeCaseConstantNames,
-              generateInterfaceSetters,
-              generateInterfaceMethodsForInterfaceFields,
-              generateDocs,
-              Paths.get(generatedDocsFolder),
-              includeImports,
-              includeEnumImports.entrySet().stream()
-                  .collect(toMap(Entry::getKey, entry -> entry.getValue().getProperties())),
-              includeClassImports.entrySet().stream()
-                  .collect(toMap(Entry::getKey, entry -> entry.getValue().getProperties())),
-              generateCustomAnnotations,
-              javaGenerateAllConstructor,
-              implementSerializable,
-              addGeneratedAnnotation,
-              disableDatesInGeneratedAnnotation,
-              addDeprecatedAnnotation,
-              trackInputFieldSet);
-
-      getLog().info(format("Codegen config: \n%s", config));
-
-      final CodeGen codeGen = new CodeGen(config);
-      codeGen.generate();
-
-      if (onlyGenerateChanged) {
-        try {
-          manifest.syncManifest();
-        } catch (Exception e) {
-          getLog().warn("error syncing manifest", e);
-        }
-      }
+    if (skip) {
+      return;
     }
-  }
 
-  /**
-   * @param typeMappingProperties: Java Properties where typeMapping will be loaded into
-   * @param artifactFile: Artifact file
-   * @param typeMappingPropertiesFiles: Input: Classpath location of typeMapping properties file
-   * @return
-   */
-  private void loadPropertiesFile(
-      java.util.Properties typeMappingProperties,
-      File artifactFile,
-      String[] typeMappingPropertiesFiles) {
-    try (JarFile jarFile = new JarFile(artifactFile)) {
-      for (String file : typeMappingPropertiesFiles) {
-        ZipEntry entry = jarFile.getEntry(file);
-        if (entry != null) {
-          try (InputStream inputStream = jarFile.getInputStream(entry)) {
-            getLog()
-                .info(
-                    String.format(
-                        "Loading typeMapping from %s in artifact %s",
-                        file, artifactFile.getAbsolutePath()));
-            // load the data into the typeMappingProperties
-            typeMappingProperties.load(inputStream);
-          }
-        }
-      }
-    } catch (IOException e) {
-      getLog().error(e);
-    }
-  }
+    // Map Mojo parameters to CustomParameters
+    CustomParameters custom =
+        new CustomParameters(
+            schemaPaths,
+            schemaJarFilesFromDependencies,
+            schemaManifestOutputDir,
+            onlyGenerateChanged,
+            project.getBasedir(),
+            typeMappingPropertiesFiles);
 
-  public void verifyPackageName() {
-    if (isNull(packageName)) {
-      throw new IllegalArgumentException("Please specify a packageName");
-    }
-  }
+    // Map Mojo parameters to DgsParameters
+    DgsParameters dgs =
+        new DgsParameters(
+            emptySet(), // schemaPaths (not used in executor)
+            emptySet(), // fullSchemaPaths (not used in executor)
+            DependencySchemaExtractor.extract(project, schemaJarFilesFromDependencies),
+            outputDir.toPath(),
+            examplesOutputDir.toPath(),
+            writeToFiles,
+            packageName,
+            subPackageNameClient,
+            subPackageNameDatafetchers,
+            subPackageNameTypes,
+            subPackageNameDocs,
+            Language.valueOf(language.toUpperCase()),
+            generateBoxedTypes,
+            generateIsGetterForPrimitiveBooleanFields,
+            generateClientApi,
+            generateClientApiv2,
+            generateInterfaces,
+            generateKotlinNullableClasses,
+            generateKotlinClosureProjections,
+            typeMapping == null ? new HashMap<>() : typeMapping,
+            includeQueries == null ? new HashSet<>() : stream(includeQueries).collect(toSet()),
+            includeMutations == null ? new HashSet<>() : stream(includeMutations).collect(toSet()),
+            includeSubscriptions == null
+                ? new HashSet<>()
+                : stream(includeSubscriptions).collect(toSet()),
+            skipEntityQueries,
+            shortProjectionNames,
+            generateDataTypes,
+            omitNullInputFields,
+            maxProjectionDepth,
+            kotlinAllFieldsOptional,
+            snakeCaseConstantNames,
+            generateInterfaceSetters,
+            generateInterfaceMethodsForInterfaceFields,
+            generateDocs,
+            Paths.get(generatedDocsFolder),
+            generateCustomAnnotations,
+            javaGenerateAllConstructor,
+            implementSerializable,
+            addGeneratedAnnotation,
+            disableDatesInGeneratedAnnotation,
+            addDeprecatedAnnotation,
+            trackInputFieldSet,
+            includeImports == null ? new HashMap<>() : includeImports,
+            includeEnumImports == null ? new HashMap<>() : includeEnumImports,
+            includeClassImports == null ? new HashMap<>() : includeClassImports);
 
-  public void verifySchemaFiles(Set<File> fullSchemaPaths) {
-    if (fullSchemaPaths.isEmpty() && schemaJarFilesFromDependencies.length < 1) {
-      getLog()
-          .error(
-              "No schema files found and no schemaJarFilesFromDependencies specified. "
-                  + "Refer to documentation for schemas and schemaJarFilesFromDependencies. ");
-      throw new IllegalArgumentException("No schema files found. Please check your configuration.");
-    }
+    ExecutionRequest request = new ExecutionRequest(custom, dgs);
+    CodegenExecutor executor = new CodegenExecutor(getLog());
+    Set<Artifact> artifacts = new HashSet<>(project.getArtifacts());
+    executor.execute(request, artifacts);
   }
 }
