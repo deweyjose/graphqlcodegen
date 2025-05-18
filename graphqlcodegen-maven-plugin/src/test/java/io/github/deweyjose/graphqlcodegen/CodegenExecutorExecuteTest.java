@@ -123,7 +123,9 @@ class CodegenExecutorExecuteTest {
     File datafetchersDir = new File(outputDir, "com/example/datafetchers");
     File barsDatafetcher = new File(datafetchersDir, "BarsDatafetcher.java");
     File showsDatafetcher = new File(datafetchersDir, "ShowsDatafetcher.java");
-    assertTrue(datafetchersDir.exists() && datafetchersDir.isDirectory(), "Datafetchers directory should exist");
+    assertTrue(
+        datafetchersDir.exists() && datafetchersDir.isDirectory(),
+        "Datafetchers directory should exist");
     assertTrue(barsDatafetcher.exists(), "BarsDatafetcher.java should be generated");
     assertTrue(showsDatafetcher.exists(), "ShowsDatafetcher.java should be generated");
   }
