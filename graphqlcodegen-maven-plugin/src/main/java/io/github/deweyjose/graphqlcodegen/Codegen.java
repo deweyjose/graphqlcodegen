@@ -28,6 +28,7 @@ import org.apache.maven.project.MavenProject;
     requiresDependencyResolution = ResolutionScope.COMPILE)
 public class Codegen extends AbstractMojo {
 
+  // === CustomParameters fields ===
   @Parameter(defaultValue = "${project}")
   private MavenProject project;
 
@@ -38,6 +39,32 @@ public class Codegen extends AbstractMojo {
 
   @Parameter(alias = "schemaJarFilesFromDependencies", property = "schemaJarFilesFromDependencies")
   private String[] schemaJarFilesFromDependencies;
+
+  @Parameter(
+      property = "schemaManifestOutputDir",
+      defaultValue = "${project.build.directory}/graphqlcodegen")
+  private File schemaManifestOutputDir;
+
+  @Parameter(property = "onlyGenerateChanged", defaultValue = "true")
+  private boolean onlyGenerateChanged;
+
+  @Parameter(property = "typeMappingPropertiesFiles")
+  private String[] typeMappingPropertiesFiles;
+
+  @Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
+  private boolean skip;
+
+  // === DgsParameters fields ===
+  @Parameter(property = "outputDir", defaultValue = "${project.build.directory}/generated-sources")
+  private File outputDir;
+
+  @Parameter(
+      property = "examplesOutputDir",
+      defaultValue = "${project.build.directory}/generated-examples")
+  private File examplesOutputDir;
+
+  @Parameter(property = "writeToFiles", defaultValue = "true")
+  private boolean writeToFiles;
 
   @Parameter(property = "packageName", defaultValue = "")
   private String packageName;
@@ -60,25 +87,17 @@ public class Codegen extends AbstractMojo {
   @Parameter(property = "typeMapping")
   private Map<String, String> typeMapping;
 
-  /**
-   * Provide the typeMapping as properties file(s) that is accessible as a compile-time-classpath
-   * resource Values in the properties file will be added to `typeMapping` Map when it is not
-   * already present
-   */
-  @Parameter(property = "typeMappingPropertiesFiles")
-  private String[] typeMappingPropertiesFiles;
-
   @Parameter(property = "generateBoxedTypes", defaultValue = "false")
   private boolean generateBoxedTypes;
+
+  @Parameter(property = "generateIsGetterForPrimitiveBooleanFields", defaultValue = "false")
+  private boolean generateIsGetterForPrimitiveBooleanFields;
 
   @Parameter(property = "generateClientApi", defaultValue = "false")
   private boolean generateClientApi;
 
   @Parameter(property = "generateClientApiv2", defaultValue = "false")
   private boolean generateClientApiv2;
-
-  @Parameter(property = "generateDataTypes", defaultValue = "true")
-  private boolean generateDataTypes;
 
   @Parameter(property = "generateInterfaces", defaultValue = "false")
   private boolean generateInterfaces;
@@ -89,24 +108,14 @@ public class Codegen extends AbstractMojo {
   @Parameter(property = "generateKotlinClosureProjections", defaultValue = "false")
   private boolean generateKotlinClosureProjections;
 
-  @Parameter(property = "outputDir", defaultValue = "${project.build.directory}/generated-sources")
-  private File outputDir;
-
-  @Parameter(
-      property = "examplesOutputDir",
-      defaultValue = "${project.build.directory}/generated-examples")
-  private File examplesOutputDir;
-
-  @Parameter(
-      property = "schemaManifestOutputDir",
-      defaultValue = "${project.build.directory}/graphqlcodegen")
-  private File schemaManifestOutputDir;
-
   @Parameter(property = "includeQueries")
   private String[] includeQueries;
 
   @Parameter(property = "includeMutations")
   private String[] includeMutations;
+
+  @Parameter(property = "includeSubscriptions")
+  private String[] includeSubscriptions;
 
   @Parameter(property = "skipEntityQueries", defaultValue = "false")
   private boolean skipEntityQueries;
@@ -114,23 +123,20 @@ public class Codegen extends AbstractMojo {
   @Parameter(property = "shortProjectionNames", defaultValue = "false")
   private boolean shortProjectionNames;
 
-  @Parameter(property = "maxProjectionDepth", defaultValue = "10")
-  private int maxProjectionDepth;
+  @Parameter(property = "generateDataTypes", defaultValue = "true")
+  private boolean generateDataTypes;
 
   @Parameter(property = "omitNullInputFields", defaultValue = "false")
   private boolean omitNullInputFields;
+
+  @Parameter(property = "maxProjectionDepth", defaultValue = "10")
+  private int maxProjectionDepth;
 
   @Parameter(property = "kotlinAllFieldsOptional", defaultValue = "false")
   private boolean kotlinAllFieldsOptional;
 
   @Parameter(property = "snakeCaseConstantNames", defaultValue = "false")
   private boolean snakeCaseConstantNames;
-
-  @Parameter(property = "writeToFiles", defaultValue = "true")
-  private boolean writeToFiles;
-
-  @Parameter(property = "includeSubscriptions")
-  private String[] includeSubscriptions;
 
   @Parameter(property = "generateInterfaceSetters", defaultValue = "false")
   private boolean generateInterfaceSetters;
@@ -159,9 +165,6 @@ public class Codegen extends AbstractMojo {
   @Parameter(property = "trackInputFieldSet", defaultValue = "false")
   private boolean trackInputFieldSet;
 
-  @Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
-  private boolean skip;
-
   @Parameter(property = "generateCustomAnnotations", defaultValue = "false")
   private boolean generateCustomAnnotations;
 
@@ -174,14 +177,8 @@ public class Codegen extends AbstractMojo {
   @Parameter(property = "includeClassImports")
   private Map<String, Properties> includeClassImports;
 
-  @Parameter(property = "onlyGenerateChanged", defaultValue = "true")
-  private boolean onlyGenerateChanged;
-
   @Parameter(property = "disableDatesInGeneratedAnnotation", defaultValue = "false")
   private boolean disableDatesInGeneratedAnnotation;
-
-  @Parameter(property = "generateIsGetterForPrimitiveBooleanFields", defaultValue = "false")
-  private boolean generateIsGetterForPrimitiveBooleanFields;
 
   @Override
   public void execute() {
