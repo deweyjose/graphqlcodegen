@@ -5,13 +5,14 @@ import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.maven.plugin.logging.Log;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -20,6 +21,29 @@ class CodegenExecutorTest {
 
   private Log log;
   private CodegenExecutor executor;
+
+  @TempDir static Path classTempDir;
+  static File testJarFile;
+  static final String propsFileName = "test-type-mapping.properties";
+  static final String propsContent = "foo=bar\nhello=world\n";
+
+  @BeforeAll
+  static void createTestJar() throws Exception {
+    // Create the properties file
+    Path propsPath = classTempDir.resolve(propsFileName);
+    java.nio.file.Files.write(
+        propsPath, propsContent.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    // Create the JAR file containing the properties file
+    testJarFile = classTempDir.resolve("test-artifact.jar").toFile();
+    try (java.util.jar.JarOutputStream jarOut =
+        new java.util.jar.JarOutputStream(new java.io.FileOutputStream(testJarFile))) {
+      java.util.jar.JarEntry entry = new java.util.jar.JarEntry(propsFileName);
+      jarOut.putNextEntry(entry);
+      byte[] bytes = java.nio.file.Files.readAllBytes(propsPath);
+      jarOut.write(bytes);
+      jarOut.closeEntry();
+    }
+  }
 
   @BeforeEach
   void setUp() {
@@ -69,17 +93,24 @@ class CodegenExecutorTest {
   }
 
   @Test
-  void testLoadPropertiesFile_validJarAndProperties(@TempDir Path tempDir) throws Exception {
-    // Copy the test JAR to the temp directory
-    File jarFile = tempDir.resolve("test-artifact.jar").toFile();
-    try (InputStream in = getClass().getClassLoader().getResourceAsStream("test-artifact.jar")) {
-      assertNotNull(in, "test-artifact.jar should be on the test classpath");
-      java.nio.file.Files.copy(in, jarFile.toPath());
-    }
-    // Call loadPropertiesFile
+  void testFilterChangedSchemaFiles() {
+    Set<File> allFiles =
+        new HashSet<>(Arrays.asList(new File("a.graphqls"), new File("b.graphqls")));
+    SchemaFileManifest manifest = mock(SchemaFileManifest.class);
+    when(manifest.getChangedFiles()).thenReturn(Collections.singleton(new File("b.graphqls")));
     CodegenExecutor exec = new CodegenExecutor(log);
-    String[] props = {"test-type-mapping.properties"};
-    Map<String, String> result = exec.loadPropertiesFile(jarFile, props);
+    Set<File> result = exec.filterChangedSchemaFiles(allFiles, manifest);
+    assertEquals(1, result.size());
+    assertTrue(result.contains(new File("b.graphqls")));
+    verify(manifest).setFiles(new HashSet<>(allFiles));
+  }
+
+  @Test
+  void testLoadPropertiesFile_validJarAndProperties(@TempDir Path tempDir) throws Exception {
+    // Call loadPropertiesFile using the shared test JAR
+    CodegenExecutor exec = new CodegenExecutor(log);
+    String[] props = {propsFileName};
+    Map<String, String> result = exec.loadPropertiesFile(testJarFile, props);
     assertEquals("bar", result.get("foo"));
     assertEquals("world", result.get("hello"));
   }
@@ -99,27 +130,16 @@ class CodegenExecutorTest {
   }
 
   @Test
-  void testExecute_withMinimalValidRequest() {
-    // TODO: create minimal valid ExecutionRequest, mock artifacts, call execute, verify log/codegen
-  }
-
-  @Test
   void testMergeTypeMapping_userPrecedence(@TempDir Path tempDir) throws Exception {
-    // Copy the test JAR to the temp directory
-    File jarFile = tempDir.resolve("test-artifact.jar").toFile();
-    try (InputStream in = getClass().getClassLoader().getResourceAsStream("test-artifact.jar")) {
-      assertNotNull(in, "test-artifact.jar should be on the test classpath");
-      java.nio.file.Files.copy(in, jarFile.toPath());
-    }
     // User map overlaps with JAR and adds a new key
     Map<String, String> userMap = new java.util.HashMap<>();
     userMap.put("foo", "userBar"); // overrides JAR
     userMap.put("userOnly", "value");
-    String[] props = {"test-type-mapping.properties"};
+    String[] props = {propsFileName};
     Set<org.apache.maven.artifact.Artifact> artifacts = new java.util.HashSet<>();
     org.apache.maven.artifact.Artifact mockArtifact =
         mock(org.apache.maven.artifact.Artifact.class);
-    when(mockArtifact.getFile()).thenReturn(jarFile);
+    when(mockArtifact.getFile()).thenReturn(testJarFile);
     artifacts.add(mockArtifact);
     CodegenExecutor exec = new CodegenExecutor(log);
     Map<String, String> result = exec.mergeTypeMapping(userMap, props, artifacts);

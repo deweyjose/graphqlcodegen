@@ -31,7 +31,14 @@ public class CodegenExecutor {
     this.log = log;
   }
 
+  /**
+   * Executes the code generation.
+   *
+   * @param request the execution request
+   * @param artifacts the artifacts
+   */
   public void execute(ExecutionRequest request, Set<Artifact> artifacts) {
+
     CustomParameters custom = request.customParameters();
     DgsParameters dgs = request.dgsParameters();
 
@@ -44,16 +51,14 @@ public class CodegenExecutor {
 
     SchemaFileManifest manifest =
         new SchemaFileManifest(
-            new File(custom.schemaManifestOutputDir(), "schema-manifest.props"),
-            custom.project().getBasedir());
+            new File(custom.schemaManifestOutputDir(), "schema-manifest.props"), custom.baseDir());
 
+    Set<File> filteredSchemaFiles = fullSchemaPaths;
     if (custom.onlyGenerateChanged()) {
-      manifest.setFiles(new HashSet<>(fullSchemaPaths));
-      fullSchemaPaths.retainAll(manifest.getChangedFiles());
-      log.info(String.format("changed schema files: %s", fullSchemaPaths));
+      filteredSchemaFiles = filterChangedSchemaFiles(fullSchemaPaths, manifest);
     }
 
-    if (fullSchemaPaths.isEmpty() && custom.schemaJarFilesFromDependencies().length < 1) {
+    if (filteredSchemaFiles.isEmpty() && custom.schemaJarFilesFromDependencies().length < 1) {
       log.info("no files to generate");
       return;
     }
@@ -64,7 +69,7 @@ public class CodegenExecutor {
     final CodeGenConfig config =
         new CodeGenConfig(
             emptySet(),
-            fullSchemaPaths,
+            filteredSchemaFiles,
             dgs.dependencySchemas(),
             dgs.outputDir(),
             dgs.examplesOutputDir(),
@@ -124,6 +129,13 @@ public class CodegenExecutor {
     }
   }
 
+  /**
+   * Expands the schema paths to include all schema files in the directories.
+   *
+   * @param schemaPaths the schema paths
+   * @param onlyGenerateChanged whether to only generate changed schema files
+   * @return the expanded schema paths
+   */
   public Set<File> expandSchemaPaths(File[] schemaPaths, boolean onlyGenerateChanged) {
     if (onlyGenerateChanged) {
       Set<File> configuredSchemaPaths = stream(schemaPaths).collect(toSet());
@@ -142,6 +154,13 @@ public class CodegenExecutor {
     }
   }
 
+  /**
+   * Loads the type mapping from the properties file in the artifact.
+   *
+   * @param artifactFile the artifact file
+   * @param typeMappingPropertiesFiles the type mapping properties files
+   * @return the type mapping
+   */
   public Map<String, String> loadPropertiesFile(
       File artifactFile, String[] typeMappingPropertiesFiles) {
     Map<String, String> typeMapping = new HashMap<>();
@@ -170,12 +189,24 @@ public class CodegenExecutor {
     return typeMapping;
   }
 
+  /**
+   * Verifies that the package name is not null.
+   *
+   * @param packageName the package name
+   */
   public void verifyPackageName(String packageName) {
     if (isNull(packageName)) {
       throw new IllegalArgumentException("Please specify a packageName");
     }
   }
 
+  /**
+   * Verifies that there are schema files to generate. If there are no schema files and no schema
+   * jar files from dependencies, an error is logged and an exception is thrown.
+   *
+   * @param fullSchemaPaths the full schema paths
+   * @param schemaJarFilesFromDependencies the schema jar files from dependencies
+   */
   public void verifySchemaFiles(
       Set<File> fullSchemaPaths, String[] schemaJarFilesFromDependencies) {
     if (fullSchemaPaths.isEmpty()
@@ -190,6 +221,11 @@ public class CodegenExecutor {
   /**
    * Merges user-supplied typeMapping with type mappings loaded from JAR properties files.
    * User-supplied values always take precedence over JAR values.
+   *
+   * @param userTypeMapping the user-supplied type mapping
+   * @param typeMappingPropertiesFiles the type mapping properties files
+   * @param artifacts the artifacts
+   * @return the merged type mapping
    */
   public Map<String, String> mergeTypeMapping(
       Map<String, String> userTypeMapping,
@@ -209,5 +245,20 @@ public class CodegenExecutor {
       finalTypeMapping.putAll(userTypeMapping);
     }
     return finalTypeMapping;
+  }
+
+  /**
+   * Returns only the changed schema files, using the manifest.
+   *
+   * @param allSchemaFiles the full schema paths
+   * @param manifest the schema manifest
+   * @return the changed schema files
+   */
+  public Set<File> filterChangedSchemaFiles(Set<File> allSchemaFiles, SchemaFileManifest manifest) {
+    manifest.setFiles(new HashSet<>(allSchemaFiles));
+    Set<File> changed = new HashSet<>(allSchemaFiles);
+    changed.retainAll(manifest.getChangedFiles());
+    log.info(String.format("changed schema files: %s", changed));
+    return changed;
   }
 }
