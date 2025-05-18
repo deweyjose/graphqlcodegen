@@ -102,7 +102,8 @@ class CodegenExecutorExecuteTest {
     assertTrue(showType.exists(), "Show.java should be generated in the types subpackage");
     assertTrue(fooType.exists(), "Foo.java should be generated in the types subpackage");
     assertTrue(actorType.exists(), "Actor.java should be generated in the types subpackage");
-    assertTrue(showInputType.exists(), "ShowInput.java should be generated in the types subpackage");
+    assertTrue(
+        showInputType.exists(), "ShowInput.java should be generated in the types subpackage");
 
     try {
       String showTypeContent = java.nio.file.Files.readString(showType.toPath());
@@ -112,15 +113,19 @@ class CodegenExecutorExecuteTest {
       String actorTypeContent = java.nio.file.Files.readString(actorType.toPath());
       assertTrue(actorTypeContent.contains("class Actor"), "Actor.java should declare class Actor");
       String showInputTypeContent = java.nio.file.Files.readString(showInputType.toPath());
-      assertTrue(showInputTypeContent.contains("class ShowInput"), "ShowInput.java should declare class ShowInput");
+      assertTrue(
+          showInputTypeContent.contains("class ShowInput"),
+          "ShowInput.java should declare class ShowInput");
     } catch (java.io.IOException e) {
       fail("Failed to read generated type files: " + e.getMessage());
     }
 
-    File clientDir = new File(outputDir, "com/example/client");
     File datafetchersDir = new File(outputDir, "com/example/datafetchers");
-    assertTrue(clientDir.exists() && clientDir.isDirectory(), "Client directory should exist");
+    File barsDatafetcher = new File(datafetchersDir, "BarsDatafetcher.java");
+    File showsDatafetcher = new File(datafetchersDir, "ShowsDatafetcher.java");
     assertTrue(datafetchersDir.exists() && datafetchersDir.isDirectory(), "Datafetchers directory should exist");
+    assertTrue(barsDatafetcher.exists(), "BarsDatafetcher.java should be generated");
+    assertTrue(showsDatafetcher.exists(), "ShowsDatafetcher.java should be generated");
   }
 
   // Simple no-op logger for integration test
