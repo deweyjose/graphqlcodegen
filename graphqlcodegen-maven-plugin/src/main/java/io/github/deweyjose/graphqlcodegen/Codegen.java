@@ -204,7 +204,8 @@ public class Codegen extends AbstractMojo {
         new DgsParameters(
             emptySet(), // schemaPaths (not used in executor)
             emptySet(), // fullSchemaPaths (not used in executor)
-            DependencySchemaExtractor.extract(project, schemaJarFilesFromDependencies),
+            DependencySchemaExtractor.extract(
+                project.getDependencyArtifacts(), schemaJarFilesFromDependencies),
             outputDir.toPath(),
             examplesOutputDir.toPath(),
             writeToFiles,
