@@ -11,7 +11,7 @@
   </parent>
 
   <artifactId>graphqlcodegen-maven-plugin</artifactId>
-  <version>3.0.1</version>
+  <version>3.0.2</version>
   <packaging>maven-plugin</packaging>
 
   <name>GraphQL Code Generator Maven Plugin</name>
@@ -67,6 +67,11 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
