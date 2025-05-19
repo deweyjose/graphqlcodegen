@@ -11,18 +11,13 @@
   </parent>
 
   <artifactId>graphqlcodegen-maven-plugin</artifactId>
-  <version>3.0.1</version>
+  <version>3.0.2</version>
   <packaging>maven-plugin</packaging>
 
   <name>GraphQL Code Generator Maven Plugin</name>
   <description>Maven plugin for GraphQL code generation</description>
 
   <dependencies>
-    <dependency>
-      <groupId>io.github.deweyjose</groupId>
-      <artifactId>graphqlcodegen-param-plugin</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
-    </dependency>
     <dependency>
       <groupId>com.squareup</groupId>
       <artifactId>kotlinpoet-jvm</artifactId>
@@ -73,6 +68,26 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>flatten.clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>io.github.deweyjose</groupId>
         <artifactId>graphqlcodegen-param-plugin</artifactId>
