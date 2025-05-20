@@ -75,7 +75,10 @@
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>flatten-maven-plugin</artifactId>
+        <artifactId>flatten-maven-plugin</artifactId>        
+        <configuration>
+          <outputDirectory>target/flattened-pom</outputDirectory>
+        </configuration>
         <executions>
           <execution>
             <id>flatten</id>
