@@ -19,11 +19,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>io.github.deweyjose</groupId>
-      <artifactId>graphqlcodegen-param-plugin</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>com.squareup</groupId>
       <artifactId>kotlinpoet-jvm</artifactId>
     </dependency>
@@ -78,6 +73,26 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>flatten.clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>io.github.deweyjose</groupId>
         <artifactId>graphqlcodegen-param-plugin</artifactId>
