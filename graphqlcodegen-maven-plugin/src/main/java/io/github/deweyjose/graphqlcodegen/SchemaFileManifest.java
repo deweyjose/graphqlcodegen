@@ -54,7 +54,7 @@ public class SchemaFileManifest {
    * @return boolean
    */
   public static boolean isGraphqlFile(File file) {
-    return file.getName().endsWith(".graphqls") || file.getName().endsWith(".graphql");
+    return file.getName().endsWith(".graphqls") || file.getName().endsWith(".graphql") || file.getName().endsWith(".gqls");
   }
 
   /**
