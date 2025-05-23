@@ -139,7 +139,7 @@ Or
 
 A list of schema file or directory paths.
 
-Directory paths: Only files with `.graphql` or `.graphqls` will be considered.
+Directory paths: Only files with `.graphql`, `.graphqls` or `.gqls` will be considered.
 
 Default value is `${project.basedir}/src/main/resources/schema`.
 
