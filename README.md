@@ -14,7 +14,7 @@ This is the main Maven plugin that users apply to their projects. It provides go
 - Invoking the DGS codegen library with the correct configuration.
 - Managing incremental code generation and manifest tracking.
 
-## 2. graphqlcodegen-param-plugin
+## 2. graphqlcodegen-bootstrap-plugin
 This is a helper plugin used only during the build of this project. Its purpose is to:
 - Download the latest `CodeGenConfig.kt` from the Netflix DGS codegen repository.
 - Parse the constructor parameters and their types.
@@ -35,7 +35,7 @@ PRs are welcome as well. The level of difficulty across DGS Codegen updates vari
 
 **Good news:** The process for handling constructor changes is now much simpler:
 
-- The `graphqlcodegen-param-plugin` will automatically fetch the latest `CodeGenConfig.kt` and generate a new builder class reflecting any new or changed parameters.
+- The `graphqlcodegen-bootstrap-plugin` will automatically fetch the latest `CodeGenConfig.kt` and generate a new builder class reflecting any new or changed parameters.
 - If the upstream constructor changes, you will get a compile failure in the main plugin module. The error will clearly indicate which parameters are missing or need to be updated.
 - Simply update the main plugin's configuration and wiring to match the new builder and parameters. The compile error will guide you to what needs to be fixed.
 - Make sure to document any new options in the `Options` section below.

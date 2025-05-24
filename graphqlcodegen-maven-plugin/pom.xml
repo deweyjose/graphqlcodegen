@@ -98,7 +98,7 @@
       </plugin>
       <plugin>
         <groupId>io.github.deweyjose</groupId>
-        <artifactId>graphqlcodegen-param-plugin</artifactId>
+        <artifactId>graphqlcodegen-bootstrap-plugin</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <executions>
           <execution>
