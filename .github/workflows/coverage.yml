@@ -38,13 +38,15 @@ jobs:
           min-coverage-changed-files: 90
           update-comment: true
           title: Code Coverage Report
-      - name: Generate Coverage Badge
+          
+      - name: Generate Coverage Badge        
         uses: cicirello/jacoco-badge-generator@v2
         with:
           jacoco-csv-file: graphqlcodegen-maven-plugin/target/site/jacoco/jacoco.csv
           badges-directory: badges
 
       - name: Commit and push coverage badge
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -53,6 +55,13 @@ jobs:
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy JaCoCo report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./graphqlcodegen-maven-plugin/target/site/jacoco
+          publish_branch: gh-pages
 
 permissions:
   contents: write
