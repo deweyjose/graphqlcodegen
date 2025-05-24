@@ -39,7 +39,7 @@ public class CodegenExecutor {
    * @param request the execution request
    * @param artifacts the artifacts
    */
-  public void execute(CodegenConfigProvider request, Set<Artifact> artifacts) {
+  public void execute(CodegenConfigProvider request, Set<Artifact> artifacts, File projectBaseDir) {
     if (request.isSkip()) {
       log.info("Skipping code generation as requested (skip=true)");
       return;
@@ -58,7 +58,8 @@ public class CodegenExecutor {
 
     SchemaFileManifest manifest =
         new SchemaFileManifest(
-            new File(request.getSchemaManifestOutputDir(), "schema-manifest.props"), new File("."));
+            new File(request.getSchemaManifestOutputDir(), "schema-manifest.props"),
+            projectBaseDir);
 
     Set<File> filteredSchemaFiles = fullSchemaPaths;
     if (request.isOnlyGenerateChanged()) {

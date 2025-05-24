@@ -210,7 +210,7 @@ class CodegenExecutorExecuteTest {
         };
     Log log = org.mockito.Mockito.mock(Log.class);
     CodegenExecutor executor = new CodegenExecutor(log);
-    executor.execute(config, new HashSet<>());
+    executor.execute(config, new HashSet<>(), new File("."));
 
     // Assert that code generation produced output files
     assertTrue(outputDir.exists() && outputDir.isDirectory(), "Output directory should exist");

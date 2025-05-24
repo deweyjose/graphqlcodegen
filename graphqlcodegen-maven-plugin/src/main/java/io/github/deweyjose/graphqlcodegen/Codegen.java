@@ -169,6 +169,6 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
 
   @Override
   public void execute() {
-    new CodegenExecutor(getLog()).execute(this, project.getArtifacts());
+    new CodegenExecutor(getLog()).execute(this, project.getArtifacts(), project.getBasedir());
   }
 }
