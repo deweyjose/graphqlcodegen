@@ -1,0 +1,7 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen,DependencySchemaExtractor,3,90,0,10,1,20,1,7,1,2
+GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen,ParameterMap,4,10,0,0,1,4,1,3,1,3
+GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen,Codegen,17,0,0,0,3,0,2,0,2,0
+GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen,CodegenExecutor,60,442,15,29,14,121,14,21,0,13
+GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen,SchemaFileManifest,19,242,3,25,5,58,4,21,1,10
+GraphQL Code Generator Maven Plugin,io.github.deweyjose.codegen.generated,GeneratedCodeGenConfigBuilder,0,315,0,0,0,90,0,46,0,46

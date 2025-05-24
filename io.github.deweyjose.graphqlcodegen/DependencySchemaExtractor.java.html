@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DependencySchemaExtractor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">GraphQL Code Generator Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">io.github.deweyjose.graphqlcodegen</a> &gt; <span class="el_source">DependencySchemaExtractor.java</span></div><h1>DependencySchemaExtractor.java</h1><pre class="source lang-java linenums">package io.github.deweyjose.graphqlcodegen;
+
+import static java.lang.String.format;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import org.apache.maven.artifact.Artifact;
+
+<span class="nc" id="L12">public class DependencySchemaExtractor {</span>
+
+  /**
+   * Extracts the schema files from the dependencies.
+   *
+   * @param dependencyArtifacts the set of dependency artifacts
+   * @param schemaJarFilesFromDependencies the schema jar files from dependencies
+   * @return the schema files
+   */
+  public static List&lt;File&gt; extract(
+      Set&lt;Artifact&gt; dependencyArtifacts, String[] schemaJarFilesFromDependencies) {
+<span class="fc" id="L23">    List&lt;File&gt; files = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L25" title="All 2 branches covered.">    for (final String jarDep : schemaJarFilesFromDependencies) {</span>
+<span class="fc" id="L26">      final String jarDepClean = jarDep.trim();</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">      if (jarDepClean.isEmpty()) {</span>
+<span class="fc" id="L28">        continue;</span>
+      }
+
+<span class="fc" id="L31">      final Optional&lt;Artifact&gt; artifactOpt = findFromDependencies(dependencyArtifacts, jarDepClean);</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">      if (artifactOpt.isPresent()) {</span>
+<span class="fc" id="L33">        final Artifact artifact = artifactOpt.get();</span>
+<span class="fc" id="L34">        final File file = artifact.getFile();</span>
+<span class="fc" id="L35">        files.add(file);</span>
+      }
+    }
+
+<span class="fc" id="L39">    return files;</span>
+  }
+
+  /**
+   * Finds the artifact from the dependencies.
+   *
+   * @param dependencyArtifacts the set of dependency artifacts
+   * @param artifactRef the artifact reference
+   * @return the artifact
+   */
+  private static Optional&lt;Artifact&gt; findFromDependencies(
+      Set&lt;Artifact&gt; dependencyArtifacts, final String artifactRef) {
+<span class="fc" id="L51">    final String cleanRef = artifactRef.trim();</span>
+
+<span class="fc bfc" id="L53" title="All 2 branches covered.">    for (final Artifact artifact : dependencyArtifacts) {</span>
+<span class="fc" id="L54">      final String ref =</span>
+<span class="fc" id="L55">          format(</span>
+<span class="fc" id="L56">              &quot;%s:%s:%s&quot;, artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());</span>
+
+<span class="fc bfc" id="L58" title="All 2 branches covered.">      if (ref.equals(cleanRef)) {</span>
+<span class="fc" id="L59">        return Optional.of(artifact);</span>
+      }
+<span class="fc" id="L61">    }</span>
+<span class="fc" id="L62">    return Optional.empty();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
