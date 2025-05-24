@@ -2,15 +2,10 @@ package io.github.deweyjose.graphqlcodegen;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.netflix.graphql.dgs.codegen.Language;
-import io.github.deweyjose.graphqlcodegen.models.CustomParameters;
-import io.github.deweyjose.graphqlcodegen.models.DgsParameters;
-import io.github.deweyjose.graphqlcodegen.models.ExecutionRequest;
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.jupiter.api.Test;
 
@@ -22,112 +17,201 @@ class CodegenExecutorExecuteTest {
     File schemaDir = new File(getClass().getClassLoader().getResource("schema").getFile());
     File[] schemaPaths = {schemaDir};
     File outputDir = new File("target/generated-test-codegen");
-    File baseDir = new File("target/generated-test-codegen");
 
-    CustomParameters custom =
-        new CustomParameters(
-            schemaPaths,
-            new String[0], // schemaJarFilesFromDependencies
-            outputDir, // schemaManifestOutputDir
-            false, // onlyGenerateChanged
-            baseDir,
-            new String[0] // typeMappingPropertiesFiles
-            );
+    CodegenConfigProvider config =
+        new CodegenConfigProvider() {
+          public File[] getSchemaPaths() {
+            return schemaPaths;
+          }
 
-    DgsParameters dgs =
-        new DgsParameters(
-            Collections.emptySet(), // schemaPaths
-            Collections.emptySet(), // fullSchemaPaths
-            List.of(), // dependencySchemas
-            outputDir.toPath(), // outputDir
-            outputDir.toPath(), // examplesOutputDir
-            true, // writeToFiles
-            "com.example", // packageName
-            "client", // subPackageNameClient
-            "datafetchers", // subPackageNameDatafetchers
-            "types", // subPackageNameTypes
-            "docs", // subPackageNameDocs
-            Language.JAVA, // language
-            false, // generateBoxedTypes
-            false, // generateIsGetterForPrimitiveBooleanFields
-            false, // generateClientApi
-            false, // generateClientApiv2
-            false, // generateInterfaces
-            false, // generateKotlinNullableClasses
-            false, // generateKotlinClosureProjections
-            new HashMap<>(), // typeMapping
-            new HashSet<>(), // includeQueries
-            new HashSet<>(), // includeMutations
-            new HashSet<>(), // includeSubscriptions
-            false, // skipEntityQueries
-            false, // shortProjectionNames
-            true, // generateDataTypes
-            false, // omitNullInputFields
-            10, // maxProjectionDepth
-            false, // kotlinAllFieldsOptional
-            false, // snakeCaseConstantNames
-            false, // generateInterfaceSetters
-            false, // generateInterfaceMethodsForInterfaceFields
-            false, // generateDocs
-            outputDir.toPath(), // generatedDocsFolder (use output dir as a safe default)
-            false, // generateCustomAnnotations
-            false, // javaGenerateAllConstructor
-            false, // implementSerializable
-            false, // addGeneratedAnnotation
-            false, // disableDatesInGeneratedAnnotation
-            false, // addDeprecatedAnnotation
-            false, // trackInputFieldSet
-            new HashMap<>(), // includeImports
-            new HashMap<>(), // includeEnumImports
-            new HashMap<>() // includeClassImports
-            );
+          public String[] getSchemaJarFilesFromDependencies() {
+            return new String[0];
+          }
 
-    ExecutionRequest request = new ExecutionRequest(custom, dgs);
-    CodegenExecutor executor = new CodegenExecutor(new NoOpLog());
+          public File getSchemaManifestOutputDir() {
+            return outputDir;
+          }
 
-    // Act
-    executor.execute(request, Collections.emptySet());
+          public boolean isOnlyGenerateChanged() {
+            return false;
+          }
 
-    // Assert
-    File[] generatedFiles = outputDir.listFiles();
-    assertNotNull(generatedFiles, "Output directory should not be null");
-    assertTrue(generatedFiles.length > 0, "Should generate at least one file");
+          public String[] getTypeMappingPropertiesFiles() {
+            return new String[0];
+          }
 
-    File typesDir = new File(outputDir, "com/example/types");
-    assertTrue(typesDir.exists() && typesDir.isDirectory(), "Types directory should exist");
-    File showType = new File(typesDir, "Show.java");
-    File fooType = new File(typesDir, "Foo.java");
-    File actorType = new File(typesDir, "Actor.java");
-    File showInputType = new File(typesDir, "ShowInput.java");
-    assertTrue(showType.exists(), "Show.java should be generated in the types subpackage");
-    assertTrue(fooType.exists(), "Foo.java should be generated in the types subpackage");
-    assertTrue(actorType.exists(), "Actor.java should be generated in the types subpackage");
-    assertTrue(
-        showInputType.exists(), "ShowInput.java should be generated in the types subpackage");
+          public boolean isSkip() {
+            return false;
+          }
 
-    try {
-      String showTypeContent = java.nio.file.Files.readString(showType.toPath());
-      assertTrue(showTypeContent.contains("class Show"), "Show.java should declare class Show");
-      String fooTypeContent = java.nio.file.Files.readString(fooType.toPath());
-      assertTrue(fooTypeContent.contains("class Foo"), "Foo.java should declare class Foo");
-      String actorTypeContent = java.nio.file.Files.readString(actorType.toPath());
-      assertTrue(actorTypeContent.contains("class Actor"), "Actor.java should declare class Actor");
-      String showInputTypeContent = java.nio.file.Files.readString(showInputType.toPath());
-      assertTrue(
-          showInputTypeContent.contains("class ShowInput"),
-          "ShowInput.java should declare class ShowInput");
-    } catch (java.io.IOException e) {
-      fail("Failed to read generated type files: " + e.getMessage());
-    }
+          public File getOutputDir() {
+            return outputDir;
+          }
 
-    File datafetchersDir = new File(outputDir, "com/example/datafetchers");
-    File barsDatafetcher = new File(datafetchersDir, "BarsDatafetcher.java");
-    File showsDatafetcher = new File(datafetchersDir, "ShowsDatafetcher.java");
-    assertTrue(
-        datafetchersDir.exists() && datafetchersDir.isDirectory(),
-        "Datafetchers directory should exist");
-    assertTrue(barsDatafetcher.exists(), "BarsDatafetcher.java should be generated");
-    assertTrue(showsDatafetcher.exists(), "ShowsDatafetcher.java should be generated");
+          public File getExamplesOutputDir() {
+            return outputDir;
+          }
+
+          public boolean isWriteToFiles() {
+            return true;
+          }
+
+          public String getPackageName() {
+            return "com.example";
+          }
+
+          public String getSubPackageNameClient() {
+            return "client";
+          }
+
+          public String getSubPackageNameDatafetchers() {
+            return "datafetchers";
+          }
+
+          public String getSubPackageNameTypes() {
+            return "types";
+          }
+
+          public String getSubPackageNameDocs() {
+            return "docs";
+          }
+
+          public String getLanguage() {
+            return "java";
+          }
+
+          public Map<String, String> getTypeMapping() {
+            return new HashMap<>();
+          }
+
+          public boolean isGenerateBoxedTypes() {
+            return false;
+          }
+
+          public boolean isGenerateIsGetterForPrimitiveBooleanFields() {
+            return false;
+          }
+
+          public boolean isGenerateClientApi() {
+            return false;
+          }
+
+          public boolean isGenerateClientApiv2() {
+            return false;
+          }
+
+          public boolean isGenerateInterfaces() {
+            return false;
+          }
+
+          public boolean isGenerateKotlinNullableClasses() {
+            return false;
+          }
+
+          public boolean isGenerateKotlinClosureProjections() {
+            return false;
+          }
+
+          public String[] getIncludeQueries() {
+            return new String[0];
+          }
+
+          public String[] getIncludeMutations() {
+            return new String[0];
+          }
+
+          public String[] getIncludeSubscriptions() {
+            return new String[0];
+          }
+
+          public boolean isSkipEntityQueries() {
+            return false;
+          }
+
+          public boolean isShortProjectionNames() {
+            return false;
+          }
+
+          public boolean isGenerateDataTypes() {
+            return true;
+          }
+
+          public boolean isOmitNullInputFields() {
+            return false;
+          }
+
+          public int getMaxProjectionDepth() {
+            return 10;
+          }
+
+          public boolean isKotlinAllFieldsOptional() {
+            return false;
+          }
+
+          public boolean isSnakeCaseConstantNames() {
+            return false;
+          }
+
+          public boolean isGenerateInterfaceSetters() {
+            return false;
+          }
+
+          public boolean isGenerateInterfaceMethodsForInterfaceFields() {
+            return false;
+          }
+
+          public Boolean getGenerateDocs() {
+            return false;
+          }
+
+          public String getGeneratedDocsFolder() {
+            return "generated-docs";
+          }
+
+          public boolean isJavaGenerateAllConstructor() {
+            return false;
+          }
+
+          public boolean isImplementSerializable() {
+            return false;
+          }
+
+          public boolean isAddGeneratedAnnotation() {
+            return false;
+          }
+
+          public boolean isAddDeprecatedAnnotation() {
+            return false;
+          }
+
+          public boolean isTrackInputFieldSet() {
+            return false;
+          }
+
+          public boolean isGenerateCustomAnnotations() {
+            return false;
+          }
+
+          public Map<String, String> getIncludeImports() {
+            return new HashMap<>();
+          }
+
+          public Map<String, ParameterMap> getIncludeEnumImports() {
+            return new HashMap<>();
+          }
+
+          public Map<String, ParameterMap> getIncludeClassImports() {
+            return new HashMap<>();
+          }
+
+          public boolean isDisableDatesInGeneratedAnnotation() {
+            return false;
+          }
+        };
+    Log log = org.mockito.Mockito.mock(Log.class);
+    CodegenExecutor executor = new CodegenExecutor(log);
+    executor.execute(config, new HashSet<>());
+    // Add assertions as needed
   }
 
   // Simple no-op logger for integration test

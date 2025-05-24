@@ -13,12 +13,12 @@ import java.util.Map;
 import org.jetbrains.kotlin.psi.KtParameter;
 import org.junit.jupiter.api.Test;
 
-class ParamCodegenTest {
+class BuilderCodegenTest {
 
   @Test
   void testDownloadCodeGenConfig() throws Exception {
-    String url = ParamCodegen.CODEGENCONFIG_URL;
-    String codeGenConfig = ParamCodegen.downloadCodeGenConfig(url);
+    String url = BuilderCodegen.CODEGENCONFIG_URL;
+    String codeGenConfig = BuilderCodegen.downloadCodeGenConfig(url);
     assertNotNull(codeGenConfig, "CodeGenConfig should not be null");
     assertTrue(
         codeGenConfig.contains("class CodeGenConfig("),
@@ -28,7 +28,7 @@ class ParamCodegenTest {
   @Test
   void testParseCodeGenConfigParameters() throws Exception {
     String codeGenConfig = "class CodeGenConfig(val schemaPaths: Set<String> = emptySet())";
-    KtParameter[] params = ParamCodegen.parseCodeGenConfigParameters(codeGenConfig);
+    KtParameter[] params = BuilderCodegen.parseCodeGenConfigParameters(codeGenConfig);
     assertNotNull(params, "Params should not be null");
     assertTrue(params.length > 0, "Params should contain at least one parameter");
     assertEquals("schemaPaths", params[0].getName(), "First param should be schemaPaths");
@@ -39,75 +39,75 @@ class ParamCodegenTest {
   }
 
   @Test
-  void testGenerateAutoCodeGen() throws Exception {
+  void testGenerateBuilderClass() throws Exception {
     // Read CodeGenConfig.kt from test resources
     java.net.URL resource = getClass().getClassLoader().getResource("CodeGenConfig.kt");
     assertNotNull(resource, "Test resource CodeGenConfig.kt should exist");
     java.nio.file.Path path = java.nio.file.Paths.get(resource.toURI());
     String codeGenConfig = java.nio.file.Files.readString(path);
-    KtParameter[] params = ParamCodegen.parseCodeGenConfigParameters(codeGenConfig);
-    ParamCodegen.generateAutoCodegen(params, "target/generated-sources/paramcodegen");
+    KtParameter[] params = BuilderCodegen.parseCodeGenConfigParameters(codeGenConfig);
+    BuilderCodegen.generateBuilderClass(params, "target/generated-sources/buildercodegen");
   }
 
   @Test
   void testMapKotlinTypeToJavaType_String() {
-    assertEquals(ClassName.get(String.class), ParamCodegen.mapKotlinTypeToJavaType("String"));
+    assertEquals(ClassName.get(String.class), BuilderCodegen.mapKotlinTypeToJavaType("String"));
   }
 
   @Test
   void testMapKotlinTypeToJavaType_Int() {
-    assertEquals(TypeName.INT, ParamCodegen.mapKotlinTypeToJavaType("Int"));
+    assertEquals(TypeName.INT, BuilderCodegen.mapKotlinTypeToJavaType("Int"));
   }
 
   @Test
   void testMapKotlinTypeToJavaType_Boolean() {
-    assertEquals(TypeName.BOOLEAN, ParamCodegen.mapKotlinTypeToJavaType("Boolean"));
+    assertEquals(TypeName.BOOLEAN, BuilderCodegen.mapKotlinTypeToJavaType("Boolean"));
   }
 
   @Test
   void testMapKotlinTypeToJavaType_Double() {
-    assertEquals(TypeName.DOUBLE, ParamCodegen.mapKotlinTypeToJavaType("Double"));
+    assertEquals(TypeName.DOUBLE, BuilderCodegen.mapKotlinTypeToJavaType("Double"));
   }
 
   @Test
   void testMapKotlinTypeToJavaType_Float() {
-    assertEquals(TypeName.FLOAT, ParamCodegen.mapKotlinTypeToJavaType("Float"));
+    assertEquals(TypeName.FLOAT, BuilderCodegen.mapKotlinTypeToJavaType("Float"));
   }
 
   @Test
   void testMapKotlinTypeToJavaType_Long() {
-    assertEquals(TypeName.LONG, ParamCodegen.mapKotlinTypeToJavaType("Long"));
+    assertEquals(TypeName.LONG, BuilderCodegen.mapKotlinTypeToJavaType("Long"));
   }
 
   @Test
   void testMapKotlinTypeToJavaType_SetString() {
     assertEquals(
-        ArrayTypeName.of(String.class), ParamCodegen.mapKotlinTypeToJavaType("Set<String>"));
+        ArrayTypeName.of(String.class), BuilderCodegen.mapKotlinTypeToJavaType("Set<String>"));
   }
 
   @Test
   void testMapKotlinTypeToJavaType_ListString() {
     assertEquals(
-        ArrayTypeName.of(String.class), ParamCodegen.mapKotlinTypeToJavaType("List<String>"));
+        ArrayTypeName.of(String.class), BuilderCodegen.mapKotlinTypeToJavaType("List<String>"));
   }
 
   @Test
   void testMapKotlinTypeToJavaType_SetFile() {
     assertEquals(
-        ArrayTypeName.of(File.class), ParamCodegen.mapKotlinTypeToJavaType("Set<java.io.File>"));
+        ArrayTypeName.of(File.class), BuilderCodegen.mapKotlinTypeToJavaType("Set<java.io.File>"));
   }
 
   @Test
   void testMapKotlinTypeToJavaType_ListFile() {
     assertEquals(
-        ArrayTypeName.of(File.class), ParamCodegen.mapKotlinTypeToJavaType("List<java.io.File>"));
+        ArrayTypeName.of(File.class), BuilderCodegen.mapKotlinTypeToJavaType("List<java.io.File>"));
   }
 
   @Test
   void testMapKotlinTypeToJavaType_Path() {
     assertEquals(
         ClassName.get("java.nio.file", "Path"),
-        ParamCodegen.mapKotlinTypeToJavaType("java.nio.file.Path"));
+        BuilderCodegen.mapKotlinTypeToJavaType("java.nio.file.Path"));
   }
 
   @Test
@@ -115,11 +115,12 @@ class ParamCodegenTest {
     TypeName expected =
         ParameterizedTypeName.get(
             ClassName.get(Map.class), ClassName.get(String.class), ClassName.get(String.class));
-    assertEquals(expected, ParamCodegen.mapKotlinTypeToJavaType("Map<String, String>"));
+    assertEquals(expected, BuilderCodegen.mapKotlinTypeToJavaType("Map<String, String>"));
   }
 
   @Test
   void testMapKotlinTypeToJavaType_UnknownType() {
-    assertEquals(ClassName.get(Object.class), ParamCodegen.mapKotlinTypeToJavaType("UnknownType"));
+    assertEquals(
+        ClassName.get(Object.class), BuilderCodegen.mapKotlinTypeToJavaType("UnknownType"));
   }
 }

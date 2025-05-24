@@ -3,7 +3,7 @@ package io.github.deweyjose.graphqlcodegen;
 import java.util.Map;
 import org.apache.maven.plugins.annotations.Parameter;
 
-public class Properties {
+public class ParameterMap {
   @Parameter private Map<String, String> properties;
 
   @Override

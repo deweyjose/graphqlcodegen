@@ -1,20 +1,8 @@
 package io.github.deweyjose.graphqlcodegen;
 
-import static java.util.Arrays.stream;
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toSet;
-
-import com.netflix.graphql.dgs.codegen.Language;
-import io.github.deweyjose.graphqlcodegen.models.CustomParameters;
-import io.github.deweyjose.graphqlcodegen.models.DgsParameters;
-import io.github.deweyjose.graphqlcodegen.models.ExecutionRequest;
 import java.io.File;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import org.apache.maven.artifact.Artifact;
+import lombok.Getter;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -22,13 +10,13 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
+@Getter
 @Mojo(
     name = "generate",
     defaultPhase = LifecyclePhase.GENERATE_SOURCES,
     requiresDependencyResolution = ResolutionScope.COMPILE)
-public class Codegen extends AbstractMojo {
+public class Codegen extends AbstractMojo implements CodegenConfigProvider {
 
-  // === CustomParameters fields ===
   @Parameter(defaultValue = "${project}")
   private MavenProject project;
 
@@ -54,7 +42,6 @@ public class Codegen extends AbstractMojo {
   @Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
   private boolean skip;
 
-  // === DgsParameters fields ===
   @Parameter(property = "outputDir", defaultValue = "${project.build.directory}/generated-sources")
   private File outputDir;
 
@@ -172,84 +159,24 @@ public class Codegen extends AbstractMojo {
   private Map<String, String> includeImports;
 
   @Parameter(property = "includeEnumImports")
-  private Map<String, Properties> includeEnumImports;
+  private Map<String, ParameterMap> includeEnumImports;
 
   @Parameter(property = "includeClassImports")
-  private Map<String, Properties> includeClassImports;
+  private Map<String, ParameterMap> includeClassImports;
 
   @Parameter(property = "disableDatesInGeneratedAnnotation", defaultValue = "false")
   private boolean disableDatesInGeneratedAnnotation;
 
   @Override
   public void execute() {
-    if (skip) {
-      return;
-    }
+    new CodegenExecutor(getLog()).execute(this, project.getArtifacts());
+  }
 
-    // Map Mojo parameters to CustomParameters
-    CustomParameters custom =
-        new CustomParameters(
-            schemaPaths,
-            schemaJarFilesFromDependencies,
-            schemaManifestOutputDir,
-            onlyGenerateChanged,
-            project.getBasedir(),
-            typeMappingPropertiesFiles);
+  public Map<String, ParameterMap> getIncludeEnumImports() {
+    return includeEnumImports;
+  }
 
-    // Map Mojo parameters to DgsParameters
-    DgsParameters dgs =
-        new DgsParameters(
-            emptySet(), // schemaPaths (not used in executor)
-            emptySet(), // fullSchemaPaths (not used in executor)
-            DependencySchemaExtractor.extract(
-                project.getDependencyArtifacts(), schemaJarFilesFromDependencies),
-            outputDir.toPath(),
-            examplesOutputDir.toPath(),
-            writeToFiles,
-            packageName,
-            subPackageNameClient,
-            subPackageNameDatafetchers,
-            subPackageNameTypes,
-            subPackageNameDocs,
-            Language.valueOf(language.toUpperCase()),
-            generateBoxedTypes,
-            generateIsGetterForPrimitiveBooleanFields,
-            generateClientApi,
-            generateClientApiv2,
-            generateInterfaces,
-            generateKotlinNullableClasses,
-            generateKotlinClosureProjections,
-            typeMapping == null ? new HashMap<>() : typeMapping,
-            includeQueries == null ? new HashSet<>() : stream(includeQueries).collect(toSet()),
-            includeMutations == null ? new HashSet<>() : stream(includeMutations).collect(toSet()),
-            includeSubscriptions == null
-                ? new HashSet<>()
-                : stream(includeSubscriptions).collect(toSet()),
-            skipEntityQueries,
-            shortProjectionNames,
-            generateDataTypes,
-            omitNullInputFields,
-            maxProjectionDepth,
-            kotlinAllFieldsOptional,
-            snakeCaseConstantNames,
-            generateInterfaceSetters,
-            generateInterfaceMethodsForInterfaceFields,
-            generateDocs,
-            Paths.get(generatedDocsFolder),
-            generateCustomAnnotations,
-            javaGenerateAllConstructor,
-            implementSerializable,
-            addGeneratedAnnotation,
-            disableDatesInGeneratedAnnotation,
-            addDeprecatedAnnotation,
-            trackInputFieldSet,
-            includeImports == null ? new HashMap<>() : includeImports,
-            includeEnumImports == null ? new HashMap<>() : includeEnumImports,
-            includeClassImports == null ? new HashMap<>() : includeClassImports);
-
-    ExecutionRequest request = new ExecutionRequest(custom, dgs);
-    CodegenExecutor executor = new CodegenExecutor(getLog());
-    Set<Artifact> artifacts = new HashSet<>(project.getArtifacts());
-    executor.execute(request, artifacts);
+  public Map<String, ParameterMap> getIncludeClassImports() {
+    return includeClassImports;
   }
 }

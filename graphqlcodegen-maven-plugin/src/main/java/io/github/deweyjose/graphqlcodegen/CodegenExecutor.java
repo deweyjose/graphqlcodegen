@@ -1,25 +1,24 @@
 package io.github.deweyjose.graphqlcodegen;
 
 import static java.util.Arrays.stream;
-import static java.util.Collections.emptySet;
 import static java.util.Objects.isNull;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 
 import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
-import io.github.deweyjose.graphqlcodegen.models.CustomParameters;
-import io.github.deweyjose.graphqlcodegen.models.DgsParameters;
-import io.github.deweyjose.graphqlcodegen.models.ExecutionRequest;
+import com.netflix.graphql.dgs.codegen.Language;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
@@ -37,90 +36,104 @@ public class CodegenExecutor {
    * @param request the execution request
    * @param artifacts the artifacts
    */
-  public void execute(ExecutionRequest request, Set<Artifact> artifacts) {
+  public void execute(CodegenConfigProvider request, Set<Artifact> artifacts) {
+    if (request.isSkip()) {
+      log.info("Skipping code generation as requested (skip=true)");
+      return;
+    }
 
-    CustomParameters custom = request.customParameters();
-    DgsParameters dgs = request.dgsParameters();
+    final Set<File> fullSchemaPaths;
 
-    verifyPackageName(dgs.packageName());
+    if (request.isOnlyGenerateChanged()) {
+      fullSchemaPaths = expandSchemaPaths(request.getSchemaPaths());
+      log.info(String.format("expanded schema paths: %s", fullSchemaPaths));
+    } else {
+      fullSchemaPaths = stream(request.getSchemaPaths()).collect(Collectors.toSet());
+    }
 
-    Set<File> fullSchemaPaths =
-        expandSchemaPaths(custom.schemaPaths(), custom.onlyGenerateChanged());
-
-    verifySchemaFiles(fullSchemaPaths, custom.schemaJarFilesFromDependencies());
+    verifySchemaFiles(fullSchemaPaths, request.getSchemaJarFilesFromDependencies());
 
     SchemaFileManifest manifest =
         new SchemaFileManifest(
-            new File(custom.schemaManifestOutputDir(), "schema-manifest.props"), custom.baseDir());
+            new File(request.getSchemaManifestOutputDir(), "schema-manifest.props"), new File("."));
 
     Set<File> filteredSchemaFiles = fullSchemaPaths;
-    if (custom.onlyGenerateChanged()) {
+    if (request.isOnlyGenerateChanged()) {
       filteredSchemaFiles = filterChangedSchemaFiles(fullSchemaPaths, manifest);
+      log.info(String.format("changed schema files: %s", filteredSchemaFiles));
     }
 
-    if (filteredSchemaFiles.isEmpty() && custom.schemaJarFilesFromDependencies().length < 1) {
+    if (filteredSchemaFiles.isEmpty() && request.getSchemaJarFilesFromDependencies().length < 1) {
       log.info("no files to generate");
       return;
     }
 
     Map<String, String> typeMapping =
-        mergeTypeMapping(dgs.typeMapping(), custom.typeMappingPropertiesFiles(), artifacts);
+        mergeTypeMapping(
+            request.getTypeMapping(), request.getTypeMappingPropertiesFiles(), artifacts);
 
+    // Convert String[] to List<File> for schemaJarFilesFromDependencies if possible
+    List<File> schemaJarFiles =
+        Optional.ofNullable(request.getSchemaJarFilesFromDependencies())
+            .map(arr -> Arrays.stream(arr).map(File::new).toList())
+            .orElse(Collections.emptyList());
+
+    // Use static helper instead
     final CodeGenConfig config =
         new CodeGenConfig(
-            emptySet(),
+            Collections.emptySet(), // schemas
             filteredSchemaFiles,
-            dgs.dependencySchemas(),
-            dgs.outputDir(),
-            dgs.examplesOutputDir(),
-            dgs.writeToFiles(),
-            dgs.packageName(),
-            dgs.subPackageNameClient(),
-            dgs.subPackageNameDatafetchers(),
-            dgs.subPackageNameTypes(),
-            dgs.subPackageNameDocs(),
-            dgs.language(),
-            dgs.generateBoxedTypes(),
-            dgs.generateIsGetterForPrimitiveBooleanFields(),
-            dgs.generateClientApi(),
-            dgs.generateClientApiv2(),
-            dgs.generateInterfaces(),
-            dgs.generateKotlinNullableClasses(),
-            dgs.generateKotlinClosureProjections(),
+            schemaJarFiles,
+            request.getOutputDir().toPath(),
+            request.getExamplesOutputDir().toPath(),
+            request.isWriteToFiles(),
+            request.getPackageName(),
+            request.getSubPackageNameClient(),
+            request.getSubPackageNameDatafetchers(),
+            request.getSubPackageNameTypes(),
+            request.getSubPackageNameDocs(),
+            Language.valueOf(request.getLanguage().toUpperCase()),
+            request.isGenerateBoxedTypes(),
+            request.isGenerateIsGetterForPrimitiveBooleanFields(),
+            request.isGenerateClientApi(),
+            request.isGenerateClientApiv2(),
+            request.isGenerateInterfaces(),
+            request.isGenerateKotlinNullableClasses(),
+            request.isGenerateKotlinClosureProjections(),
             typeMapping,
-            dgs.includeQueries(),
-            dgs.includeMutations(),
-            dgs.includeSubscriptions(),
-            dgs.skipEntityQueries(),
-            dgs.shortProjectionNames(),
-            dgs.generateDataTypes(),
-            dgs.omitNullInputFields(),
-            dgs.maxProjectionDepth(),
-            dgs.kotlinAllFieldsOptional(),
-            dgs.snakeCaseConstantNames(),
-            dgs.generateInterfaceSetters(),
-            dgs.generateInterfaceMethodsForInterfaceFields(),
-            dgs.generateDocs(),
-            dgs.generatedDocsFolder(),
-            dgs.includeImports(),
-            dgs.includeEnumImports().entrySet().stream()
-                .collect(toMap(Entry::getKey, entry -> entry.getValue().getProperties())),
-            dgs.includeClassImports().entrySet().stream()
-                .collect(toMap(Entry::getKey, entry -> entry.getValue().getProperties())),
-            dgs.generateCustomAnnotations(),
-            dgs.javaGenerateAllConstructor(),
-            dgs.implementSerializable(),
-            dgs.addGeneratedAnnotation(),
-            dgs.disableDatesInGeneratedAnnotation(),
-            dgs.addDeprecatedAnnotation(),
-            dgs.trackInputFieldSet());
+            toSet(request.getIncludeQueries()),
+            toSet(request.getIncludeMutations()),
+            toSet(request.getIncludeSubscriptions()),
+            request.isSkipEntityQueries(),
+            request.isShortProjectionNames(),
+            request.isGenerateDataTypes(),
+            request.isOmitNullInputFields(),
+            request.getMaxProjectionDepth(),
+            request.isKotlinAllFieldsOptional(),
+            request.isSnakeCaseConstantNames(),
+            request.isGenerateInterfaceSetters(),
+            request.isGenerateInterfaceMethodsForInterfaceFields(),
+            request.getGenerateDocs() != null && request.getGenerateDocs(),
+            request.getGeneratedDocsFolder() == null
+                ? java.nio.file.Paths.get("generated-docs")
+                : java.nio.file.Paths.get(request.getGeneratedDocsFolder()),
+            request.getIncludeImports() == null
+                ? Collections.emptyMap()
+                : request.getIncludeImports(),
+            toMap(request.getIncludeEnumImports()),
+            toMap(request.getIncludeClassImports()),
+            request.isGenerateCustomAnnotations(),
+            request.isJavaGenerateAllConstructor(),
+            request.isImplementSerializable(),
+            request.isAddGeneratedAnnotation(),
+            request.isDisableDatesInGeneratedAnnotation(),
+            request.isAddDeprecatedAnnotation(),
+            request.isTrackInputFieldSet());
 
     log.info(String.format("Codegen config: \n%s", config));
-
     final CodeGen codeGen = new CodeGen(config);
     codeGen.generate();
-
-    if (custom.onlyGenerateChanged()) {
+    if (request.isOnlyGenerateChanged()) {
       try {
         manifest.syncManifest();
       } catch (Exception e) {
@@ -136,22 +149,18 @@ public class CodegenExecutor {
    * @param onlyGenerateChanged whether to only generate changed schema files
    * @return the expanded schema paths
    */
-  public Set<File> expandSchemaPaths(File[] schemaPaths, boolean onlyGenerateChanged) {
-    if (onlyGenerateChanged) {
-      Set<File> configuredSchemaPaths = stream(schemaPaths).collect(toSet());
-      Set<File> expandedSchemaPaths = new HashSet<>();
-      for (File path : configuredSchemaPaths) {
-        if (path.isFile()) {
-          expandedSchemaPaths.add(path);
-        } else {
-          expandedSchemaPaths.addAll(SchemaFileManifest.findGraphQLSFiles(path));
-        }
+  public static Set<File> expandSchemaPaths(File[] schemaPaths) {
+    Set<File> configuredSchemaPaths = stream(schemaPaths).collect(Collectors.toSet());
+    Set<File> expandedSchemaPaths = new HashSet<>();
+    for (File path : configuredSchemaPaths) {
+      if (path.isFile()) {
+        expandedSchemaPaths.add(path);
+      } else {
+        expandedSchemaPaths.addAll(SchemaFileManifest.findGraphQLSFiles(path));
       }
-      log.info(String.format("expanded schema paths: %s", expandedSchemaPaths));
-      return expandedSchemaPaths;
-    } else {
-      return stream(schemaPaths).collect(toSet());
     }
+
+    return expandedSchemaPaths;
   }
 
   /**
@@ -161,7 +170,7 @@ public class CodegenExecutor {
    * @param typeMappingPropertiesFiles the type mapping properties files
    * @return the type mapping
    */
-  public Map<String, String> loadPropertiesFile(
+  public static Map<String, String> loadPropertiesFile(
       File artifactFile, String[] typeMappingPropertiesFiles) {
     Map<String, String> typeMapping = new HashMap<>();
     try (JarFile jarFile = new JarFile(artifactFile)) {
@@ -170,10 +179,6 @@ public class CodegenExecutor {
         ZipEntry entry = jarFile.getEntry(file);
         if (entry != null) {
           try (InputStream inputStream = jarFile.getInputStream(entry)) {
-            log.info(
-                String.format(
-                    "Loading typeMapping from %s in artifact %s",
-                    file, artifactFile.getAbsolutePath()));
             java.util.Properties typeMappingProperties = new java.util.Properties();
             typeMappingProperties.load(inputStream);
             typeMappingProperties.forEach(
@@ -184,7 +189,7 @@ public class CodegenExecutor {
         }
       }
     } catch (IOException e) {
-      log.error(e);
+      e.printStackTrace();
     }
     return typeMapping;
   }
@@ -194,7 +199,7 @@ public class CodegenExecutor {
    *
    * @param packageName the package name
    */
-  public void verifyPackageName(String packageName) {
+  public static void verifyPackageName(String packageName) {
     if (isNull(packageName)) {
       throw new IllegalArgumentException("Please specify a packageName");
     }
@@ -207,13 +212,10 @@ public class CodegenExecutor {
    * @param fullSchemaPaths the full schema paths
    * @param schemaJarFilesFromDependencies the schema jar files from dependencies
    */
-  public void verifySchemaFiles(
+  public static void verifySchemaFiles(
       Set<File> fullSchemaPaths, String[] schemaJarFilesFromDependencies) {
     if (fullSchemaPaths.isEmpty()
         && (schemaJarFilesFromDependencies == null || schemaJarFilesFromDependencies.length < 1)) {
-      log.error(
-          "No schema files found and no schemaJarFilesFromDependencies specified. "
-              + "Refer to documentation for schemas and schemaJarFilesFromDependencies. ");
       throw new IllegalArgumentException("No schema files found. Please check your configuration.");
     }
   }
@@ -227,7 +229,7 @@ public class CodegenExecutor {
    * @param artifacts the artifacts
    * @return the merged type mapping
    */
-  public Map<String, String> mergeTypeMapping(
+  public static Map<String, String> mergeTypeMapping(
       Map<String, String> userTypeMapping,
       String[] typeMappingPropertiesFiles,
       Set<Artifact> artifacts) {
@@ -254,11 +256,27 @@ public class CodegenExecutor {
    * @param manifest the schema manifest
    * @return the changed schema files
    */
-  public Set<File> filterChangedSchemaFiles(Set<File> allSchemaFiles, SchemaFileManifest manifest) {
+  public static Set<File> filterChangedSchemaFiles(
+      Set<File> allSchemaFiles, SchemaFileManifest manifest) {
     manifest.setFiles(new HashSet<>(allSchemaFiles));
     Set<File> changed = new HashSet<>(allSchemaFiles);
     changed.retainAll(manifest.getChangedFiles());
-    log.info(String.format("changed schema files: %s", changed));
     return changed;
+  }
+
+  public static Set<String> toSet(String[] arr) {
+    return Optional.ofNullable(arr)
+        .map(a -> java.util.Arrays.stream(a).collect(Collectors.toSet()))
+        .orElse(Collections.emptySet());
+  }
+
+  public static Map<String, Map<String, String>> toMap(
+      Map<String, io.github.deweyjose.graphqlcodegen.ParameterMap> m) {
+    if (m == null) return Collections.emptyMap();
+    return m.entrySet().stream()
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey,
+                e -> e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));
   }
 }

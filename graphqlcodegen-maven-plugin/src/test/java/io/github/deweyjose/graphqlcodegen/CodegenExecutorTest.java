@@ -8,9 +8,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,7 +79,7 @@ class CodegenExecutorTest {
 
     // Test with both files and directories
     File[] schemaPaths = {schemaFile, schemaDir};
-    Set<File> result = executor.expandSchemaPaths(schemaPaths, true);
+    Set<File> result = CodegenExecutor.expandSchemaPaths(schemaPaths);
 
     // Should find all 3 schema files
     assertEquals(3, result.size());
@@ -86,7 +88,7 @@ class CodegenExecutorTest {
     assertTrue(result.contains(schemaFile3));
 
     // Test without recursive search
-    result = executor.expandSchemaPaths(schemaPaths, false);
+    result = Arrays.stream(schemaPaths).collect(Collectors.toSet());
     assertEquals(2, result.size());
     assertTrue(result.contains(schemaFile));
     assertTrue(result.contains(schemaDir));
@@ -149,5 +151,27 @@ class CodegenExecutorTest {
     assertEquals("world", result.get("hello"));
     // User-only value should be present
     assertEquals("value", result.get("userOnly"));
+  }
+
+  @Test
+  void testToSet_nullAndEmptyAndNormal() {
+    assertEquals(Collections.emptySet(), CodegenExecutor.toSet(null));
+    assertEquals(Collections.emptySet(), CodegenExecutor.toSet(new String[0]));
+    assertEquals(Set.of("a", "b"), CodegenExecutor.toSet(new String[] {"a", "b"}));
+  }
+
+  @Test
+  void testToMap_nullAndEmptyAndNormal() {
+    assertEquals(Collections.emptyMap(), CodegenExecutor.toMap(null));
+    assertEquals(Collections.emptyMap(), CodegenExecutor.toMap(Collections.emptyMap()));
+    ParameterMap paramMap = new ParameterMap();
+    Map<String, String> props = new HashMap<>();
+    props.put("foo", "bar");
+    paramMap.setProperties(props);
+    Map<String, ParameterMap> input = new HashMap<>();
+    input.put("key", paramMap);
+    Map<String, Map<String, String>> result = CodegenExecutor.toMap(input);
+    assertEquals(1, result.size());
+    assertEquals(Map.of("foo", "bar"), result.get("key"));
   }
 }
