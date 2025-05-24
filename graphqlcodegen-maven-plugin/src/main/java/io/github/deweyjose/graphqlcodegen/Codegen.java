@@ -171,12 +171,4 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   public void execute() {
     new CodegenExecutor(getLog()).execute(this, project.getArtifacts());
   }
-
-  public Map<String, ParameterMap> getIncludeEnumImports() {
-    return includeEnumImports;
-  }
-
-  public Map<String, ParameterMap> getIncludeClassImports() {
-    return includeClassImports;
-  }
 }

@@ -211,12 +211,13 @@ class CodegenExecutorExecuteTest {
     Log log = org.mockito.Mockito.mock(Log.class);
     CodegenExecutor executor = new CodegenExecutor(log);
     executor.execute(config, new HashSet<>());
-    
+
     // Assert that code generation produced output files
     assertTrue(outputDir.exists() && outputDir.isDirectory(), "Output directory should exist");
     File[] generatedFiles = outputDir.listFiles();
     assertNotNull(generatedFiles, "Output directory should not be empty");
-    assertTrue(generatedFiles.length > 0, "There should be generated files in the output directory");
+    assertTrue(
+        generatedFiles.length > 0, "There should be generated files in the output directory");
 
     // Check for specific generated type files and their content
     File typesDir = new File(outputDir, "com/example/types");
@@ -227,19 +228,25 @@ class CodegenExecutorExecuteTest {
       assertTrue(f.exists(), fileName + " should be generated");
       String content = java.nio.file.Files.readString(f.toPath());
       String className = fileName.replace(".java", "");
-      assertTrue(content.contains("public class " + className), fileName + " should contain class definition");
+      assertTrue(
+          content.contains("public class " + className),
+          fileName + " should contain class definition");
     }
 
     // Check for datafetcher files
     File datafetchersDir = new File(outputDir, "com/example/datafetchers");
-    assertTrue(datafetchersDir.exists() && datafetchersDir.isDirectory(), "Datafetchers directory should exist");
+    assertTrue(
+        datafetchersDir.exists() && datafetchersDir.isDirectory(),
+        "Datafetchers directory should exist");
     String[] expectedDatafetcherFiles = {"BarsDatafetcher.java", "ShowsDatafetcher.java"};
     for (String fileName : expectedDatafetcherFiles) {
       File f = new File(datafetchersDir, fileName);
       assertTrue(f.exists(), fileName + " should be generated");
       String content = java.nio.file.Files.readString(f.toPath());
       String className = fileName.replace(".java", "");
-      assertTrue(content.contains("public class " + className), fileName + " should contain class definition");
+      assertTrue(
+          content.contains("public class " + className),
+          fileName + " should contain class definition");
     }
   }
 

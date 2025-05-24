@@ -6,9 +6,11 @@ import static java.util.Objects.isNull;
 import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
 import com.netflix.graphql.dgs.codegen.Language;
+import io.github.deweyjose.codegen.generated.GeneratedCodeGenConfigBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -72,63 +75,61 @@ public class CodegenExecutor {
         mergeTypeMapping(
             request.getTypeMapping(), request.getTypeMappingPropertiesFiles(), artifacts);
 
-    // Convert String[] to List<File> for schemaJarFilesFromDependencies if possible
     List<File> schemaJarFiles =
         Optional.ofNullable(request.getSchemaJarFilesFromDependencies())
             .map(arr -> Arrays.stream(arr).map(File::new).toList())
             .orElse(Collections.emptyList());
 
-    // Use static helper instead
     final CodeGenConfig config =
-        new CodeGenConfig(
-            Collections.emptySet(), // schemas
-            filteredSchemaFiles,
-            schemaJarFiles,
-            request.getOutputDir().toPath(),
-            request.getExamplesOutputDir().toPath(),
-            request.isWriteToFiles(),
-            request.getPackageName(),
-            request.getSubPackageNameClient(),
-            request.getSubPackageNameDatafetchers(),
-            request.getSubPackageNameTypes(),
-            request.getSubPackageNameDocs(),
-            Language.valueOf(request.getLanguage().toUpperCase()),
-            request.isGenerateBoxedTypes(),
-            request.isGenerateIsGetterForPrimitiveBooleanFields(),
-            request.isGenerateClientApi(),
-            request.isGenerateClientApiv2(),
-            request.isGenerateInterfaces(),
-            request.isGenerateKotlinNullableClasses(),
-            request.isGenerateKotlinClosureProjections(),
-            typeMapping,
-            toSet(request.getIncludeQueries()),
-            toSet(request.getIncludeMutations()),
-            toSet(request.getIncludeSubscriptions()),
-            request.isSkipEntityQueries(),
-            request.isShortProjectionNames(),
-            request.isGenerateDataTypes(),
-            request.isOmitNullInputFields(),
-            request.getMaxProjectionDepth(),
-            request.isKotlinAllFieldsOptional(),
-            request.isSnakeCaseConstantNames(),
-            request.isGenerateInterfaceSetters(),
-            request.isGenerateInterfaceMethodsForInterfaceFields(),
-            request.getGenerateDocs() != null && request.getGenerateDocs(),
-            request.getGeneratedDocsFolder() == null
-                ? java.nio.file.Paths.get("generated-docs")
-                : java.nio.file.Paths.get(request.getGeneratedDocsFolder()),
-            request.getIncludeImports() == null
-                ? Collections.emptyMap()
-                : request.getIncludeImports(),
-            toMap(request.getIncludeEnumImports()),
-            toMap(request.getIncludeClassImports()),
-            request.isGenerateCustomAnnotations(),
-            request.isJavaGenerateAllConstructor(),
-            request.isImplementSerializable(),
-            request.isAddGeneratedAnnotation(),
-            request.isDisableDatesInGeneratedAnnotation(),
-            request.isAddDeprecatedAnnotation(),
-            request.isTrackInputFieldSet());
+        new GeneratedCodeGenConfigBuilder()
+            .setSchemas(Collections.emptySet())
+            .setSchemaFiles(filteredSchemaFiles)
+            .setSchemaJarFilesFromDependencies(schemaJarFiles)
+            .setOutputDir(request.getOutputDir().toPath())
+            .setExamplesOutputDir(request.getExamplesOutputDir().toPath())
+            .setWriteToFiles(request.isWriteToFiles())
+            .setPackageName(request.getPackageName())
+            .setSubPackageNameClient(request.getSubPackageNameClient())
+            .setSubPackageNameDatafetchers(request.getSubPackageNameDatafetchers())
+            .setSubPackageNameTypes(request.getSubPackageNameTypes())
+            .setSubPackageNameDocs(request.getSubPackageNameDocs())
+            .setLanguage(Language.valueOf(request.getLanguage().toUpperCase()))
+            .setGenerateBoxedTypes(request.isGenerateBoxedTypes())
+            .setGenerateIsGetterForPrimitiveBooleanFields(
+                request.isGenerateIsGetterForPrimitiveBooleanFields())
+            .setGenerateClientApi(request.isGenerateClientApi())
+            .setGenerateClientApiv2(request.isGenerateClientApiv2())
+            .setGenerateInterfaces(request.isGenerateInterfaces())
+            .setGenerateKotlinNullableClasses(request.isGenerateKotlinNullableClasses())
+            .setGenerateKotlinClosureProjections(request.isGenerateKotlinClosureProjections())
+            .setTypeMapping(typeMapping)
+            .setIncludeQueries(toSet(request.getIncludeQueries()))
+            .setIncludeMutations(toSet(request.getIncludeMutations()))
+            .setIncludeSubscriptions(toSet(request.getIncludeSubscriptions()))
+            .setSkipEntityQueries(request.isSkipEntityQueries())
+            .setShortProjectionNames(request.isShortProjectionNames())
+            .setGenerateDataTypes(request.isGenerateDataTypes())
+            .setOmitNullInputFields(request.isOmitNullInputFields())
+            .setMaxProjectionDepth(request.getMaxProjectionDepth())
+            .setKotlinAllFieldsOptional(request.isKotlinAllFieldsOptional())
+            .setSnakeCaseConstantNames(request.isSnakeCaseConstantNames())
+            .setGenerateInterfaceSetters(request.isGenerateInterfaceSetters())
+            .setGenerateInterfaceMethodsForInterfaceFields(
+                request.isGenerateInterfaceMethodsForInterfaceFields())
+            .setGenerateDocs(request.getGenerateDocs())
+            .setGeneratedDocsFolder(Paths.get(request.getGeneratedDocsFolder()))
+            .setIncludeImports(
+                Optional.ofNullable(request.getIncludeImports()).orElse(Collections.emptyMap()))
+            .setIncludeEnumImports(toMap(request.getIncludeEnumImports()))
+            .setIncludeClassImports(toMap(request.getIncludeClassImports()))
+            .setGenerateCustomAnnotations(request.isGenerateCustomAnnotations())
+            .setJavaGenerateAllConstructor(request.isJavaGenerateAllConstructor())
+            .setImplementSerializable(request.isImplementSerializable())
+            .setAddGeneratedAnnotation(request.isAddGeneratedAnnotation())
+            .setDisableDatesInGeneratedAnnotation(request.isDisableDatesInGeneratedAnnotation())
+            .setAddDeprecatedAnnotation(request.isAddDeprecatedAnnotation())
+            .setTrackInputFieldSet(request.isTrackInputFieldSet())
+            .build();
 
     log.info(String.format("Codegen config: \n%s", config));
     final CodeGen codeGen = new CodeGen(config);
@@ -179,7 +180,7 @@ public class CodegenExecutor {
         ZipEntry entry = jarFile.getEntry(file);
         if (entry != null) {
           try (InputStream inputStream = jarFile.getInputStream(entry)) {
-            java.util.Properties typeMappingProperties = new java.util.Properties();
+            Properties typeMappingProperties = new Properties();
             typeMappingProperties.load(inputStream);
             typeMappingProperties.forEach(
                 (k, v) -> {

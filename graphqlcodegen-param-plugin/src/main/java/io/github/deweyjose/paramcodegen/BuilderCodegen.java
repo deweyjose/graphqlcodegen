@@ -124,7 +124,7 @@ public class BuilderCodegen extends AbstractMojo {
     for (KtParameter param : params) {
       String name = param.getName();
       String kotlinType = param.getTypeReference().getText();
-      TypeName javaType = mapKotlinTypeToJavaType(kotlinType);
+      TypeName javaType = mapKotlinTypeToJavaPoetType(kotlinType);
       FieldSpec field = FieldSpec.builder(javaType, name, Modifier.PRIVATE).build();
       builderClass.addField(field);
       // Setter
@@ -159,49 +159,62 @@ public class BuilderCodegen extends AbstractMojo {
         .writeTo(new File(outputDir));
   }
 
-  /**
-   * Map the Kotlin type to a Java type.
-   *
-   * @param kotlinType The Kotlin type to map.
-   * @return The Java type.
-   */
-  public static TypeName mapKotlinTypeToJavaType(String kotlinType) {
-    switch (kotlinType) {
-      case "String":
-        return ClassName.get(String.class);
-      case "Int":
-        return TypeName.INT;
-      case "Boolean":
-        return TypeName.BOOLEAN;
-      case "Double":
-        return TypeName.DOUBLE;
-      case "Float":
-        return TypeName.FLOAT;
-      case "Long":
-        return TypeName.LONG;
-      case "Set<String>":
-      case "List<String>":
-        return ArrayTypeName.of(String.class);
-      case "Set<java.io.File>":
-      case "List<java.io.File>":
-        return ArrayTypeName.of(File.class);
-      case "java.io.File":
-        return ClassName.get("java.io", "File");
-      case "java.nio.file.Path":
-        return ClassName.get("java.nio.file", "Path");
-      case "Map<String, String>":
-        return ParameterizedTypeName.get(
-            ClassName.get("java.util", "Map"),
-            ClassName.get(String.class),
-            ClassName.get(String.class));
-      default:
-        return ClassName.get(Object.class);
-    }
-  }
-
   // Utility: capitalize
   private static String capitalize(String str) {
     if (str == null || str.isEmpty()) return str;
     return str.substring(0, 1).toUpperCase() + str.substring(1);
+  }
+
+  /**
+   * Map a Kotlin type string to a JavaPoet TypeName, using ClassName.get and
+   * ParameterizedTypeName.get for known types.
+   */
+  public static TypeName mapKotlinTypeToJavaPoetType(String kotlinType) {
+    // Handle generics
+    if (kotlinType.startsWith("Set<")) {
+      String inner = kotlinType.substring(4, kotlinType.length() - 1);
+      return ParameterizedTypeName.get(
+          ClassName.get("java.util", "Set"), mapKotlinTypeToJavaPoetType(inner));
+    }
+    if (kotlinType.startsWith("List<")) {
+      String inner = kotlinType.substring(5, kotlinType.length() - 1);
+      return ParameterizedTypeName.get(
+          ClassName.get("java.util", "List"), mapKotlinTypeToJavaPoetType(inner));
+    }
+    if (kotlinType.startsWith("Map<")) {
+      String inner = kotlinType.substring(4, kotlinType.length() - 1);
+      String[] parts = inner.split(",");
+      if (parts.length == 2) {
+        return ParameterizedTypeName.get(
+            ClassName.get("java.util", "Map"),
+            mapKotlinTypeToJavaPoetType(parts[0].trim()),
+            mapKotlinTypeToJavaPoetType(parts[1].trim()));
+      }
+    }
+    if (kotlinType.equals("String")) return ClassName.get("java.lang", "String");
+    if (kotlinType.equals("Int")) return TypeName.INT;
+    if (kotlinType.equals("Boolean")) return TypeName.BOOLEAN;
+    if (kotlinType.equals("Double")) return TypeName.DOUBLE;
+    if (kotlinType.equals("Float")) return TypeName.FLOAT;
+    if (kotlinType.equals("Long")) return TypeName.LONG;
+    if (kotlinType.equals("File") || kotlinType.equals("java.io.File"))
+      return ClassName.get("java.io", "File");
+    if (kotlinType.equals("Path") || kotlinType.equals("java.nio.file.Path"))
+      return ClassName.get("java.nio.file", "Path");
+    if (kotlinType.equals("Language"))
+      return ClassName.get("com.netflix.graphql.dgs.codegen", "Language");
+    if (kotlinType.equals("Integer")) return ClassName.get("java.lang", "Integer");
+    // Special case for Map<String, Map<String, String>>
+    if (kotlinType.replaceAll("\\s+", "").equals("Map<String,Map<String,String>>")) {
+      return ParameterizedTypeName.get(
+          ClassName.get("java.util", "Map"),
+          ClassName.get("java.lang", "String"),
+          ParameterizedTypeName.get(
+              ClassName.get("java.util", "Map"),
+              ClassName.get("java.lang", "String"),
+              ClassName.get("java.lang", "String")));
+    }
+    // Fallback
+    throw new IllegalArgumentException("Unsupported Kotlin type: " + kotlinType);
   }
 }

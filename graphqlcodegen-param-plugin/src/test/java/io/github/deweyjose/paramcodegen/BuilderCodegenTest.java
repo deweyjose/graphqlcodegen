@@ -4,12 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import java.io.File;
-import java.util.Map;
 import org.jetbrains.kotlin.psi.KtParameter;
 import org.junit.jupiter.api.Test;
 
@@ -47,80 +41,5 @@ class BuilderCodegenTest {
     String codeGenConfig = java.nio.file.Files.readString(path);
     KtParameter[] params = BuilderCodegen.parseCodeGenConfigParameters(codeGenConfig);
     BuilderCodegen.generateBuilderClass(params, "target/generated-sources/buildercodegen");
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_String() {
-    assertEquals(ClassName.get(String.class), BuilderCodegen.mapKotlinTypeToJavaType("String"));
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_Int() {
-    assertEquals(TypeName.INT, BuilderCodegen.mapKotlinTypeToJavaType("Int"));
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_Boolean() {
-    assertEquals(TypeName.BOOLEAN, BuilderCodegen.mapKotlinTypeToJavaType("Boolean"));
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_Double() {
-    assertEquals(TypeName.DOUBLE, BuilderCodegen.mapKotlinTypeToJavaType("Double"));
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_Float() {
-    assertEquals(TypeName.FLOAT, BuilderCodegen.mapKotlinTypeToJavaType("Float"));
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_Long() {
-    assertEquals(TypeName.LONG, BuilderCodegen.mapKotlinTypeToJavaType("Long"));
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_SetString() {
-    assertEquals(
-        ArrayTypeName.of(String.class), BuilderCodegen.mapKotlinTypeToJavaType("Set<String>"));
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_ListString() {
-    assertEquals(
-        ArrayTypeName.of(String.class), BuilderCodegen.mapKotlinTypeToJavaType("List<String>"));
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_SetFile() {
-    assertEquals(
-        ArrayTypeName.of(File.class), BuilderCodegen.mapKotlinTypeToJavaType("Set<java.io.File>"));
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_ListFile() {
-    assertEquals(
-        ArrayTypeName.of(File.class), BuilderCodegen.mapKotlinTypeToJavaType("List<java.io.File>"));
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_Path() {
-    assertEquals(
-        ClassName.get("java.nio.file", "Path"),
-        BuilderCodegen.mapKotlinTypeToJavaType("java.nio.file.Path"));
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_MapStringString() {
-    TypeName expected =
-        ParameterizedTypeName.get(
-            ClassName.get(Map.class), ClassName.get(String.class), ClassName.get(String.class));
-    assertEquals(expected, BuilderCodegen.mapKotlinTypeToJavaType("Map<String, String>"));
-  }
-
-  @Test
-  void testMapKotlinTypeToJavaType_UnknownType() {
-    assertEquals(
-        ClassName.get(Object.class), BuilderCodegen.mapKotlinTypeToJavaType("UnknownType"));
   }
 }
