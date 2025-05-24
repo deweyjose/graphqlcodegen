@@ -10,12 +10,12 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>graphqlcodegen-param-plugin</artifactId>
+  <artifactId>graphqlcodegen-bootstrap-plugin</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
-  <name>GraphQL Codegen Param Plugin</name>
-  <description>Maven plugin for parameter code generation</description>
+  <name>GraphQL Codegen Bootstrap Plugin</name>
+  <description>Maven plugin for bootstrapping codegen parameter mapping</description>
 
   <dependencies>
     <dependency>
@@ -68,7 +68,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
         <configuration>
-          <goalPrefix>paramcodegen</goalPrefix>
+          <goalPrefix>bootstrapcodegen</goalPrefix>
         </configuration>
       </plugin>
       <plugin>

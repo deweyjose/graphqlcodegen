@@ -1,4 +1,4 @@
-package io.github.deweyjose.paramcodegen;
+package io.github.deweyjose.bootstrapcodegen;
 
 import com.squareup.javapoet.*;
 import java.io.File;
@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.psi.KtPrimaryConstructor;
 
 // This class is a Maven Mojo that fetches CodeGenConfig.kt from GitHub, parses its constructor, and
 // will generate Java code for parameter mapping. See tests in
-// src/test/java/io/github/deweyjose/paramcodegen/ParamCodegenTest.java.
+// src/test/java/io/github/deweyjose/bootstrapcodegen/ParamCodegenTest.java.
 @Mojo(name = "generate")
 public class BuilderCodegen extends AbstractMojo {
 

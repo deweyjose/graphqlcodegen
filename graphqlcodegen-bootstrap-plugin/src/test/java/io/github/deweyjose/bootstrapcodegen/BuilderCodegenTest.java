@@ -1,4 +1,4 @@
-package io.github.deweyjose.paramcodegen;
+package io.github.deweyjose.bootstrapcodegen;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
