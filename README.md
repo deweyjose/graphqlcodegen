@@ -3,6 +3,25 @@
 This maven plugin is a port of the netflix codegen plugin for Gradle.
 Found [here](https://github.com/Netflix/dgs-codegen).
 
+# Architecture
+
+This project is organized into two main Maven modules:
+
+## 1. graphqlcodegen-maven-plugin
+This is the main Maven plugin that users apply to their projects. It provides goals for generating Java (or Kotlin) code from GraphQL schemas, mirroring the functionality of the Netflix DGS Gradle codegen plugin. It is responsible for:
+- Accepting configuration via plugin parameters.
+- Resolving schema files from the local project and dependencies.
+- Invoking the DGS codegen library with the correct configuration.
+- Managing incremental code generation and manifest tracking.
+
+## 2. graphqlcodegen-param-plugin
+This is a helper plugin used only during the build of this project. Its purpose is to:
+- Download the latest `CodeGenConfig.kt` from the Netflix DGS codegen repository.
+- Parse the constructor parameters and their types.
+- Generate a Java builder class that exactly matches the upstream config surface.
+
+This architecture ensures that the Maven plugin's configuration is always in sync with the upstream DGS codegen library, and makes it much easier to adapt to changes in the core library.
+
 # Contributing
 
 ### GitHub Issue
@@ -12,23 +31,26 @@ newer [releases](https://github.com/Netflix/dgs-codegen/releases) of the core DG
 
 ### PRs
 
-PRS are welcome as well. The level of difficulty across DGS Codgen updates varies. Typically we add
-new plugin options and update
-the [CodeGenConfig](https://github.com/Netflix/dgs-codegen/blob/master/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt#L443)
-constructor - when new
-options are added to the Codegen core library.
+PRs are welcome as well. The level of difficulty across DGS Codegen updates varies. Typically, new plugin options are added when the [CodeGenConfig](https://github.com/Netflix/dgs-codegen/blob/master/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt) constructor in the core library changes.
 
-Please make sure you run step 2 below to ensure your PR builds correctly. You may need to analyze
-the CodeGenConfig ctor parameters and add support for new options.
-Make sure to document any new options to the `Options` section below.
+**Good news:** The process for handling constructor changes is now much simpler:
+
+- The `graphqlcodegen-param-plugin` will automatically fetch the latest `CodeGenConfig.kt` and generate a new builder class reflecting any new or changed parameters.
+- If the upstream constructor changes, you will get a compile failure in the main plugin module. The error will clearly indicate which parameters are missing or need to be updated.
+- Simply update the main plugin's configuration and wiring to match the new builder and parameters. The compile error will guide you to what needs to be fixed.
+- Make sure to document any new options in the `Options` section below.
 
 Process:
 
-1. bump the version in [pom.xml](pom.xml)
-2. run `mvn install` locally to ensure the project still builds
-3. run `mvn spotless:apply` if there are any code style/formating violations
-4. Adjust [CodeGen](src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) to support new
-   options if needed.
+1. Bump the version in [pom.xml](pom.xml)
+2. Run `mvn spotless:apply clean install` locally to ensure the project still builds and is formatted
+3. Adjust [CodeGen](src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) and related classes to support new options if needed
+4. **Test with the example project:**
+   - Clone [graphqlcodegen-example](https://github.com/deweyjose/graphqlcodegen-example)
+   - Bump the plugin version in its `pom.xml` to match your changes
+   - Run `mvn spotless:apply clean install` in the example project to ensure everything works as expected
+
+> **Note:** In the future, the example repo will be folded into this repository as a set of test modules to make testing and validation even easier.
 
 # Overview
 
