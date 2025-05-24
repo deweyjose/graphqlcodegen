@@ -1,26 +1,29 @@
-name: Code Coverage
+name: Java CI with JaCoCo
 
 on:
   push:
-    branches: [ main, code-coverage ]
+    branches: [ '**' ]
   pull_request:
+    branches: [ '**' ]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
+
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Build and test with Maven
-        run: mvn clean verify
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+
+      - name: Build with Gradle
+        run: ./gradlew build jacocoTestReport
+
+      - name: Upload JaCoCo Report
+        uses: actions/upload-artifact@v3
         with:
-          files: ./graphqlcodegen-maven-plugin/target/site/jacoco/jacoco.xml
-          flags: unittests
-          name: codecov-graphqlcodegen
-          fail_ci_if_error: true 
+          name: jacoco-report
+          path: build/reports/jacoco/test/html
