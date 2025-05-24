@@ -27,12 +27,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
-          path: target/site/jacoco
+          path: graphqlcodegen-maven-plugin/target/site/jacoco
       
       - name: JaCoCo Report
         uses: madrapps/jacoco-report@v1.7.2
         with:
-          paths: target/site/jacoco/jacoco.xml
+          paths: graphqlcodegen-maven-plugin/target/site/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 80
           min-coverage-changed-files: 90
