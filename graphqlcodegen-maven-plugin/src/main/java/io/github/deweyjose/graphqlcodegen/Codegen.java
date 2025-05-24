@@ -171,4 +171,9 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   public void execute() {
     new CodegenExecutor(getLog()).execute(this, project.getArtifacts(), project.getBasedir());
   }
+
+  // Dummy function for testing coverage reporting
+  public void dummyFunction() {
+    // does nothing
+  }
 }
