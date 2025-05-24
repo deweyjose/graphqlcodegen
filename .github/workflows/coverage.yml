@@ -54,5 +54,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Deploy JaCoCo report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./graphqlcodegen-maven-plugin/target/site/jacoco
+          publish_branch: gh-pages
+
 permissions:
   contents: write
