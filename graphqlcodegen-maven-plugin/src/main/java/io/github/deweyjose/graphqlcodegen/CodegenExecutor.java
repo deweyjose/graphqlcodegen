@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,9 +76,7 @@ public class CodegenExecutor {
             request.getTypeMapping(), request.getTypeMappingPropertiesFiles(), artifacts);
 
     List<File> schemaJarFiles =
-        Optional.ofNullable(request.getSchemaJarFilesFromDependencies())
-            .map(arr -> Arrays.stream(arr).map(File::new).toList())
-            .orElse(Collections.emptyList());
+        DependencySchemaExtractor.extract(artifacts, request.getSchemaJarFilesFromDependencies());
 
     final CodeGenConfig config =
         new GeneratedCodeGenConfigBuilder()
