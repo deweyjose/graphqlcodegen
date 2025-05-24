@@ -2,9 +2,9 @@ name: Java CI with JaCoCo
 
 on:
   push:
-    branches: [ '**' ]
+    branches: [ main ]
   pull_request:
-    branches: [ '**' ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -18,12 +18,13 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: maven
 
-      - name: Build with Gradle
-        run: ./gradlew build jacocoTestReport
+      - name: Build with Maven
+        run: mvn clean verify
 
       - name: Upload JaCoCo Report
         uses: actions/upload-artifact@v3
         with:
           name: jacoco-report
-          path: build/reports/jacoco/test/html
+          path: target/site/jacoco
