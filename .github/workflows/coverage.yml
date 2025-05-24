@@ -43,3 +43,16 @@ jobs:
         with:
           jacoco-csv-file: graphqlcodegen-maven-plugin/target/site/jacoco/jacoco.csv
           badges-directory: badges
+
+      - name: Commit and push coverage badge
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add badges/*.svg
+          git commit -m "Update coverage badge" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+  contents: write

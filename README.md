@@ -1,3 +1,5 @@
+![code coverage](badges/jacoco.svg)
+
 # graphqlcodegen-maven-plugin
 
 This maven plugin is a port of the netflix codegen plugin for Gradle.
