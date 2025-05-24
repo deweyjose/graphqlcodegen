@@ -28,3 +28,14 @@ jobs:
         with:
           name: jacoco-report
           path: target/site/jacoco
+      
+      - name: JaCoCo Report
+        uses: madrapps/jacoco-report@v1.7.2
+        with:
+          paths: target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 80
+          min-coverage-changed-files: 90
+          update-comment: true
+          title: Code Coverage Report
+
