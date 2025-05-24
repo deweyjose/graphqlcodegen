@@ -38,4 +38,8 @@ jobs:
           min-coverage-changed-files: 90
           update-comment: true
           title: Code Coverage Report
-
+      - name: Generate Coverage Badge
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          jacoco-csv-file: graphqlcodegen-maven-plugin/target/site/jacoco/jacoco.csv
+          badges-directory: badges
