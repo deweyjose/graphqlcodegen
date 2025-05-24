@@ -37,7 +37,7 @@ your Domain Graph
 Service's graphql schema file during the project's build process. The plugin requires the
 designated `packageName` for file generation.
 If no `schemaPath` is specified, it will look in the src/main/resources/schema folder for
-any files with .graphqls extension.
+any files with .graphqls, .graphql or .gqls extension.
 
 # Example Repo
 
@@ -139,7 +139,7 @@ Or
 
 A list of schema file or directory paths.
 
-Directory paths: Only files with `.graphql` or `.graphqls` will be considered.
+Directory paths: Only files with file extensions `.graphql`, `.graphqls` and `.gqls` will be considered.
 
 Default value is `${project.basedir}/src/main/resources/schema`.
 

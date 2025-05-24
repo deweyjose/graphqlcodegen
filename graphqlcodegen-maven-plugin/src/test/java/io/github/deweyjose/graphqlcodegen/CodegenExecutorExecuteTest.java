@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 class CodegenExecutorExecuteTest {
 
   @Test
-  void integrationTest_generateCodeFromSchema() {
+  void integrationTest_generateCodeFromSchema() throws java.io.IOException {
     // Arrange
     File schemaDir = new File(getClass().getClassLoader().getResource("schema").getFile());
     File[] schemaPaths = {schemaDir};
@@ -211,7 +211,36 @@ class CodegenExecutorExecuteTest {
     Log log = org.mockito.Mockito.mock(Log.class);
     CodegenExecutor executor = new CodegenExecutor(log);
     executor.execute(config, new HashSet<>());
-    // Add assertions as needed
+    
+    // Assert that code generation produced output files
+    assertTrue(outputDir.exists() && outputDir.isDirectory(), "Output directory should exist");
+    File[] generatedFiles = outputDir.listFiles();
+    assertNotNull(generatedFiles, "Output directory should not be empty");
+    assertTrue(generatedFiles.length > 0, "There should be generated files in the output directory");
+
+    // Check for specific generated type files and their content
+    File typesDir = new File(outputDir, "com/example/types");
+    assertTrue(typesDir.exists() && typesDir.isDirectory(), "Types directory should exist");
+    String[] expectedTypeFiles = {"Show.java", "ShowInput.java", "Foo.java", "Actor.java"};
+    for (String fileName : expectedTypeFiles) {
+      File f = new File(typesDir, fileName);
+      assertTrue(f.exists(), fileName + " should be generated");
+      String content = java.nio.file.Files.readString(f.toPath());
+      String className = fileName.replace(".java", "");
+      assertTrue(content.contains("public class " + className), fileName + " should contain class definition");
+    }
+
+    // Check for datafetcher files
+    File datafetchersDir = new File(outputDir, "com/example/datafetchers");
+    assertTrue(datafetchersDir.exists() && datafetchersDir.isDirectory(), "Datafetchers directory should exist");
+    String[] expectedDatafetcherFiles = {"BarsDatafetcher.java", "ShowsDatafetcher.java"};
+    for (String fileName : expectedDatafetcherFiles) {
+      File f = new File(datafetchersDir, fileName);
+      assertTrue(f.exists(), fileName + " should be generated");
+      String content = java.nio.file.Files.readString(f.toPath());
+      String className = fileName.replace(".java", "");
+      assertTrue(content.contains("public class " + className), fileName + " should contain class definition");
+    }
   }
 
   // Simple no-op logger for integration test
