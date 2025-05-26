@@ -755,6 +755,18 @@ Example
 <disableDatesInGeneratedAnnotation>true</disableDatesInGeneratedAnnotation>
 ```
 
+# AI Stories & Project History
+
+Below is a curated set of AI-generated documentation and project history, summarizing key architectural changes, automation, and major improvements. These documents provide context for contributors and maintainers.
+
+| Title | Link | Quick Summary |
+|-------|------|--------------|
+| Automating GraphQL Codegen Maven Plugin Maintenance | [human-thoughts.md](docs/ai-stories/human-thoughts.md) | Reflections on automating plugin maintenance, AI-assisted development, and test coverage improvements. |
+| Multi-Module Refactor & Parameter Plugin Integration | [chat-summary-pr-multimodule-paramplugin.md](docs/ai-stories/chat-summary-pr-multimodule-paramplugin.md) | Details the transition to a multi-module Maven setup and parameter plugin automation. |
+| Major Accomplishments: May 2024 PRs (216, 217, 221, 225, 226, 227, 228) | [chat-summary-major-accomplishments.md](docs/ai-stories/chat-summary-major-accomplishments.md) | Summarizes architectural evolution, automation, and future direction post-major PRs. |
+| PR: Add Code Coverage Reporting, Badge, and GitHub Pages Publishing | [chat-summary-pr-coverage-report-pages.md](docs/ai-stories/chat-summary-pr-coverage-report-pages.md) | Documents the addition of code coverage, CI integration, and publishing to GitHub Pages. |
+| PR Summary: May 2024 | [chat-summary-pr-summary.md](docs/ai-stories/chat-summary-pr-summary.md) | High-level summary of recent PRs, dependency updates, and type mapping improvements. |
+
 # Usage
 
 Add the following to your pom files build/plugins section.
