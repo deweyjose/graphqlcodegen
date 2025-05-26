@@ -69,4 +69,3 @@ class DependencySchemaExtractorTest {
     assertTrue(result.isEmpty());
   }
 }
- 
