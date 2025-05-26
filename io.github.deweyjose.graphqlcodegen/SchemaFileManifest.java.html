@@ -71,11 +71,11 @@ public class SchemaFileManifest {
 <span class="fc" id="L71">    File[] contents = directory.listFiles();</span>
 <span class="pc bpc" id="L72" title="1 of 2 branches missed.">    if (contents != null) {</span>
 <span class="fc bfc" id="L73" title="All 2 branches covered.">      for (File content : contents) {</span>
-<span class="fc bfc" id="L74" title="All 4 branches covered.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
+<span class="pc bpc" id="L74" title="2 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
 <span class="fc" id="L75">          result.add(content);</span>
-<span class="fc bfc" id="L76" title="All 2 branches covered.">        } else if (content.isDirectory()) {</span>
-<span class="fc" id="L77">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
-<span class="fc" id="L78">          result.addAll(subdirectoryGraphQLSFiles);</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        } else if (content.isDirectory()) {</span>
+<span class="nc" id="L77">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
+<span class="nc" id="L78">          result.addAll(subdirectoryGraphQLSFiles);</span>
         }
       }
     }

@@ -25,6 +25,9 @@ import org.apache.maven.project.MavenProject;
       defaultValue = &quot;${project.basedir}/src/main/resources/schema&quot;)
   private File[] schemaPaths;
 
+  @Parameter(property = &quot;schemaUrls&quot;)
+  private String[] schemaUrls;
+
   @Parameter(alias = &quot;schemaJarFilesFromDependencies&quot;, property = &quot;schemaJarFilesFromDependencies&quot;)
   private String[] schemaJarFilesFromDependencies;
 
@@ -169,12 +172,16 @@ import org.apache.maven.project.MavenProject;
 
   @Override
   public void execute() {
-<span class="nc" id="L172">    new CodegenExecutor(getLog()).execute(this, project.getArtifacts(), project.getBasedir());</span>
-<span class="nc" id="L173">  }</span>
+<span class="nc" id="L175">    new CodegenExecutor(getLog()).execute(this, project.getArtifacts(), project.getBasedir());</span>
+<span class="nc" id="L176">  }</span>
 
-  // Dummy function for testing coverage reporting
-  public void dummyFunction() {
-    // does nothing
-<span class="nc" id="L178">  }</span>
+  public File[] getSchemaPaths() {
+<span class="nc" id="L179">    return schemaPaths;</span>
+  }
+
+  @Override
+  public String[] getSchemaUrls() {
+<span class="nc" id="L184">    return schemaUrls;</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
