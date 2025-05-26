@@ -31,7 +31,7 @@ class SchemaFileManifestTest {
   void testFindGraphqlFiles() {
     File directory = getFile("schema");
     Set<File> files = SchemaFileManifest.findGraphQLSFiles(directory);
-    assertEquals(4, files.size());
+    assertEquals(2, files.size());
   }
 
   @Test

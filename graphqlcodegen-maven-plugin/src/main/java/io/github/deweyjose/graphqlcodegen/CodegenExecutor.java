@@ -10,7 +10,13 @@ import io.github.deweyjose.codegen.generated.GeneratedCodeGenConfigBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +28,7 @@ import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
+import lombok.SneakyThrows;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
 
@@ -38,6 +45,7 @@ public class CodegenExecutor {
    * @param request the execution request
    * @param artifacts the artifacts
    */
+  @SneakyThrows
   public void execute(CodegenConfigProvider request, Set<Artifact> artifacts, File projectBaseDir) {
     if (request.isSkip()) {
       log.info("Skipping code generation as requested (skip=true)");
@@ -53,6 +61,9 @@ public class CodegenExecutor {
       fullSchemaPaths = stream(request.getSchemaPaths()).collect(Collectors.toSet());
     }
 
+    for (String url : request.getSchemaUrls()) {
+      fullSchemaPaths.add(saveUrlToFile(url, request.getSchemaManifestOutputDir()));
+    }
     verifySchemaFiles(fullSchemaPaths, request.getSchemaJarFilesFromDependencies());
 
     SchemaFileManifest manifest =
@@ -277,5 +288,38 @@ public class CodegenExecutor {
             Collectors.toMap(
                 Map.Entry::getKey,
                 e -> e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));
+  }
+
+  public static String fetchSchema(String url) throws IOException, InterruptedException {
+    HttpClient client = HttpClient.newHttpClient();
+    HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
+    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+    String body = response.body();
+    return body;
+  }
+
+  // Production version
+  public static File saveUrlToFile(String url, File outputDir)
+      throws IOException, InterruptedException {
+    String content = fetchSchema(url);
+    String fileName = "remote-schemas/" + md5Hex(url) + ".graphqls";
+    File outFile = new File(outputDir, fileName);
+    Files.createDirectories(outFile.getParentFile().toPath());
+    Files.writeString(outFile.toPath(), content);
+    return outFile;
+  }
+
+  private static String md5Hex(String input) {
+    try {
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      byte[] digest = md.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      StringBuilder sb = new StringBuilder();
+      for (byte b : digest) {
+        sb.append(String.format("%02x", b));
+      }
+      return sb.toString();
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to compute MD5 hash", e);
+    }
   }
 }
