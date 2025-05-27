@@ -766,6 +766,7 @@ Below is a curated set of AI-generated documentation and project history, summar
 | Major Accomplishments: May 2024 PRs (216, 217, 221, 225, 226, 227, 228) | [chat-summary-major-accomplishments.md](docs/ai-stories/chat-summary-major-accomplishments.md) | Summarizes architectural evolution, automation, and future direction post-major PRs. |
 | PR: Add Code Coverage Reporting, Badge, and GitHub Pages Publishing | [chat-summary-pr-coverage-report-pages.md](docs/ai-stories/chat-summary-pr-coverage-report-pages.md) | Documents the addition of code coverage, CI integration, and publishing to GitHub Pages. |
 | PR Summary: May 2024 | [chat-summary-pr-summary.md](docs/ai-stories/chat-summary-pr-summary.md) | High-level summary of recent PRs, dependency updates, and type mapping improvements. |
+| PR-235: Remote Schema Support & Javadoc Compliance | [pr-235-remote-schema-javadoc.md](docs/ai-stories/pr-235-remote-schema-javadoc.md) | Adds remote schema URL support, deterministic downloads, and documents the iterative Javadoc compliance process for Maven Central release. |
 
 # Usage
 
