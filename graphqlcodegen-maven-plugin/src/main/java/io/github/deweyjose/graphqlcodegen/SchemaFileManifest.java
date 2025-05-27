@@ -14,6 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import nu.studer.java.util.OrderedProperties;
 import nu.studer.java.util.OrderedProperties.OrderedPropertiesBuilder;
 
+/**
+ * Manages a manifest of GraphQL schema files and their checksums for change detection.
+ */
 @Slf4j
 public class SchemaFileManifest {
   private Set<File> files;
@@ -21,12 +24,11 @@ public class SchemaFileManifest {
   private final File projectPath;
 
   /**
-   * Manifest constructor loads the properties file into memory. The properties file has a property
-   * for each path with the previous known checksum.
+   * Constructs a SchemaFileManifest with a set of files, manifest path, and project path.
    *
-   * @param files
-   * @param manifestPath
-   * @param projectPath
+   * @param files the set of schema files
+   * @param manifestPath the manifest file path
+   * @param projectPath the project base directory
    */
   public SchemaFileManifest(Set<File> files, File manifestPath, File projectPath) {
     this.files = files;
@@ -34,11 +36,23 @@ public class SchemaFileManifest {
     this.projectPath = projectPath;
   }
 
+  /**
+   * Constructs a SchemaFileManifest with a manifest path and project path.
+   *
+   * @param manifestPath the manifest file path
+   * @param projectPath the project base directory
+   */
   public SchemaFileManifest(File manifestPath, File projectPath) {
     this.manifestPath = manifestPath;
     this.projectPath = projectPath;
   }
 
+  /**
+   * Generates an MD5 checksum for the given file.
+   *
+   * @param path the file to checksum
+   * @return the checksum as a hex string
+   */
   @SneakyThrows
   public static String generateChecksum(File path) {
     byte[] data = Files.readAllBytes(Paths.get(path.toURI()));
@@ -48,10 +62,10 @@ public class SchemaFileManifest {
   }
 
   /**
-   * We only care about files ending with .graphql(s)
+   * Returns true if the file is a GraphQL schema file (.graphql, .graphqls, .gqls).
    *
-   * @param file
-   * @return boolean
+   * @param file the file to check
+   * @return true if the file is a GraphQL schema file
    */
   public static boolean isGraphqlFile(File file) {
     return file.getName().endsWith(".graphqls")
@@ -60,10 +74,10 @@ public class SchemaFileManifest {
   }
 
   /**
-   * Traverse the directory structure collecting .graphql(s) files.
+   * Recursively finds all GraphQL schema files in a directory.
    *
-   * @param directory
-   * @return Set
+   * @param directory the directory to search
+   * @return a set of GraphQL schema files
    */
   public static Set<File> findGraphQLSFiles(File directory) {
     Set<File> result = new HashSet<>();
@@ -83,14 +97,19 @@ public class SchemaFileManifest {
     return result;
   }
 
+  /**
+   * Sets the files to be tracked by the manifest.
+   *
+   * @param files the set of files
+   */
   public void setFiles(Set<File> files) {
     this.files = files;
   }
 
   /**
-   * Computes the Set of files that have changed or are new and need to trigger code generation.
+   * Computes the set of files that have changed or are new and need to trigger code generation.
    *
-   * @return Set
+   * @return a set of changed or new files
    */
   public Set<File> getChangedFiles() {
     Set<File> changed = new HashSet<>();
@@ -110,7 +129,9 @@ public class SchemaFileManifest {
     return changed;
   }
 
-  /** Clear the old manifest, compute new checksums for each file and save the properties file. */
+  /**
+   * Clears the old manifest, computes new checksums for each file, and saves the properties file.
+   */
   @SneakyThrows
   public void syncManifest() {
     OrderedProperties manifest =

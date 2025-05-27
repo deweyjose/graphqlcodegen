@@ -32,9 +32,17 @@ import lombok.SneakyThrows;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
 
+/**
+ * Executes code generation and provides utility methods for schema expansion, manifest, and type mapping.
+ */
 public class CodegenExecutor {
   private final Log log;
 
+  /**
+   * Constructs a CodegenExecutor with the given Maven logger.
+   *
+   * @param log the Maven logger
+   */
   public CodegenExecutor(Log log) {
     this.log = log;
   }
@@ -44,6 +52,7 @@ public class CodegenExecutor {
    *
    * @param request the execution request
    * @param artifacts the artifacts
+   * @param projectBaseDir the project base directory
    */
   @SneakyThrows
   public void execute(CodegenConfigProvider request, Set<Artifact> artifacts, File projectBaseDir) {
@@ -156,7 +165,6 @@ public class CodegenExecutor {
    * Expands the schema paths to include all schema files in the directories.
    *
    * @param schemaPaths the schema paths
-   * @param onlyGenerateChanged whether to only generate changed schema files
    * @return the expanded schema paths
    */
   public static Set<File> expandSchemaPaths(File[] schemaPaths) {
@@ -274,12 +282,24 @@ public class CodegenExecutor {
     return changed;
   }
 
+  /**
+   * Converts an array of strings to a set.
+   *
+   * @param arr the array
+   * @return a set of strings
+   */
   public static Set<String> toSet(String[] arr) {
     return Optional.ofNullable(arr)
         .map(a -> java.util.Arrays.stream(a).collect(Collectors.toSet()))
         .orElse(Collections.emptySet());
   }
 
+  /**
+   * Converts a map of ParameterMap to a map of string-to-string maps.
+   *
+   * @param m the map to convert
+   * @return a map of string to string maps
+   */
   public static Map<String, Map<String, String>> toMap(
       Map<String, io.github.deweyjose.graphqlcodegen.ParameterMap> m) {
     if (m == null) return Collections.emptyMap();
@@ -290,6 +310,14 @@ public class CodegenExecutor {
                 e -> e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));
   }
 
+  /**
+   * Fetches the contents of a remote schema URL.
+   *
+   * @param url the URL to fetch
+   * @return the schema contents as a string
+   * @throws IOException if an I/O error occurs
+   * @throws InterruptedException if the operation is interrupted
+   */
   public static String fetchSchema(String url) throws IOException, InterruptedException {
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
@@ -298,7 +326,15 @@ public class CodegenExecutor {
     return body;
   }
 
-  // Production version
+  /**
+   * Downloads a remote schema and saves it to a file.
+   *
+   * @param url the schema URL
+   * @param outputDir the output directory
+   * @return the file containing the downloaded schema
+   * @throws IOException if an I/O error occurs
+   * @throws InterruptedException if the operation is interrupted
+   */
   public static File saveUrlToFile(String url, File outputDir)
       throws IOException, InterruptedException {
     String content = fetchSchema(url);
@@ -309,6 +345,12 @@ public class CodegenExecutor {
     return outFile;
   }
 
+  /**
+   * Computes the MD5 hash of a string and returns it as a hex string.
+   *
+   * @param input the input string
+   * @return the MD5 hash as a hex string
+   */
   private static String md5Hex(String input) {
     try {
       MessageDigest md = MessageDigest.getInstance("MD5");

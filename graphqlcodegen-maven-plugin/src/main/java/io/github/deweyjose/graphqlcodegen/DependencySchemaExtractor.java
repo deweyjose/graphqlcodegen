@@ -9,6 +9,9 @@ import java.util.Optional;
 import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 
+/**
+ * Utility for extracting schema files from Maven dependency artifacts.
+ */
 public class DependencySchemaExtractor {
 
   /**
