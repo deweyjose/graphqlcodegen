@@ -14,19 +14,19 @@ import lombok.extern.slf4j.Slf4j;
 import nu.studer.java.util.OrderedProperties;
 import nu.studer.java.util.OrderedProperties.OrderedPropertiesBuilder;
 
-<span class="fc" id="L17">@Slf4j</span>
+/** Manages a manifest of GraphQL schema files and their checksums for change detection. */
+<span class="fc" id="L18">@Slf4j</span>
 public class SchemaFileManifest {
   private Set&lt;File&gt; files;
   private final File manifestPath;
   private final File projectPath;
 
   /**
-   * Manifest constructor loads the properties file into memory. The properties file has a property
-   * for each path with the previous known checksum.
+   * Constructs a SchemaFileManifest with a set of files, manifest path, and project path.
    *
-   * @param files
-   * @param manifestPath
-   * @param projectPath
+   * @param files the set of schema files
+   * @param manifestPath the manifest file path
+   * @param projectPath the project base directory
    */
 <span class="fc" id="L31">  public SchemaFileManifest(Set&lt;File&gt; files, File manifestPath, File projectPath) {</span>
 <span class="fc" id="L32">    this.files = files;</span>
@@ -34,115 +34,134 @@ public class SchemaFileManifest {
 <span class="fc" id="L34">    this.projectPath = projectPath;</span>
 <span class="fc" id="L35">  }</span>
 
-<span class="fc" id="L37">  public SchemaFileManifest(File manifestPath, File projectPath) {</span>
-<span class="fc" id="L38">    this.manifestPath = manifestPath;</span>
-<span class="fc" id="L39">    this.projectPath = projectPath;</span>
-<span class="fc" id="L40">  }</span>
+  /**
+   * Constructs a SchemaFileManifest with a manifest path and project path.
+   *
+   * @param manifestPath the manifest file path
+   * @param projectPath the project base directory
+   */
+<span class="fc" id="L43">  public SchemaFileManifest(File manifestPath, File projectPath) {</span>
+<span class="fc" id="L44">    this.manifestPath = manifestPath;</span>
+<span class="fc" id="L45">    this.projectPath = projectPath;</span>
+<span class="fc" id="L46">  }</span>
 
-<span class="nc" id="L42">  @SneakyThrows</span>
+  /**
+   * Generates an MD5 checksum for the given file.
+   *
+   * @param path the file to checksum
+   * @return the checksum as a hex string
+   */
+<span class="nc" id="L54">  @SneakyThrows</span>
   public static String generateChecksum(File path) {
-<span class="fc" id="L44">    byte[] data = Files.readAllBytes(Paths.get(path.toURI()));</span>
-<span class="fc" id="L45">    byte[] hash = MessageDigest.getInstance(&quot;MD5&quot;).digest(data);</span>
-<span class="fc" id="L46">    String checksum = new BigInteger(1, hash).toString(16);</span>
-<span class="fc" id="L47">    return checksum;</span>
+<span class="fc" id="L56">    byte[] data = Files.readAllBytes(Paths.get(path.toURI()));</span>
+<span class="fc" id="L57">    byte[] hash = MessageDigest.getInstance(&quot;MD5&quot;).digest(data);</span>
+<span class="fc" id="L58">    String checksum = new BigInteger(1, hash).toString(16);</span>
+<span class="fc" id="L59">    return checksum;</span>
   }
 
   /**
-   * We only care about files ending with .graphql(s)
+   * Returns true if the file is a GraphQL schema file (.graphql, .graphqls, .gqls).
    *
-   * @param file
-   * @return boolean
+   * @param file the file to check
+   * @return true if the file is a GraphQL schema file
    */
   public static boolean isGraphqlFile(File file) {
-<span class="fc bfc" id="L57" title="All 2 branches covered.">    return file.getName().endsWith(&quot;.graphqls&quot;)</span>
-<span class="fc bfc" id="L58" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.graphql&quot;)</span>
-<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        || file.getName().endsWith(&quot;.gqls&quot;);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">    return file.getName().endsWith(&quot;.graphqls&quot;)</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.graphql&quot;)</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        || file.getName().endsWith(&quot;.gqls&quot;);</span>
   }
 
   /**
-   * Traverse the directory structure collecting .graphql(s) files.
+   * Recursively finds all GraphQL schema files in a directory.
    *
-   * @param directory
-   * @return Set
+   * @param directory the directory to search
+   * @return a set of GraphQL schema files
    */
   public static Set&lt;File&gt; findGraphQLSFiles(File directory) {
-<span class="fc" id="L69">    Set&lt;File&gt; result = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L81">    Set&lt;File&gt; result = new HashSet&lt;&gt;();</span>
 
-<span class="fc" id="L71">    File[] contents = directory.listFiles();</span>
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">    if (contents != null) {</span>
-<span class="fc bfc" id="L73" title="All 2 branches covered.">      for (File content : contents) {</span>
-<span class="pc bpc" id="L74" title="2 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
-<span class="fc" id="L75">          result.add(content);</span>
-<span class="nc bnc" id="L76" title="All 2 branches missed.">        } else if (content.isDirectory()) {</span>
-<span class="nc" id="L77">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
-<span class="nc" id="L78">          result.addAll(subdirectoryGraphQLSFiles);</span>
+<span class="fc" id="L83">    File[] contents = directory.listFiles();</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">    if (contents != null) {</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">      for (File content : contents) {</span>
+<span class="pc bpc" id="L86" title="2 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
+<span class="fc" id="L87">          result.add(content);</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        } else if (content.isDirectory()) {</span>
+<span class="nc" id="L89">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
+<span class="nc" id="L90">          result.addAll(subdirectoryGraphQLSFiles);</span>
         }
       }
     }
 
-<span class="fc" id="L83">    return result;</span>
+<span class="fc" id="L95">    return result;</span>
   }
-
-  public void setFiles(Set&lt;File&gt; files) {
-<span class="fc" id="L87">    this.files = files;</span>
-<span class="fc" id="L88">  }</span>
 
   /**
-   * Computes the Set of files that have changed or are new and need to trigger code generation.
+   * Sets the files to be tracked by the manifest.
    *
-   * @return Set
+   * @param files the set of files
+   */
+  public void setFiles(Set&lt;File&gt; files) {
+<span class="fc" id="L104">    this.files = files;</span>
+<span class="fc" id="L105">  }</span>
+
+  /**
+   * Computes the set of files that have changed or are new and need to trigger code generation.
+   *
+   * @return a set of changed or new files
    */
   public Set&lt;File&gt; getChangedFiles() {
-<span class="fc" id="L96">    Set&lt;File&gt; changed = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L97">    OrderedProperties manifest = loadManifest();</span>
-<span class="fc bfc" id="L98" title="All 2 branches covered.">    for (File file : files) {</span>
-<span class="fc" id="L99">      String oldChecksum = manifest.getProperty(relativizeToProject(file));</span>
-<span class="fc bfc" id="L100" title="All 2 branches covered.">      if (oldChecksum == null) {</span>
-<span class="fc" id="L101">        log.info(&quot;{} is new, will generate code&quot;, file.getName());</span>
-<span class="pc bpc" id="L102" title="1 of 2 branches missed.">      } else if (!oldChecksum.equals(generateChecksum(file))) {</span>
-<span class="nc" id="L103">        log.info(&quot;{} has changed, will generate code&quot;, file.getName());</span>
+<span class="fc" id="L113">    Set&lt;File&gt; changed = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L114">    OrderedProperties manifest = loadManifest();</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">    for (File file : files) {</span>
+<span class="fc" id="L116">      String oldChecksum = manifest.getProperty(relativizeToProject(file));</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">      if (oldChecksum == null) {</span>
+<span class="fc" id="L118">        log.info(&quot;{} is new, will generate code&quot;, file.getName());</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">      } else if (!oldChecksum.equals(generateChecksum(file))) {</span>
+<span class="nc" id="L120">        log.info(&quot;{} has changed, will generate code&quot;, file.getName());</span>
       } else {
-<span class="fc" id="L105">        log.info(&quot;{} has not changed, will not generate code&quot;, file.getName());</span>
-<span class="fc" id="L106">        continue;</span>
+<span class="fc" id="L122">        log.info(&quot;{} has not changed, will not generate code&quot;, file.getName());</span>
+<span class="fc" id="L123">        continue;</span>
       }
-<span class="fc" id="L108">      changed.add(file);</span>
-<span class="fc" id="L109">    }</span>
-<span class="fc" id="L110">    return changed;</span>
+<span class="fc" id="L125">      changed.add(file);</span>
+<span class="fc" id="L126">    }</span>
+<span class="fc" id="L127">    return changed;</span>
   }
 
-  /** Clear the old manifest, compute new checksums for each file and save the properties file. */
-<span class="pc" id="L114">  @SneakyThrows</span>
+  /**
+   * Clears the old manifest, computes new checksums for each file, and saves the properties file.
+   */
+<span class="pc" id="L133">  @SneakyThrows</span>
   public void syncManifest() {
-<span class="fc" id="L116">    OrderedProperties manifest =</span>
-<span class="fc" id="L117">        new OrderedPropertiesBuilder().withSuppressDateInComment(true).build();</span>
-<span class="fc bfc" id="L118" title="All 2 branches covered.">    for (File file : files) {</span>
-<span class="fc" id="L119">      manifest.setProperty(relativizeToProject(file), generateChecksum(file));</span>
-<span class="fc" id="L120">    }</span>
+<span class="fc" id="L135">    OrderedProperties manifest =</span>
+<span class="fc" id="L136">        new OrderedPropertiesBuilder().withSuppressDateInComment(true).build();</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">    for (File file : files) {</span>
+<span class="fc" id="L138">      manifest.setProperty(relativizeToProject(file), generateChecksum(file));</span>
+<span class="fc" id="L139">    }</span>
 
-<span class="fc bfc" id="L122" title="All 2 branches covered.">    if (!manifestPath.exists()) {</span>
-<span class="fc" id="L123">      manifestPath.getParentFile().mkdirs();</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">    if (!manifestPath.exists()) {</span>
+<span class="fc" id="L142">      manifestPath.getParentFile().mkdirs();</span>
     }
 
-<span class="fc" id="L126">    try (FileOutputStream fos = new FileOutputStream(manifestPath)) {</span>
-<span class="fc" id="L127">      manifest.store(fos, &quot;Schema Manifest&quot;);</span>
-<span class="fc" id="L128">      fos.flush();</span>
+<span class="fc" id="L145">    try (FileOutputStream fos = new FileOutputStream(manifestPath)) {</span>
+<span class="fc" id="L146">      manifest.store(fos, &quot;Schema Manifest&quot;);</span>
+<span class="fc" id="L147">      fos.flush();</span>
     }
-<span class="fc" id="L130">  }</span>
+<span class="fc" id="L149">  }</span>
 
-<span class="nc" id="L132">  @SneakyThrows</span>
+<span class="nc" id="L151">  @SneakyThrows</span>
   private OrderedProperties loadManifest() {
-<span class="fc" id="L134">    OrderedProperties properties =</span>
-<span class="fc" id="L135">        new OrderedPropertiesBuilder().withSuppressDateInComment(true).build();</span>
-<span class="fc bfc" id="L136" title="All 2 branches covered.">    if (manifestPath.exists()) {</span>
-<span class="fc" id="L137">      try (FileInputStream fis = new FileInputStream(manifestPath)) {</span>
-<span class="fc" id="L138">        properties.load(fis);</span>
+<span class="fc" id="L153">    OrderedProperties properties =</span>
+<span class="fc" id="L154">        new OrderedPropertiesBuilder().withSuppressDateInComment(true).build();</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">    if (manifestPath.exists()) {</span>
+<span class="fc" id="L156">      try (FileInputStream fis = new FileInputStream(manifestPath)) {</span>
+<span class="fc" id="L157">        properties.load(fis);</span>
       }
     }
-<span class="fc" id="L141">    return properties;</span>
+<span class="fc" id="L160">    return properties;</span>
   }
 
   private String relativizeToProject(File file) {
-<span class="fc" id="L145">    return projectPath.toPath().relativize(file.toPath()).toString();</span>
+<span class="fc" id="L164">    return projectPath.toPath().relativize(file.toPath()).toString();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

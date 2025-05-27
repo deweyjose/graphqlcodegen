@@ -3,20 +3,36 @@
 import java.util.Map;
 import org.apache.maven.plugins.annotations.Parameter;
 
-<span class="fc" id="L6">public class ParameterMap {</span>
+/** Wrapper for a map of string properties, used for plugin parameter mapping. */
+<span class="fc" id="L7">public class ParameterMap {</span>
   @Parameter private Map&lt;String, String&gt; properties;
 
+  /**
+   * Returns the string representation of the properties map.
+   *
+   * @return the properties as a string
+   */
   @Override
   public String toString() {
-<span class="nc" id="L11">    return properties.toString();</span>
+<span class="nc" id="L17">    return properties.toString();</span>
   } // to test
 
+  /**
+   * Gets the properties map.
+   *
+   * @return the properties map
+   */
   public Map&lt;String, String&gt; getProperties() {
-<span class="fc" id="L15">    return properties;</span>
+<span class="fc" id="L26">    return properties;</span>
   }
 
+  /**
+   * Sets the properties map.
+   *
+   * @param properties the properties map
+   */
   public void setProperties(final Map&lt;String, String&gt; properties) {
-<span class="fc" id="L19">    this.properties = properties;</span>
-<span class="fc" id="L20">  }</span>
+<span class="fc" id="L35">    this.properties = properties;</span>
+<span class="fc" id="L36">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
