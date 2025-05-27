@@ -33,7 +33,8 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
 
 /**
- * Executes code generation and provides utility methods for schema expansion, manifest, and type mapping.
+ * Executes code generation and provides utility methods for schema expansion, manifest, and type
+ * mapping.
  */
 public class CodegenExecutor {
   private final Log log;

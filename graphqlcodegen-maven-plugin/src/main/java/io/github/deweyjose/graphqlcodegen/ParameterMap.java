@@ -3,9 +3,7 @@ package io.github.deweyjose.graphqlcodegen;
 import java.util.Map;
 import org.apache.maven.plugins.annotations.Parameter;
 
-/**
- * Wrapper for a map of string properties, used for plugin parameter mapping.
- */
+/** Wrapper for a map of string properties, used for plugin parameter mapping. */
 public class ParameterMap {
   @Parameter private Map<String, String> properties;
 

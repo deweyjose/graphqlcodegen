@@ -14,9 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import nu.studer.java.util.OrderedProperties;
 import nu.studer.java.util.OrderedProperties.OrderedPropertiesBuilder;
 
-/**
- * Manages a manifest of GraphQL schema files and their checksums for change detection.
- */
+/** Manages a manifest of GraphQL schema files and their checksums for change detection. */
 @Slf4j
 public class SchemaFileManifest {
   private Set<File> files;
