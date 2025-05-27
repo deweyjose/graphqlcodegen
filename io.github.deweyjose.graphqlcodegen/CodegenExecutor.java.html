@@ -54,9 +54,9 @@ public class CodegenExecutor {
 
     final Set&lt;File&gt; fullSchemaPaths;
 
-<span class="pc bpc" id="L57" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="nc" id="L58">      fullSchemaPaths = expandSchemaPaths(request.getSchemaPaths());</span>
-<span class="nc" id="L59">      log.info(String.format(&quot;expanded schema paths: %s&quot;, fullSchemaPaths));</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="fc" id="L58">      fullSchemaPaths = expandSchemaPaths(request.getSchemaPaths());</span>
+<span class="fc" id="L59">      log.info(String.format(&quot;expanded schema paths: %s&quot;, fullSchemaPaths));</span>
     } else {
 <span class="fc" id="L61">      fullSchemaPaths = stream(request.getSchemaPaths()).collect(Collectors.toSet());</span>
     }
@@ -72,9 +72,9 @@ public class CodegenExecutor {
             projectBaseDir);
 
 <span class="fc" id="L74">    Set&lt;File&gt; filteredSchemaFiles = fullSchemaPaths;</span>
-<span class="pc bpc" id="L75" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="nc" id="L76">      filteredSchemaFiles = filterChangedSchemaFiles(fullSchemaPaths, manifest);</span>
-<span class="nc" id="L77">      log.info(String.format(&quot;changed schema files: %s&quot;, filteredSchemaFiles));</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="fc" id="L76">      filteredSchemaFiles = filterChangedSchemaFiles(fullSchemaPaths, manifest);</span>
+<span class="fc" id="L77">      log.info(String.format(&quot;changed schema files: %s&quot;, filteredSchemaFiles));</span>
     }
 
 <span class="pc bpc" id="L80" title="3 of 4 branches missed.">    if (filteredSchemaFiles.isEmpty() &amp;&amp; request.getSchemaJarFilesFromDependencies().length &lt; 1) {</span>
@@ -143,12 +143,12 @@ public class CodegenExecutor {
 <span class="fc" id="L143">    log.info(String.format(&quot;Codegen config: \n%s&quot;, config));</span>
 <span class="fc" id="L144">    final CodeGen codeGen = new CodeGen(config);</span>
 <span class="fc" id="L145">    codeGen.generate();</span>
-<span class="pc bpc" id="L146" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
       try {
-<span class="nc" id="L148">        manifest.syncManifest();</span>
+<span class="fc" id="L148">        manifest.syncManifest();</span>
 <span class="nc" id="L149">      } catch (Exception e) {</span>
 <span class="nc" id="L150">        log.warn(&quot;error syncing manifest&quot;, e);</span>
-<span class="nc" id="L151">      }</span>
+<span class="fc" id="L151">      }</span>
     }
 <span class="fc" id="L153">  }</span>
 
