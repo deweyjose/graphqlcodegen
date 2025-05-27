@@ -10,6 +10,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
+/**
+ * Maven Mojo for GraphQL code generation.
+ */
 @Getter
 @Mojo(
     name = "generate",
