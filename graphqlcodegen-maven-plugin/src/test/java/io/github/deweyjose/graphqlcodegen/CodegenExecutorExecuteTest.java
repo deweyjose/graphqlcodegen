@@ -274,7 +274,7 @@ class CodegenExecutorExecuteTest {
           }
 
           public boolean isOnlyGenerateChanged() {
-            return false;
+            return true;
           }
 
           public String[] getTypeMappingPropertiesFiles() {
