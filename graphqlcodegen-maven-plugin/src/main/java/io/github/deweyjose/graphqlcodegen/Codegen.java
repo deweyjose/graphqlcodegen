@@ -25,6 +25,9 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
       defaultValue = "${project.basedir}/src/main/resources/schema")
   private File[] schemaPaths;
 
+  @Parameter(property = "schemaUrls")
+  private String[] schemaUrls;
+
   @Parameter(alias = "schemaJarFilesFromDependencies", property = "schemaJarFilesFromDependencies")
   private String[] schemaJarFilesFromDependencies;
 
@@ -172,8 +175,12 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
     new CodegenExecutor(getLog()).execute(this, project.getArtifacts(), project.getBasedir());
   }
 
-  // Dummy function for testing coverage reporting
-  public void dummyFunction() {
-    // does nothing
+  public File[] getSchemaPaths() {
+    return schemaPaths;
+  }
+
+  @Override
+  public String[] getSchemaUrls() {
+    return schemaUrls;
   }
 }

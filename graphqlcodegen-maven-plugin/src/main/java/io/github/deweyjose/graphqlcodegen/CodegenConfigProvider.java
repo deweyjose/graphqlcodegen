@@ -97,4 +97,6 @@ public interface CodegenConfigProvider {
   Map<String, ParameterMap> getIncludeClassImports();
 
   boolean isDisableDatesInGeneratedAnnotation();
+
+  String[] getSchemaUrls();
 }
