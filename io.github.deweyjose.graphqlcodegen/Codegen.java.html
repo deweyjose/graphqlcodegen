@@ -173,16 +173,17 @@ import org.apache.maven.project.MavenProject;
 
   @Override
   public void execute() {
-<span class="nc" id="L176">    new CodegenExecutor(getLog()).execute(this, project.getArtifacts(), project.getBasedir());</span>
-<span class="nc" id="L177">  }</span>
+<span class="nc" id="L176">    project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
+<span class="nc" id="L177">    new CodegenExecutor(getLog()).execute(this, project.getArtifacts(), project.getBasedir());</span>
+<span class="nc" id="L178">  }</span>
 
   public File[] getSchemaPaths() {
-<span class="nc" id="L180">    return schemaPaths;</span>
+<span class="nc" id="L181">    return schemaPaths;</span>
   }
 
   @Override
   public String[] getSchemaUrls() {
-<span class="nc" id="L185">    return schemaUrls;</span>
+<span class="nc" id="L186">    return schemaUrls;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
