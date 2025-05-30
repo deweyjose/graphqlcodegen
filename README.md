@@ -384,6 +384,20 @@ Example:
 <outputDir>${project.build.directory}/generated-sources</outputDir>
 ```
 
+## autoAddSource
+
+Controls whether the plugin automatically adds the generated sources directory to the Maven compile classpath. This eliminates the need for the build-helper-maven-plugin in most setups. 
+
+- Type: boolean
+- Required: false
+- Default: true
+
+Example:
+
+```xml
+<autoAddSource>true</autoAddSource>
+```
+
 ## exampleOutputDir
 
 - Type: string
@@ -789,42 +803,11 @@ Add the following to your pom files build/plugins section.
     <schemaPaths>
       <param>src/main/resources/schema/schema.graphqls</param>
     </schemaPaths>
-    <packageName>com.acme.[your_project].generated</packageName>
+    <packageName>com.acme.[your_project].generated</packageName>    
   </configuration>
-</plugin>
-```
-
-You'll also need to add the generates-sources folder to the classpath:
-
-```xml
-
-<plugin>
-  <groupId>org.codehaus.mojo</groupId>
-  <artifactId>build-helper-maven-plugin</artifactId>
-  <executions>
-    <execution>
-      <phase>generate-sources</phase>
-      <goals>
-        <goal>add-source</goal>
-      </goals>
-      <configuration>
-        <sources>
-          <source>${project.build.directory}/generated-sources</source>
-        </sources>
-      </configuration>
-    </execution>
-  </executions>
 </plugin>
 ```
 
 # Generated Output
 
-COPIED FROM NETFLIX DOCUMENTATION.
-
-The generated types are available as part of the packageName.types package under build/generated.
-These are
-automatically added to your project's sources. The generated example data fetchers are available
-under
-build/generated-examples. Note that these are NOT added to your project's sources and serve mainly
-as a basic
-boilerplate code requiring further customization.
+The generated types are available as part of the packageName.types package under build/generated. These are automatically added to your project's sources (no build-helper plugin required). The generated example data fetchers are available under build/generated-examples. Note that these are NOT added to your project's sources and serve mainly as a basic boilerplate code requiring further customization.

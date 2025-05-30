@@ -244,4 +244,9 @@ public interface CodegenConfigProvider {
    * @return remote schema URLs
    */
   String[] getSchemaUrls();
+
+  /**
+   * @return whether to auto add source
+   */
+  boolean isAutoAddSource();
 }
