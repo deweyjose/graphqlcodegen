@@ -20,6 +20,10 @@ class CodegenExecutorExecuteTest {
 
     CodegenConfigProvider config =
         new CodegenConfigProvider() {
+          public boolean isAutoAddSource() {
+            return true;
+          }
+
           public File[] getSchemaPaths() {
             return schemaPaths;
           }
@@ -261,6 +265,10 @@ class CodegenExecutorExecuteTest {
 
     CodegenConfigProvider config =
         new CodegenConfigProvider() {
+          public boolean isAutoAddSource() {
+            return true;
+          }
+
           public File[] getSchemaPaths() {
             return new File[0];
           }
