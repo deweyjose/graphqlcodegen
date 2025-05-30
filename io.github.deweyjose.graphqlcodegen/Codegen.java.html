@@ -171,19 +171,25 @@ import org.apache.maven.project.MavenProject;
   @Parameter(property = &quot;disableDatesInGeneratedAnnotation&quot;, defaultValue = &quot;false&quot;)
   private boolean disableDatesInGeneratedAnnotation;
 
+  @Parameter(property = &quot;autoAddSource&quot;, defaultValue = &quot;true&quot;)
+  private boolean autoAddSource;
+
   @Override
   public void execute() {
-<span class="nc" id="L176">    project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
-<span class="nc" id="L177">    new CodegenExecutor(getLog()).execute(this, project.getArtifacts(), project.getBasedir());</span>
-<span class="nc" id="L178">  }</span>
+<span class="nc" id="L179">    new CodegenExecutor(getLog()).execute(this, project.getArtifacts(), project.getBasedir());</span>
+
+<span class="nc bnc" id="L181" title="All 2 branches missed.">    if (autoAddSource) {</span>
+<span class="nc" id="L182">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
+    }
+<span class="nc" id="L184">  }</span>
 
   public File[] getSchemaPaths() {
-<span class="nc" id="L181">    return schemaPaths;</span>
+<span class="nc" id="L187">    return schemaPaths;</span>
   }
 
   @Override
   public String[] getSchemaUrls() {
-<span class="nc" id="L186">    return schemaUrls;</span>
+<span class="nc" id="L192">    return schemaUrls;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
