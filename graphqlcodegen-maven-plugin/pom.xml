@@ -77,6 +77,10 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.netflix.graphql.dgs</groupId>
+      <artifactId>graphql-dgs-client</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
