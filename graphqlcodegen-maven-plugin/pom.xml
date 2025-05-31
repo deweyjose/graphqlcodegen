@@ -73,6 +73,10 @@
       <groupId>com.graphql-java</groupId>
       <artifactId>graphql-java</artifactId>
     </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
   </dependencies>
 
   <build>

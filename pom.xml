@@ -144,6 +144,11 @@
         <artifactId>kotlin-reflect</artifactId>
         <version>1.9.23</version>
       </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.19.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
