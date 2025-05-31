@@ -1,9 +1,6 @@
 package io.github.deweyjose.graphqlcodegen;
 
-import static io.github.deweyjose.graphqlcodegen.SchemaFileManifest.generateChecksum;
-import static junit.framework.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,10 +8,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -22,30 +17,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-@Slf4j
-class SchemaFileManifestTest {
+class SchemaManifestServiceTest {
 
   @TempDir Path tempFolder;
-
-  @Test
-  void testFindGraphqlFiles() {
-    File directory = getFile("schema");
-    Set<File> files = SchemaFileManifest.findGraphQLSFiles(directory);
-    assertEquals(2, files.size());
-  }
-
-  @Test
-  void testIsGraphqlFile() {
-    assertTrue(SchemaFileManifest.isGraphqlFile(new File("abc/foo.graphql")));
-    assertTrue(SchemaFileManifest.isGraphqlFile(new File("abc/foo.graphqls")));
-    assertFalse(SchemaFileManifest.isGraphqlFile(new File("abc/foo.graph")));
-    assertFalse(SchemaFileManifest.isGraphqlFile(new File("abc")));
-  }
 
   @SneakyThrows
   @Test
   void testManifestNoChange() {
-
     File bar = getFile("schema/bar.graphqls");
     File foo = getFile("schema/foo.graphqls");
 
@@ -60,8 +38,8 @@ class SchemaFileManifestTest {
       properties.store(fis, "Schema Manifest");
     }
 
-    SchemaFileManifest sfm =
-        new SchemaFileManifest(
+    SchemaManifestService sfm =
+        new SchemaManifestService(
             new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
 
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
@@ -69,7 +47,7 @@ class SchemaFileManifestTest {
     sfm.syncManifest();
 
     sfm =
-        new SchemaFileManifest(
+        new SchemaManifestService(
             new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
 
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
@@ -78,13 +56,12 @@ class SchemaFileManifestTest {
   @SneakyThrows
   @Test
   void testManifestRequiresChange() {
-
     File bar = getFile("schema/bar.graphqls");
     File foo = getFile("schema/foo.graphqls");
     File manifest = tempFolder.resolve("manifest.props").toFile();
 
-    SchemaFileManifest sfm =
-        new SchemaFileManifest(
+    SchemaManifestService sfm =
+        new SchemaManifestService(
             new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
 
     Assertions.assertTrue(sfm.getChangedFiles().contains(foo));
@@ -93,13 +70,13 @@ class SchemaFileManifestTest {
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
 
     sfm =
-        new SchemaFileManifest(
+        new SchemaManifestService(
             new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
     sfm.syncManifest();
 
     sfm =
-        new SchemaFileManifest(
+        new SchemaManifestService(
             new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
   }
@@ -107,17 +84,11 @@ class SchemaFileManifestTest {
   @ParameterizedTest
   @MethodSource("checksumProvider")
   void testChecksum(File file, String checksum) {
-    assertEquals(checksum, generateChecksum(file));
+    assertEquals(checksum, SchemaManifestService.generateChecksum(file));
   }
 
-  /**
-   * wrapper for resource File objects
-   *
-   * @param path
-   * @return File
-   */
   private static File getFile(String path) {
-    return new File(SchemaFileManifestTest.class.getClassLoader().getResource(path).getFile());
+    return new File(SchemaManifestServiceTest.class.getClassLoader().getResource(path).getFile());
   }
 
   private static Stream<Arguments> checksumProvider() {

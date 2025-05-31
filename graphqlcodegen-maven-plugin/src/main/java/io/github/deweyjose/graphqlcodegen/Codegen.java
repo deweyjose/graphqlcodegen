@@ -174,7 +174,8 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   @Override
   public void execute() {
     project.addCompileSourceRoot(outputDir.getAbsolutePath());
-    new CodegenExecutor(getLog()).execute(this, project.getArtifacts(), project.getBasedir());
+    new CodegenExecutor(getLog(), new SchemaFileService(), new TypeMappingService())
+        .execute(this, project.getArtifacts(), project.getBasedir());
   }
 
   public File[] getSchemaPaths() {

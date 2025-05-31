@@ -23,6 +23,8 @@ class CodegenExecutorTest {
 
   private Log log;
   private CodegenExecutor executor;
+  private SchemaFileService schemaFileService;
+  private TypeMappingService typeMappingService;
 
   @TempDir static Path classTempDir;
   static File testJarFile;
@@ -50,17 +52,9 @@ class CodegenExecutorTest {
   @BeforeEach
   void setUp() {
     log = mock(Log.class);
-    executor = new CodegenExecutor(log);
-  }
-
-  @Test
-  void testVerifyPackageNameThrowsOnNull() {
-    assertThrows(IllegalArgumentException.class, () -> CodegenExecutor.verifyPackageName(null));
-  }
-
-  @Test
-  void testVerifyPackageNameDoesNotThrow() {
-    assertDoesNotThrow(() -> CodegenExecutor.verifyPackageName("com.example"));
+    schemaFileService = new SchemaFileService();
+    typeMappingService = new TypeMappingService();
+    executor = new CodegenExecutor(log, schemaFileService, typeMappingService);
   }
 
   @Test
@@ -79,7 +73,7 @@ class CodegenExecutorTest {
 
     // Test with both files and directories
     File[] schemaPaths = {schemaFile, schemaDir};
-    Set<File> result = CodegenExecutor.expandSchemaPaths(schemaPaths);
+    Set<File> result = schemaFileService.expandSchemaPaths(schemaPaths);
 
     // Should find all 3 schema files
     assertEquals(3, result.size());
@@ -98,9 +92,9 @@ class CodegenExecutorTest {
   void testFilterChangedSchemaFiles() {
     Set<File> allFiles =
         new HashSet<>(Arrays.asList(new File("a.graphqls"), new File("b.graphqls")));
-    SchemaFileManifest manifest = mock(SchemaFileManifest.class);
+    SchemaManifestService manifest = mock(SchemaManifestService.class);
     when(manifest.getChangedFiles()).thenReturn(Collections.singleton(new File("b.graphqls")));
-    Set<File> result = CodegenExecutor.filterChangedSchemaFiles(allFiles, manifest);
+    Set<File> result = schemaFileService.filterChangedSchemaFiles(allFiles, manifest);
     assertEquals(1, result.size());
     assertTrue(result.contains(new File("b.graphqls")));
     verify(manifest).setFiles(new HashSet<>(allFiles));
@@ -110,7 +104,7 @@ class CodegenExecutorTest {
   void testLoadPropertiesFile_validJarAndProperties(@TempDir Path tempDir) throws Exception {
     // Call loadPropertiesFile using the shared test JAR
     String[] props = {propsFileName};
-    Map<String, String> result = CodegenExecutor.loadPropertiesFile(testJarFile, props);
+    Map<String, String> result = typeMappingService.loadPropertiesFile(testJarFile, props);
     assertEquals("bar", result.get("foo"));
     assertEquals("world", result.get("hello"));
   }
@@ -119,14 +113,14 @@ class CodegenExecutorTest {
   void testVerifySchemaFilesThrowsOnEmpty() {
     assertThrows(
         IllegalArgumentException.class,
-        () -> CodegenExecutor.verifySchemaFiles(Collections.emptySet(), new String[0]));
+        () -> schemaFileService.verifySchemaFiles(Collections.emptySet(), new String[0]));
   }
 
   @Test
   void testVerifySchemaFilesDoesNotThrow() {
     Set<File> files = new HashSet<>();
     files.add(new File("dummy.graphqls"));
-    assertDoesNotThrow(() -> CodegenExecutor.verifySchemaFiles(files, new String[0]));
+    assertDoesNotThrow(() -> schemaFileService.verifySchemaFiles(files, new String[0]));
   }
 
   @Test
@@ -141,8 +135,7 @@ class CodegenExecutorTest {
         mock(org.apache.maven.artifact.Artifact.class);
     when(mockArtifact.getFile()).thenReturn(testJarFile);
     artifacts.add(mockArtifact);
-    CodegenExecutor exec = new CodegenExecutor(log);
-    Map<String, String> result = exec.mergeTypeMapping(userMap, props, artifacts);
+    Map<String, String> result = typeMappingService.mergeTypeMapping(userMap, props, artifacts);
     // User value should win
     assertEquals("userBar", result.get("foo"));
     // JAR value should be present if not overridden
@@ -175,7 +168,7 @@ class CodegenExecutorTest {
 
   @Test
   void testDownloadCodeGenConfig_fetchesRemoteSchema() throws Exception {
-    String content = CodegenExecutor.fetchSchema(TestUtils.TEST_SCHEMA_URL);
+    String content = schemaFileService.fetchSchema(TestUtils.TEST_SCHEMA_URL);
     assertNotNull(content);
     assertTrue(
         content.contains("type") || content.contains("schema"), "Should contain GraphQL SDL");
@@ -185,7 +178,7 @@ class CodegenExecutorTest {
   void testSaveUrlToFile_createsFileWithContent(@TempDir java.nio.file.Path tempDir)
       throws Exception {
     // Arrange
-    File outFile = CodegenExecutor.saveUrlToFile(TestUtils.TEST_SCHEMA_URL, tempDir.toFile());
+    File outFile = schemaFileService.saveUrlToFile(TestUtils.TEST_SCHEMA_URL, tempDir.toFile());
     assertTrue(outFile.exists());
     String content = java.nio.file.Files.readString(outFile.toPath());
     assertTrue(

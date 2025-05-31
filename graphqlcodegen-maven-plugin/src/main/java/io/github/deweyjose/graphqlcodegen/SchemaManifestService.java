@@ -16,7 +16,7 @@ import nu.studer.java.util.OrderedProperties.OrderedPropertiesBuilder;
 
 /** Manages a manifest of GraphQL schema files and their checksums for change detection. */
 @Slf4j
-public class SchemaFileManifest {
+public class SchemaManifestService {
   private Set<File> files;
   private final File manifestPath;
   private final File projectPath;
@@ -28,7 +28,7 @@ public class SchemaFileManifest {
    * @param manifestPath the manifest file path
    * @param projectPath the project base directory
    */
-  public SchemaFileManifest(Set<File> files, File manifestPath, File projectPath) {
+  public SchemaManifestService(Set<File> files, File manifestPath, File projectPath) {
     this.files = files;
     this.manifestPath = manifestPath;
     this.projectPath = projectPath;
@@ -40,7 +40,7 @@ public class SchemaFileManifest {
    * @param manifestPath the manifest file path
    * @param projectPath the project base directory
    */
-  public SchemaFileManifest(File manifestPath, File projectPath) {
+  public SchemaManifestService(File manifestPath, File projectPath) {
     this.manifestPath = manifestPath;
     this.projectPath = projectPath;
   }

@@ -213,7 +213,9 @@ class CodegenExecutorExecuteTest {
           }
         };
     Log log = org.mockito.Mockito.mock(Log.class);
-    CodegenExecutor executor = new CodegenExecutor(log);
+    SchemaFileService schemaFileService = new SchemaFileService();
+    TypeMappingService typeMappingService = new TypeMappingService();
+    CodegenExecutor executor = new CodegenExecutor(log, schemaFileService, typeMappingService);
     executor.execute(config, new HashSet<>(), new File("."));
 
     // Assert that code generation produced output files
@@ -454,7 +456,9 @@ class CodegenExecutorExecuteTest {
           }
         };
     Log log = org.mockito.Mockito.mock(Log.class);
-    CodegenExecutor executor = new CodegenExecutor(log);
+    SchemaFileService schemaFileService = new SchemaFileService();
+    TypeMappingService typeMappingService = new TypeMappingService();
+    CodegenExecutor executor = new CodegenExecutor(log, schemaFileService, typeMappingService);
     executor.execute(config, new HashSet<>(), new File("."));
 
     // Assert that code generation produced output files
