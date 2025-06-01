@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Codegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">GraphQL Code Generator Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">io.github.deweyjose.graphqlcodegen</a> &gt; <span class="el_source">Codegen.java</span></div><h1>Codegen.java</h1><pre class="source lang-java linenums">package io.github.deweyjose.graphqlcodegen;
 
+import io.github.deweyjose.graphqlcodegen.services.SchemaFileService;
+import io.github.deweyjose.graphqlcodegen.services.SchemaManifestService;
+import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
 import java.io.File;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +21,7 @@ import org.apache.maven.project.MavenProject;
     name = &quot;generate&quot;,
     defaultPhase = LifecyclePhase.GENERATE_SOURCES,
     requiresDependencyResolution = ResolutionScope.COMPILE)
-<span class="nc" id="L21">public class Codegen extends AbstractMojo implements CodegenConfigProvider {</span>
+<span class="nc" id="L24">public class Codegen extends AbstractMojo implements CodegenConfigProvider {</span>
 
   @Parameter(defaultValue = &quot;${project}&quot;)
   private MavenProject project;
@@ -177,35 +180,37 @@ import org.apache.maven.project.MavenProject;
   private boolean autoAddSource;
 
   public File[] getSchemaPaths() {
-<span class="nc" id="L180">    return schemaPaths;</span>
+<span class="nc" id="L183">    return schemaPaths;</span>
   }
 
   @Override
   public String[] getSchemaUrls() {
-<span class="nc" id="L185">    return schemaUrls;</span>
+<span class="nc" id="L188">    return schemaUrls;</span>
   }
 
   @Override
   public void execute() {
-<span class="nc bnc" id="L190" title="All 2 branches missed.">    if (skip) {</span>
-<span class="nc" id="L191">      getLog().info(&quot;Skipping code generation as requested (skip=true)&quot;);</span>
-<span class="nc" id="L192">      return;</span>
+<span class="nc" id="L193">    Logger.registerMavenLog(getLog());</span>
+
+<span class="nc bnc" id="L195" title="All 2 branches missed.">    if (skip) {</span>
+<span class="nc" id="L196">      Logger.info(&quot;Skipping code generation as requested (skip=true)&quot;);</span>
+<span class="nc" id="L197">      return;</span>
     }
 
-<span class="nc" id="L195">    SchemaManifestService manifest =</span>
-<span class="nc" id="L196">        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());</span>
-<span class="nc" id="L197">    TypeMappingService typeMappingService = new TypeMappingService();</span>
-<span class="nc" id="L198">    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest);</span>
+<span class="nc" id="L200">    SchemaManifestService manifest =</span>
+<span class="nc" id="L201">        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());</span>
+<span class="nc" id="L202">    TypeMappingService typeMappingService = new TypeMappingService();</span>
+<span class="nc" id="L203">    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest);</span>
 
     @SuppressWarnings(&quot;unchecked&quot;)
-<span class="nc" id="L201">    Set&lt;Artifact&gt; artifacts = project.getArtifacts();</span>
+<span class="nc" id="L206">    Set&lt;Artifact&gt; artifacts = project.getArtifacts();</span>
 
-<span class="nc" id="L203">    var executor = new CodegenExecutor(getLog(), schemaFileService, typeMappingService);</span>
-<span class="nc" id="L204">    executor.execute(this, artifacts, project.getBasedir());</span>
+<span class="nc" id="L208">    var executor = new CodegenExecutor(schemaFileService, typeMappingService);</span>
+<span class="nc" id="L209">    executor.execute(this, artifacts, project.getBasedir());</span>
 
-<span class="nc bnc" id="L206" title="All 2 branches missed.">    if (autoAddSource) {</span>
-<span class="nc" id="L207">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">    if (autoAddSource) {</span>
+<span class="nc" id="L212">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
     }
-<span class="nc" id="L209">  }</span>
+<span class="nc" id="L214">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

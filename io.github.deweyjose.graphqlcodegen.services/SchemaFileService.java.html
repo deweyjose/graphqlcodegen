@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SchemaFileService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">GraphQL Code Generator Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">io.github.deweyjose.graphqlcodegen</a> &gt; <span class="el_source">SchemaFileService.java</span></div><h1>SchemaFileService.java</h1><pre class="source lang-java linenums">package io.github.deweyjose.graphqlcodegen;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SchemaFileService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">GraphQL Code Generator Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">io.github.deweyjose.graphqlcodegen.services</a> &gt; <span class="el_source">SchemaFileService.java</span></div><h1>SchemaFileService.java</h1><pre class="source lang-java linenums">package io.github.deweyjose.graphqlcodegen.services;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +59,7 @@ public class SchemaFileService {
   public void loadSchemaJarFilesFromDependencies(
       Set&lt;Artifact&gt; artifacts, Collection&lt;String&gt; schemaJarFilesFromDependencies) {
 <span class="fc" id="L61">    this.schemaJarFilesFromDependencies =</span>
-<span class="fc" id="L62">        DependencySchemaExtractor.extract(artifacts, schemaJarFilesFromDependencies);</span>
+<span class="fc" id="L62">        extractSchemaFilesFromDependencies(artifacts, schemaJarFilesFromDependencies);</span>
 <span class="fc" id="L63">  }</span>
 
   /**
@@ -166,6 +166,58 @@ public class SchemaFileService {
 <span class="fc bfc" id="L166" title="All 2 branches covered.">    return file.getName().endsWith(&quot;.graphqls&quot;)</span>
 <span class="fc bfc" id="L167" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.graphql&quot;)</span>
 <span class="fc bfc" id="L168" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.gqls&quot;);</span>
+  }
+
+  /**
+   * Extracts the schema files from the dependencies.
+   *
+   * @param dependencyArtifacts the set of dependency artifacts
+   * @param schemaJarFilesFromDependencies the schema jar files from dependencies
+   * @return the schema files
+   */
+  public static List&lt;File&gt; extractSchemaFilesFromDependencies(
+      Set&lt;Artifact&gt; dependencyArtifacts, Collection&lt;String&gt; schemaJarFilesFromDependencies) {
+<span class="fc" id="L180">    List&lt;File&gt; files = new java.util.ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L182" title="All 2 branches covered.">    for (final String jarDep : schemaJarFilesFromDependencies) {</span>
+<span class="fc" id="L183">      final String jarDepClean = jarDep.trim();</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">      if (jarDepClean.isEmpty()) {</span>
+<span class="fc" id="L185">        continue;</span>
+      }
+
+<span class="fc" id="L188">      final java.util.Optional&lt;Artifact&gt; artifactOpt =</span>
+<span class="fc" id="L189">          findArtifactFromDependencies(dependencyArtifacts, jarDepClean);</span>
+<span class="fc bfc" id="L190" title="All 2 branches covered.">      if (artifactOpt.isPresent()) {</span>
+<span class="fc" id="L191">        final Artifact artifact = artifactOpt.get();</span>
+<span class="fc" id="L192">        final File file = artifact.getFile();</span>
+<span class="fc" id="L193">        files.add(file);</span>
+      }
+<span class="fc" id="L195">    }</span>
+
+<span class="fc" id="L197">    return files;</span>
+  }
+
+  /**
+   * Finds the artifact from the dependencies.
+   *
+   * @param dependencyArtifacts the set of dependency artifacts
+   * @param artifactRef the artifact reference
+   * @return the artifact
+   */
+  private static java.util.Optional&lt;Artifact&gt; findArtifactFromDependencies(
+      Set&lt;Artifact&gt; dependencyArtifacts, final String artifactRef) {
+<span class="fc" id="L209">    final String cleanRef = artifactRef.trim();</span>
+
+<span class="fc bfc" id="L211" title="All 2 branches covered.">    for (final Artifact artifact : dependencyArtifacts) {</span>
+<span class="fc" id="L212">      final String ref =</span>
+<span class="fc" id="L213">          String.format(</span>
+<span class="fc" id="L214">              &quot;%s:%s:%s&quot;, artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());</span>
+
+<span class="fc bfc" id="L216" title="All 2 branches covered.">      if (ref.equals(cleanRef)) {</span>
+<span class="fc" id="L217">        return java.util.Optional.of(artifact);</span>
+      }
+<span class="fc" id="L219">    }</span>
+<span class="fc" id="L220">    return java.util.Optional.empty();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
