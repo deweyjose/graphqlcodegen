@@ -24,6 +24,12 @@ public class CodegenExecutor {
   private final SchemaFileService schemaFileService;
   private final TypeMappingService typeMappingService;
 
+  /**
+   * Constructor for CodegenExecutor.
+   *
+   * @param schemaFileService the schema file service
+   * @param typeMappingService the type mapping service
+   */
   public CodegenExecutor(
       SchemaFileService schemaFileService, TypeMappingService typeMappingService) {
     this.schemaFileService = schemaFileService;
@@ -133,6 +139,7 @@ public class CodegenExecutor {
   /**
    * Converts an array of strings to a set.
    *
+   * @param <T> the type of the elements in the array
    * @param arr the array
    * @return a set of strings
    */
