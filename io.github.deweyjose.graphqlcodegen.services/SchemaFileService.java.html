@@ -37,9 +37,9 @@ public class SchemaFileService {
 <span class="fc" id="L37">  }</span>
 
   /**
-   * Loads the schema paths into the schema paths.
+   * Loads the schema paths, expanding directories to include all GraphQL schema files within them.
    *
-   * @param schemaPaths the schema paths to load
+   * @param schemaPaths the collection of files or directories to load as schema paths
    */
   public void loadExpandedSchemaPaths(Collection&lt;File&gt; schemaPaths) {
 <span class="fc" id="L45">    setSchemaPaths(</span>
@@ -56,168 +56,215 @@ public class SchemaFileService {
 <span class="fc" id="L56">            .collect(Collectors.toSet()));</span>
 <span class="fc" id="L57">  }</span>
 
+  /**
+   * Loads the schema jar files from dependencies into the internal list.
+   *
+   * @param artifacts the set of Maven artifacts (dependencies)
+   * @param schemaJarFilesFromDependencies the collection of dependency coordinates to extract
+   *     schema jars from
+   */
   public void loadSchemaJarFilesFromDependencies(
       Set&lt;Artifact&gt; artifacts, Collection&lt;String&gt; schemaJarFilesFromDependencies) {
-<span class="fc" id="L61">    this.schemaJarFilesFromDependencies =</span>
-<span class="fc" id="L62">        extractSchemaFilesFromDependencies(artifacts, schemaJarFilesFromDependencies);</span>
-<span class="fc" id="L63">  }</span>
+<span class="fc" id="L68">    this.schemaJarFilesFromDependencies =</span>
+<span class="fc" id="L69">        extractSchemaFilesFromDependencies(artifacts, schemaJarFilesFromDependencies);</span>
+<span class="fc" id="L70">  }</span>
 
   /**
-   * Loads the schema URLs into the schema paths.
+   * Loads remote schema URLs and saves them as files in the output directory, adding them to
+   * schemaPaths.
    *
-   * @param schemaUrls the schema URLs to load
+   * @param schemaUrls the array of schema URLs to load
+   * @throws IOException if an I/O error occurs while saving the schema
+   * @throws InterruptedException if the thread is interrupted while fetching the schema
    */
-<span class="pc" id="L70">  @SneakyThrows</span>
+<span class="pc" id="L80">  @SneakyThrows</span>
   public void loadSchemaUrls(String[] schemaUrls) {
-<span class="fc bfc" id="L72" title="All 2 branches covered.">    for (String url : schemaUrls) {</span>
-<span class="fc" id="L73">      schemaPaths.add(saveUrlToFile(url, outputDir));</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">    for (String url : schemaUrls) {</span>
+<span class="fc" id="L83">      schemaPaths.add(saveUrlToFile(url, outputDir));</span>
     }
-<span class="fc" id="L75">  }</span>
+<span class="fc" id="L85">  }</span>
 
+  /**
+   * Checks if there are any schema files or schema jars to generate. Throws if none are found.
+   *
+   * @throws IllegalArgumentException if no schema files or jars are found
+   */
   public void checkHasSchemaFiles() {
-<span class="fc bfc" id="L78" title="All 2 branches covered.">    if (getSchemaPaths().isEmpty()</span>
-<span class="fc" id="L79">        &amp;&amp; Optional.ofNullable(getSchemaJarFilesFromDependencies())</span>
-<span class="fc" id="L80">            .orElse(Collections.emptyList())</span>
-<span class="pc bpc" id="L81" title="1 of 2 branches missed.">            .isEmpty()) {</span>
-<span class="fc" id="L82">      throw new IllegalArgumentException(&quot;No schema files found. Please check your configuration.&quot;);</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">    if (getSchemaPaths().isEmpty()</span>
+<span class="fc" id="L94">        &amp;&amp; Optional.ofNullable(getSchemaJarFilesFromDependencies())</span>
+<span class="fc" id="L95">            .orElse(Collections.emptyList())</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">            .isEmpty()) {</span>
+<span class="fc" id="L97">      throw new IllegalArgumentException(&quot;No schema files found. Please check your configuration.&quot;);</span>
     }
-<span class="fc" id="L84">  }</span>
+<span class="fc" id="L99">  }</span>
 
+  /**
+   * Returns true if there are no schema files or schema jars to process.
+   *
+   * @return true if there is no work to do, false otherwise
+   */
   public boolean noWorkToDo() {
-<span class="pc bpc" id="L87" title="3 of 4 branches missed.">    return getSchemaPaths().isEmpty() &amp;&amp; getSchemaJarFilesFromDependencies().isEmpty();</span>
+<span class="pc bpc" id="L107" title="3 of 4 branches missed.">    return getSchemaPaths().isEmpty() &amp;&amp; getSchemaJarFilesFromDependencies().isEmpty();</span>
   }
 
+  /** Syncs the manifest by writing the current state to disk. Prints stack trace on error. */
   public void syncManifest() {
     try {
-<span class="fc" id="L92">      manifest.syncManifest();</span>
-<span class="nc" id="L93">    } catch (Exception e) {</span>
-<span class="nc" id="L94">      e.printStackTrace();</span>
-<span class="fc" id="L95">    }</span>
-<span class="fc" id="L96">  }</span>
+<span class="fc" id="L113">      manifest.syncManifest();</span>
+<span class="nc" id="L114">    } catch (Exception e) {</span>
+<span class="nc" id="L115">      e.printStackTrace();</span>
+<span class="fc" id="L116">    }</span>
+<span class="fc" id="L117">  }</span>
 
+  /** Filters schemaPaths to only include files that have changed according to the manifest. */
   public void filterChangedSchemaFiles() {
-<span class="fc" id="L99">    manifest.setFiles(new HashSet&lt;&gt;(schemaPaths));</span>
-<span class="fc" id="L100">    Set&lt;File&gt; changed = new HashSet&lt;&gt;(schemaPaths);</span>
-<span class="fc" id="L101">    changed.retainAll(manifest.getChangedFiles());</span>
-<span class="fc" id="L102">    setSchemaPaths(changed);</span>
-<span class="fc" id="L103">  }</span>
+<span class="fc" id="L121">    manifest.setFiles(new HashSet&lt;&gt;(schemaPaths));</span>
+<span class="fc" id="L122">    Set&lt;File&gt; changed = new HashSet&lt;&gt;(schemaPaths);</span>
+<span class="fc" id="L123">    changed.retainAll(manifest.getChangedFiles());</span>
+<span class="fc" id="L124">    setSchemaPaths(changed);</span>
+<span class="fc" id="L125">  }</span>
 
+  /**
+   * Fetches the contents of a remote schema from the given URL as a string.
+   *
+   * @param url the URL to fetch the schema from
+   * @return the schema SDL as a string
+   * @throws IOException if an I/O error occurs
+   * @throws InterruptedException if the thread is interrupted
+   */
   public String fetchSchema(String url) throws IOException, InterruptedException {
-<span class="fc" id="L106">    HttpClient client = HttpClient.newHttpClient();</span>
-<span class="fc" id="L107">    HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();</span>
-<span class="fc" id="L108">    HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());</span>
-<span class="fc" id="L109">    return response.body();</span>
+<span class="fc" id="L136">    HttpClient client = HttpClient.newHttpClient();</span>
+<span class="fc" id="L137">    HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();</span>
+<span class="fc" id="L138">    HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());</span>
+<span class="fc" id="L139">    return response.body();</span>
   }
 
+  /**
+   * Downloads a remote schema from the given URL and saves it as a file in the output directory.
+   *
+   * @param url the URL to download the schema from
+   * @param outputDir the output directory to save the file in
+   * @return the File object representing the saved schema
+   * @throws IOException if an I/O error occurs
+   * @throws InterruptedException if the thread is interrupted
+   */
   public File saveUrlToFile(String url, File outputDir) throws IOException, InterruptedException {
-<span class="fc" id="L113">    String content = fetchSchema(url);</span>
-<span class="fc" id="L114">    String fileName = &quot;remote-schemas/&quot; + md5Hex(url) + &quot;.graphqls&quot;;</span>
-<span class="fc" id="L115">    File outFile = new File(outputDir, fileName);</span>
-<span class="fc" id="L116">    Files.createDirectories(outFile.getParentFile().toPath());</span>
-<span class="fc" id="L117">    Files.writeString(outFile.toPath(), content);</span>
-<span class="fc" id="L118">    return outFile;</span>
+<span class="fc" id="L152">    String content = fetchSchema(url);</span>
+<span class="fc" id="L153">    String fileName = &quot;remote-schemas/&quot; + md5Hex(url) + &quot;.graphqls&quot;;</span>
+<span class="fc" id="L154">    File outFile = new File(outputDir, fileName);</span>
+<span class="fc" id="L155">    Files.createDirectories(outFile.getParentFile().toPath());</span>
+<span class="fc" id="L156">    Files.writeString(outFile.toPath(), content);</span>
+<span class="fc" id="L157">    return outFile;</span>
   }
 
+  /**
+   * Computes the MD5 hash of the input string and returns it as a hex string.
+   *
+   * @param input the input string
+   * @return the MD5 hash as a hex string
+   */
   private String md5Hex(String input) {
     try {
-<span class="fc" id="L123">      MessageDigest md = MessageDigest.getInstance(&quot;MD5&quot;);</span>
-<span class="fc" id="L124">      byte[] digest = md.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));</span>
-<span class="fc" id="L125">      StringBuilder sb = new StringBuilder();</span>
-<span class="fc bfc" id="L126" title="All 2 branches covered.">      for (byte b : digest) {</span>
-<span class="fc" id="L127">        sb.append(String.format(&quot;%02x&quot;, b));</span>
+<span class="fc" id="L168">      MessageDigest md = MessageDigest.getInstance(&quot;MD5&quot;);</span>
+<span class="fc" id="L169">      byte[] digest = md.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));</span>
+<span class="fc" id="L170">      StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">      for (byte b : digest) {</span>
+<span class="fc" id="L172">        sb.append(String.format(&quot;%02x&quot;, b));</span>
       }
-<span class="fc" id="L129">      return sb.toString();</span>
-<span class="nc" id="L130">    } catch (Exception e) {</span>
-<span class="nc" id="L131">      throw new RuntimeException(&quot;Failed to compute MD5 hash&quot;, e);</span>
+<span class="fc" id="L174">      return sb.toString();</span>
+<span class="nc" id="L175">    } catch (Exception e) {</span>
+<span class="nc" id="L176">      throw new RuntimeException(&quot;Failed to compute MD5 hash&quot;, e);</span>
     }
   }
 
   /**
-   * Recursively finds all GraphQL schema files in a directory.
+   * Recursively finds all GraphQL schema files in a directory and its subdirectories.
    *
    * @param directory the directory to search
-   * @return a set of GraphQL schema files
+   * @return a set of GraphQL schema files found
    */
   public static Set&lt;File&gt; findGraphQLSFiles(File directory) {
-<span class="fc" id="L142">    Set&lt;File&gt; result = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L187">    Set&lt;File&gt; result = new HashSet&lt;&gt;();</span>
 
-<span class="fc" id="L144">    File[] contents = directory.listFiles();</span>
-<span class="pc bpc" id="L145" title="1 of 2 branches missed.">    if (contents != null) {</span>
-<span class="fc bfc" id="L146" title="All 2 branches covered.">      for (File content : contents) {</span>
-<span class="pc bpc" id="L147" title="1 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
-<span class="fc" id="L148">          result.add(content);</span>
-<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        } else if (content.isDirectory()) {</span>
-<span class="fc" id="L150">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
-<span class="fc" id="L151">          result.addAll(subdirectoryGraphQLSFiles);</span>
+<span class="fc" id="L189">    File[] contents = directory.listFiles();</span>
+<span class="pc bpc" id="L190" title="1 of 2 branches missed.">    if (contents != null) {</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">      for (File content : contents) {</span>
+<span class="pc bpc" id="L192" title="1 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
+<span class="fc" id="L193">          result.add(content);</span>
+<span class="pc bpc" id="L194" title="1 of 2 branches missed.">        } else if (content.isDirectory()) {</span>
+<span class="fc" id="L195">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
+<span class="fc" id="L196">          result.addAll(subdirectoryGraphQLSFiles);</span>
         }
       }
     }
 
-<span class="fc" id="L156">    return result;</span>
+<span class="fc" id="L201">    return result;</span>
   }
 
   /**
    * Returns true if the file is a GraphQL schema file (.graphql, .graphqls, .gqls).
    *
    * @param file the file to check
-   * @return true if the file is a GraphQL schema file
+   * @return true if the file is a GraphQL schema file, false otherwise
    */
   public static boolean isGraphqlFile(File file) {
-<span class="fc bfc" id="L166" title="All 2 branches covered.">    return file.getName().endsWith(&quot;.graphqls&quot;)</span>
-<span class="fc bfc" id="L167" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.graphql&quot;)</span>
-<span class="fc bfc" id="L168" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.gqls&quot;);</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">    return file.getName().endsWith(&quot;.graphqls&quot;)</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.graphql&quot;)</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.gqls&quot;);</span>
   }
 
   /**
-   * Extracts the schema files from the dependencies.
+   * Extracts schema files from the given set of dependency artifacts, matching the provided
+   * dependency coordinates.
    *
-   * @param dependencyArtifacts the set of dependency artifacts
-   * @param schemaJarFilesFromDependencies the schema jar files from dependencies
-   * @return the schema files
+   * @param dependencyArtifacts the set of Maven dependency artifacts
+   * @param schemaJarFilesFromDependencies the collection of dependency coordinates to match
+   * @return a list of schema files (jars) found in the dependencies
    */
   public static List&lt;File&gt; extractSchemaFilesFromDependencies(
       Set&lt;Artifact&gt; dependencyArtifacts, Collection&lt;String&gt; schemaJarFilesFromDependencies) {
-<span class="fc" id="L180">    List&lt;File&gt; files = new java.util.ArrayList&lt;&gt;();</span>
+<span class="fc" id="L226">    List&lt;File&gt; files = new java.util.ArrayList&lt;&gt;();</span>
 
-<span class="fc bfc" id="L182" title="All 2 branches covered.">    for (final String jarDep : schemaJarFilesFromDependencies) {</span>
-<span class="fc" id="L183">      final String jarDepClean = jarDep.trim();</span>
-<span class="fc bfc" id="L184" title="All 2 branches covered.">      if (jarDepClean.isEmpty()) {</span>
-<span class="fc" id="L185">        continue;</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">    for (final String jarDep : schemaJarFilesFromDependencies) {</span>
+<span class="fc" id="L229">      final String jarDepClean = jarDep.trim();</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">      if (jarDepClean.isEmpty()) {</span>
+<span class="fc" id="L231">        continue;</span>
       }
 
-<span class="fc" id="L188">      final java.util.Optional&lt;Artifact&gt; artifactOpt =</span>
-<span class="fc" id="L189">          findArtifactFromDependencies(dependencyArtifacts, jarDepClean);</span>
-<span class="fc bfc" id="L190" title="All 2 branches covered.">      if (artifactOpt.isPresent()) {</span>
-<span class="fc" id="L191">        final Artifact artifact = artifactOpt.get();</span>
-<span class="fc" id="L192">        final File file = artifact.getFile();</span>
-<span class="fc" id="L193">        files.add(file);</span>
+<span class="fc" id="L234">      final java.util.Optional&lt;Artifact&gt; artifactOpt =</span>
+<span class="fc" id="L235">          findArtifactFromDependencies(dependencyArtifacts, jarDepClean);</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">      if (artifactOpt.isPresent()) {</span>
+<span class="fc" id="L237">        final Artifact artifact = artifactOpt.get();</span>
+<span class="fc" id="L238">        final File file = artifact.getFile();</span>
+<span class="fc" id="L239">        files.add(file);</span>
       }
-<span class="fc" id="L195">    }</span>
+<span class="fc" id="L241">    }</span>
 
-<span class="fc" id="L197">    return files;</span>
+<span class="fc" id="L243">    return files;</span>
   }
 
   /**
-   * Finds the artifact from the dependencies.
+   * Finds a Maven artifact in the given set of dependencies matching the provided coordinate
+   * string.
    *
-   * @param dependencyArtifacts the set of dependency artifacts
-   * @param artifactRef the artifact reference
-   * @return the artifact
+   * @param dependencyArtifacts the set of Maven dependency artifacts
+   * @param artifactRef the Maven coordinate string (groupId:artifactId:version)
+   * @return an Optional containing the matching Artifact, or empty if not found
    */
   private static java.util.Optional&lt;Artifact&gt; findArtifactFromDependencies(
       Set&lt;Artifact&gt; dependencyArtifacts, final String artifactRef) {
-<span class="fc" id="L209">    final String cleanRef = artifactRef.trim();</span>
+<span class="fc" id="L256">    final String cleanRef = artifactRef.trim();</span>
 
-<span class="fc bfc" id="L211" title="All 2 branches covered.">    for (final Artifact artifact : dependencyArtifacts) {</span>
-<span class="fc" id="L212">      final String ref =</span>
-<span class="fc" id="L213">          String.format(</span>
-<span class="fc" id="L214">              &quot;%s:%s:%s&quot;, artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());</span>
+<span class="fc bfc" id="L258" title="All 2 branches covered.">    for (final Artifact artifact : dependencyArtifacts) {</span>
+<span class="fc" id="L259">      final String ref =</span>
+<span class="fc" id="L260">          String.format(</span>
+<span class="fc" id="L261">              &quot;%s:%s:%s&quot;, artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());</span>
 
-<span class="fc bfc" id="L216" title="All 2 branches covered.">      if (ref.equals(cleanRef)) {</span>
-<span class="fc" id="L217">        return java.util.Optional.of(artifact);</span>
+<span class="fc bfc" id="L263" title="All 2 branches covered.">      if (ref.equals(cleanRef)) {</span>
+<span class="fc" id="L264">        return java.util.Optional.of(artifact);</span>
       }
-<span class="fc" id="L219">    }</span>
-<span class="fc" id="L220">    return java.util.Optional.empty();</span>
+<span class="fc" id="L266">    }</span>
+<span class="fc" id="L267">    return java.util.Optional.empty();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
