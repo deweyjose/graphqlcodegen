@@ -45,11 +45,6 @@ public class CodegenExecutor {
    */
   @SneakyThrows
   public void execute(CodegenConfigProvider request, Set<Artifact> artifacts, File projectBaseDir) {
-    if (request.isSkip()) {
-      log.info("Skipping code generation as requested (skip=true)");
-      return;
-    }
-
     // get the schema paths that might have changed or all of them.
     if (request.isOnlyGenerateChanged()) {
       schemaFileService.loadExpandedSchemaPaths(toSet(request.getSchemaPaths()));

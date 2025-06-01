@@ -176,8 +176,22 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   @Parameter(property = "autoAddSource", defaultValue = "true")
   private boolean autoAddSource;
 
+  public File[] getSchemaPaths() {
+    return schemaPaths;
+  }
+
+  @Override
+  public String[] getSchemaUrls() {
+    return schemaUrls;
+  }
+
   @Override
   public void execute() {
+    if (skip) {
+      getLog().info("Skipping code generation as requested (skip=true)");
+      return;
+    }
+
     SchemaManifestService manifest =
         new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());
     TypeMappingService typeMappingService = new TypeMappingService();
@@ -188,17 +202,9 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
 
     var executor = new CodegenExecutor(getLog(), schemaFileService, typeMappingService);
     executor.execute(this, artifacts, project.getBasedir());
+
     if (autoAddSource) {
       project.addCompileSourceRoot(outputDir.getAbsolutePath());
     }
-  }
-
-  public File[] getSchemaPaths() {
-    return schemaPaths;
-  }
-
-  @Override
-  public String[] getSchemaUrls() {
-    return schemaUrls;
   }
 }
