@@ -7,7 +7,6 @@ import io.github.deweyjose.graphqlcodegen.services.SchemaManifestService;
 import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
 import java.io.File;
 import java.util.HashSet;
-import org.apache.maven.plugin.logging.Log;
 import org.junit.jupiter.api.Test;
 
 class CodegenExecutorExecuteTest {
@@ -22,7 +21,6 @@ class CodegenExecutorExecuteTest {
     config.setSchemaPaths(schemaPaths);
     config.setOutputDir(outputDir);
     config.setSchemaManifestOutputDir(outputDir);
-    Log log = new TestLog();
     SchemaFileService schemaFileService =
         new SchemaFileService(outputDir, new SchemaManifestService(outputDir, outputDir));
     TypeMappingService typeMappingService = new TypeMappingService();
@@ -76,7 +74,6 @@ class CodegenExecutorExecuteTest {
     config.setSchemaManifestOutputDir(outputDir);
     config.setSchemaUrls(new String[] {TestUtils.TEST_SCHEMA_URL});
     config.setOnlyGenerateChanged(true);
-    Log log = new TestLog();
     SchemaFileService schemaFileService =
         new SchemaFileService(outputDir, new SchemaManifestService(outputDir, outputDir));
     TypeMappingService typeMappingService = new TypeMappingService();

@@ -231,13 +231,12 @@ public class SchemaFileService {
         continue;
       }
 
-      final java.util.Optional<Artifact> artifactOpt =
-          findArtifactFromDependencies(dependencyArtifacts, jarDepClean);
-      if (artifactOpt.isPresent()) {
-        final Artifact artifact = artifactOpt.get();
-        final File file = artifact.getFile();
-        files.add(file);
-      }
+      findArtifactFromDependencies(dependencyArtifacts, jarDepClean)
+          .ifPresent(
+              artifact -> {
+                final File file = artifact.getFile();
+                files.add(file);
+              });
     }
 
     return files;
@@ -251,7 +250,7 @@ public class SchemaFileService {
    * @param artifactRef the Maven coordinate string (groupId:artifactId:version)
    * @return an Optional containing the matching Artifact, or empty if not found
    */
-  private static java.util.Optional<Artifact> findArtifactFromDependencies(
+  private static Optional<Artifact> findArtifactFromDependencies(
       Set<Artifact> dependencyArtifacts, final String artifactRef) {
     final String cleanRef = artifactRef.trim();
 
@@ -264,6 +263,6 @@ public class SchemaFileService {
         return java.util.Optional.of(artifact);
       }
     }
-    return java.util.Optional.empty();
+    return Optional.empty();
   }
 }
