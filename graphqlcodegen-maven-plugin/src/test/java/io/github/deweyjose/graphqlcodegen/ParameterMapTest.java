@@ -19,4 +19,4 @@ class ParameterMapTest {
     assertTrue(result.contains("hello=world"));
     assertTrue(result.startsWith("{") && result.endsWith("}"));
   }
-} 
+}

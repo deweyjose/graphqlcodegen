@@ -8,7 +8,9 @@ import java.io.FileOutputStream;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
@@ -91,15 +93,16 @@ class SchemaManifestServiceTest {
     File manifest = tempDir.resolve("manifest.props").toFile();
 
     // Sync manifest with initial content
-    SchemaManifestService sfm = new SchemaManifestService(new HashSet<>(java.util.List.of(file)), manifest, tempDir.toFile());
+    SchemaManifestService sfm =
+        new SchemaManifestService(new HashSet<>(List.of(file)), manifest, tempDir.toFile());
     sfm.syncManifest();
 
     // Change file content
     java.nio.file.Files.writeString(file.toPath(), "type Query { bar: Int }");
 
     // Now getChangedFiles should detect the file as changed
-    sfm = new SchemaManifestService(new HashSet<>(java.util.List.of(file)), manifest, tempDir.toFile());
-    java.util.Set<File> changed = sfm.getChangedFiles();
+    sfm = new SchemaManifestService(new HashSet<>(List.of(file)), manifest, tempDir.toFile());
+    Set<File> changed = sfm.getChangedFiles();
     assertEquals(1, changed.size());
     assertTrue(changed.contains(file));
   }
