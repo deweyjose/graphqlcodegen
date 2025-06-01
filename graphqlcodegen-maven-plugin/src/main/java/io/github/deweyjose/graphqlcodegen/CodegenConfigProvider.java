@@ -253,5 +253,8 @@ public interface CodegenConfigProvider {
    */
   boolean isAutoAddSource();
 
+  /**
+   * @return introspection requests
+   */
   List<IntrospectionRequest> getIntrospectionRequests();
 }

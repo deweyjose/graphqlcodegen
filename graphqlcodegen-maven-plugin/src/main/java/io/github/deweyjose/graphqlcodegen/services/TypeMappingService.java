@@ -11,6 +11,7 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import org.apache.maven.artifact.Artifact;
 
+/** This class provides services related to type mapping. */
 public class TypeMappingService {
   /**
    * Loads type mapping properties from the specified files inside a JAR file.

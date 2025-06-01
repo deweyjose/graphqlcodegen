@@ -91,6 +91,13 @@ public class SchemaFileService {
     }
   }
 
+  /**
+   * Loads introspected schemas from the given collection of IntrospectionRequest objects.
+   *
+   * @param schemaUrls the collection of IntrospectionRequest objects to load
+   * @throws IOException if an I/O error occurs while saving the schema
+   * @throws InterruptedException if the thread is interrupted while fetching the schema
+   */
   @SneakyThrows
   public void loadIntrospectedSchemas(Collection<IntrospectionRequest> schemaUrls) {
     for (IntrospectionRequest request : schemaUrls) {
