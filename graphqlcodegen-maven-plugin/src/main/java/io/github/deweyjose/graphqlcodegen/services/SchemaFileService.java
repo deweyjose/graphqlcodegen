@@ -232,11 +232,8 @@ public class SchemaFileService {
       }
 
       findArtifactFromDependencies(dependencyArtifacts, jarDepClean)
-          .ifPresent(
-              artifact -> {
-                final File file = artifact.getFile();
-                files.add(file);
-              });
+          .map(Artifact::getFile)
+          .ifPresent(files::add);
     }
 
     return files;
