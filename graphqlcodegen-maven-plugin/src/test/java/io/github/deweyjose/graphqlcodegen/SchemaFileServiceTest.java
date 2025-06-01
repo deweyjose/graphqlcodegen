@@ -85,6 +85,7 @@ class SchemaFileServiceTest {
   void testIsGraphqlFile() {
     assertTrue(SchemaFileService.isGraphqlFile(new File("abc/foo.graphql")));
     assertTrue(SchemaFileService.isGraphqlFile(new File("abc/foo.graphqls")));
+    assertTrue(SchemaFileService.isGraphqlFile(new File("abc/foo.gqls")));
     assertFalse(SchemaFileService.isGraphqlFile(new File("abc/foo.graph")));
     assertFalse(SchemaFileService.isGraphqlFile(new File("abc")));
   }
@@ -94,6 +95,32 @@ class SchemaFileServiceTest {
     File directory = TestUtils.getFile("schema");
     Set<File> files = SchemaFileService.findGraphQLSFiles(directory);
     assertEquals(2, files.size());
+  }
+
+  @Test
+  @SneakyThrows
+  void testFindGraphqlFilesWithNestedDirectories(@TempDir Path tempDir) {
+    // Create root directory with a schema file
+    File rootSchema = tempDir.resolve("root.graphqls").toFile();
+    rootSchema.createNewFile();
+
+    // Create a nested directory with another schema file
+    File nestedDir = tempDir.resolve("nested").toFile();
+    nestedDir.mkdir();
+    File nestedSchema = new File(nestedDir, "nested.graphqls");
+    nestedSchema.createNewFile();
+
+    // Create a deeper nested directory with another schema file
+    File deepDir = new File(nestedDir, "deep");
+    deepDir.mkdir();
+    File deepSchema = new File(deepDir, "deep.graphqls");
+    deepSchema.createNewFile();
+
+    Set<File> files = SchemaFileService.findGraphQLSFiles(tempDir.toFile());
+    assertEquals(3, files.size());
+    assertTrue(files.contains(rootSchema));
+    assertTrue(files.contains(nestedSchema));
+    assertTrue(files.contains(deepSchema));
   }
 
   @Test

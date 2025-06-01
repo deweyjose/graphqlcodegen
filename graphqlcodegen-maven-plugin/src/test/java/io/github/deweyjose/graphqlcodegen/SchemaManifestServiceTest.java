@@ -1,6 +1,7 @@
 package io.github.deweyjose.graphqlcodegen;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -79,6 +80,28 @@ class SchemaManifestServiceTest {
         new SchemaManifestService(
             new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
+  }
+
+  @SneakyThrows
+  @Test
+  void testManifestDetectsChangedFileContent(@TempDir Path tempDir) {
+    // Create a file and write initial content
+    File file = tempDir.resolve("test.graphqls").toFile();
+    java.nio.file.Files.writeString(file.toPath(), "type Query { foo: String }");
+    File manifest = tempDir.resolve("manifest.props").toFile();
+
+    // Sync manifest with initial content
+    SchemaManifestService sfm = new SchemaManifestService(new HashSet<>(java.util.List.of(file)), manifest, tempDir.toFile());
+    sfm.syncManifest();
+
+    // Change file content
+    java.nio.file.Files.writeString(file.toPath(), "type Query { bar: Int }");
+
+    // Now getChangedFiles should detect the file as changed
+    sfm = new SchemaManifestService(new HashSet<>(java.util.List.of(file)), manifest, tempDir.toFile());
+    java.util.Set<File> changed = sfm.getChangedFiles();
+    assertEquals(1, changed.size());
+    assertTrue(changed.contains(file));
   }
 
   @ParameterizedTest
