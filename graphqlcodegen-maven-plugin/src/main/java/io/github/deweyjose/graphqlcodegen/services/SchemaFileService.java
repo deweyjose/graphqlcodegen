@@ -1,5 +1,6 @@
 package io.github.deweyjose.graphqlcodegen.services;
 
+import io.github.deweyjose.graphqlcodegen.services.RemoteSchemaService.IntrospectionOperation;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,10 +9,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -27,6 +30,15 @@ public class SchemaFileService {
 
   private Set<File> schemaPaths;
   private List<File> schemaJarFilesFromDependencies;
+
+  @Builder
+  @Getter
+  public static class SchemaIntrospectionRequest {
+    public String url;
+    public String introspectionQuery;
+    public String introspectionOperationName;
+    public Map<String, String> headers;
+  }
 
   public SchemaFileService(File outputDir, SchemaManifestService manifest) {
     this(outputDir, manifest, new RemoteSchemaService());
@@ -84,7 +96,22 @@ public class SchemaFileService {
   @SneakyThrows
   public void loadSchemaUrls(String[] schemaUrls) {
     for (String url : schemaUrls) {
-      schemaPaths.add(saveUrlToFile(url, outputDir));
+      String content = remoteSchemaService.getRemoteSchemaFile(url);
+      schemaPaths.add(saveUrlToFile(url, content));
+    }
+  }
+
+  @SneakyThrows
+  public void loadIntrospectedSchemaUrls(List<SchemaIntrospectionRequest> schemaUrls) {
+    for (SchemaIntrospectionRequest request : schemaUrls) {
+      IntrospectionOperation operation =
+          IntrospectionOperation.builder()
+              .query(request.introspectionQuery)
+              .operationName(request.introspectionOperationName)
+              .build();
+      String content =
+          remoteSchemaService.getIntrospectedSchemaFile(request.url, operation, request.headers);
+      schemaPaths.add(saveUrlToFile(request.url, content));
     }
   }
 
@@ -149,8 +176,7 @@ public class SchemaFileService {
    * @throws IOException if an I/O error occurs
    * @throws InterruptedException if the thread is interrupted
    */
-  public File saveUrlToFile(String url, File outputDir) throws IOException, InterruptedException {
-    String content = remoteSchemaService.getRemoteSchemaFile(url);
+  private File saveUrlToFile(String url, String content) throws IOException, InterruptedException {
     String fileName =
         "remote-schemas/" + Base64.getEncoder().encodeToString(url.getBytes()) + ".graphqls";
     File outFile = new File(outputDir, fileName);
