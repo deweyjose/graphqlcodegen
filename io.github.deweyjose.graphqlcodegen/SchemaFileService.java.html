@@ -144,11 +144,11 @@ public class SchemaFileService {
 <span class="fc" id="L144">    File[] contents = directory.listFiles();</span>
 <span class="pc bpc" id="L145" title="1 of 2 branches missed.">    if (contents != null) {</span>
 <span class="fc bfc" id="L146" title="All 2 branches covered.">      for (File content : contents) {</span>
-<span class="pc bpc" id="L147" title="2 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
+<span class="pc bpc" id="L147" title="1 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
 <span class="fc" id="L148">          result.add(content);</span>
-<span class="nc bnc" id="L149" title="All 2 branches missed.">        } else if (content.isDirectory()) {</span>
-<span class="nc" id="L150">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
-<span class="nc" id="L151">          result.addAll(subdirectoryGraphQLSFiles);</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        } else if (content.isDirectory()) {</span>
+<span class="fc" id="L150">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
+<span class="fc" id="L151">          result.addAll(subdirectoryGraphQLSFiles);</span>
         }
       }
     }
@@ -165,7 +165,7 @@ public class SchemaFileService {
   public static boolean isGraphqlFile(File file) {
 <span class="fc bfc" id="L166" title="All 2 branches covered.">    return file.getName().endsWith(&quot;.graphqls&quot;)</span>
 <span class="fc bfc" id="L167" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.graphql&quot;)</span>
-<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        || file.getName().endsWith(&quot;.gqls&quot;);</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.gqls&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

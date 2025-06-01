@@ -80,8 +80,8 @@ public class SchemaManifestService {
 <span class="fc" id="L80">      String oldChecksum = manifest.getProperty(relativizeToProject(file));</span>
 <span class="fc bfc" id="L81" title="All 2 branches covered.">      if (oldChecksum == null) {</span>
 <span class="fc" id="L82">        log.info(&quot;{} is new, will generate code&quot;, file.getName());</span>
-<span class="pc bpc" id="L83" title="1 of 2 branches missed.">      } else if (!oldChecksum.equals(generateChecksum(file))) {</span>
-<span class="nc" id="L84">        log.info(&quot;{} has changed, will generate code&quot;, file.getName());</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">      } else if (!oldChecksum.equals(generateChecksum(file))) {</span>
+<span class="fc" id="L84">        log.info(&quot;{} has changed, will generate code&quot;, file.getName());</span>
       } else {
 <span class="fc" id="L86">        log.info(&quot;{} has not changed, will not generate code&quot;, file.getName());</span>
 <span class="fc" id="L87">        continue;</span>
