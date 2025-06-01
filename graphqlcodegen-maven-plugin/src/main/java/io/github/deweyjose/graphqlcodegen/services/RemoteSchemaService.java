@@ -17,26 +17,47 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
+/**
+ * Service for fetching and converting remote GraphQL schemas, including introspection queries.
+ *
+ * <p>This service provides methods to:
+ *
+ * <ul>
+ *   <li>Fetch a remote GraphQL schema file via HTTP GET
+ *   <li>Fetch and convert a remote GraphQL schema via introspection (HTTP POST)
+ *   <li>Convert introspection JSON results to GraphQL SDL
+ * </ul>
+ */
 public class RemoteSchemaService {
   private final HttpClient httpClient;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
+  /**
+   * Represents a GraphQL introspection operation, including the query and optional operation name.
+   */
   @Builder
   @Getter
   public static class IntrospectionOperation {
+    /** The GraphQL introspection query string. */
     private String query;
+
+    /** The operation name for the introspection query (optional). */
     private String operationName;
   }
 
-  public static class IntrospectionRequest {
-    public IntrospectionOperation operation;
-    public Map<String, Object> variables;
-  }
-
+  /** Constructs a new RemoteSchemaService using Java's built-in HttpClient. */
   public RemoteSchemaService() {
     this.httpClient = HttpClient.newHttpClient();
   }
 
+  /**
+   * Fetches a remote GraphQL schema file via HTTP GET.
+   *
+   * @param url the URL of the remote schema file
+   * @return the contents of the schema file as a String
+   * @throws IOException if the request fails or returns a non-200 status
+   * @throws InterruptedException if the thread is interrupted
+   */
   public String getRemoteSchemaFile(String url) throws IOException, InterruptedException {
     HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
     HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
@@ -47,6 +68,15 @@ public class RemoteSchemaService {
     return response.body();
   }
 
+  /**
+   * Fetches a remote GraphQL schema via introspection (HTTP POST) and converts it to SDL.
+   *
+   * @param url the URL of the GraphQL endpoint
+   * @param operation the introspection operation (query and operation name)
+   * @param headers additional HTTP headers to include in the request
+   * @return the GraphQL schema SDL as a String
+   * @throws IOException if the request fails or returns a non-200 status
+   */
   @SneakyThrows
   public String getIntrospectedSchemaFile(
       String url, IntrospectionOperation operation, Map<String, String> headers) {
@@ -71,6 +101,12 @@ public class RemoteSchemaService {
     return convertIntrospectionToSchema(introspection);
   }
 
+  /**
+   * Converts a parsed introspection result (as a Map) to GraphQL SDL.
+   *
+   * @param introspection the introspection result as a Map (should contain a "data" key)
+   * @return the GraphQL schema SDL as a String
+   */
   public String convertIntrospectionToSchema(Map<String, Object> introspection) {
     IntrospectionResultToSchema introspectionResultToSchema = new IntrospectionResultToSchema();
     ExecutionResult executionResult =

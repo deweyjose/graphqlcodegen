@@ -3,7 +3,6 @@ package io.github.deweyjose.graphqlcodegen.services;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
