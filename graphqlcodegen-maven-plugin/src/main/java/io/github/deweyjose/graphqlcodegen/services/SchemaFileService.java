@@ -2,13 +2,8 @@ package io.github.deweyjose.graphqlcodegen.services;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.security.MessageDigest;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,13 +23,21 @@ import org.apache.maven.artifact.Artifact;
 public class SchemaFileService {
   private final File outputDir;
   private final SchemaManifestService manifest;
+  private final RemoteSchemaService remoteSchemaService;
+
   private Set<File> schemaPaths;
   private List<File> schemaJarFilesFromDependencies;
 
   public SchemaFileService(File outputDir, SchemaManifestService manifest) {
+    this(outputDir, manifest, new RemoteSchemaService());
+  }
+
+  public SchemaFileService(
+      File outputDir, SchemaManifestService manifest, RemoteSchemaService remoteSchemaService) {
     this.schemaPaths = new HashSet<>();
     this.outputDir = outputDir;
     this.manifest = manifest;
+    this.remoteSchemaService = remoteSchemaService;
   }
 
   /**
@@ -134,10 +137,7 @@ public class SchemaFileService {
    * @throws InterruptedException if the thread is interrupted
    */
   public String fetchSchema(String url) throws IOException, InterruptedException {
-    HttpClient client = HttpClient.newHttpClient();
-    HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
-    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-    return response.body();
+    return remoteSchemaService.getRemoteSchemaFile(url);
   }
 
   /**
@@ -150,12 +150,32 @@ public class SchemaFileService {
    * @throws InterruptedException if the thread is interrupted
    */
   public File saveUrlToFile(String url, File outputDir) throws IOException, InterruptedException {
-    String content = fetchSchema(url);
-    String fileName = "remote-schemas/" + Base64.getEncoder().encodeToString(url.getBytes()) + ".graphqls";
+    String content = remoteSchemaService.getRemoteSchemaFile(url);
+    String fileName = "remote-schemas/" + md5Hex(url) + ".graphqls";
     File outFile = new File(outputDir, fileName);
     Files.createDirectories(outFile.getParentFile().toPath());
     Files.writeString(outFile.toPath(), content);
     return outFile;
+  }
+
+  /**
+   * Computes the MD5 hash of the input string and returns it as a hex string.
+   *
+   * @param input the input string
+   * @return the MD5 hash as a hex string
+   */
+  private String md5Hex(String input) {
+    try {
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      byte[] digest = md.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+      StringBuilder sb = new StringBuilder();
+      for (byte b : digest) {
+        sb.append(String.format("%02x", b));
+      }
+      return sb.toString();
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to compute MD5 hash", e);
+    }
   }
 
   /**

@@ -58,8 +58,7 @@
     <junit.version>5.12.2</junit.version>
     <lombok.version>1.18.38</lombok.version>
     <kotlinpoet-jvm.version>1.18.1</kotlinpoet-jvm.version>
-    <spotless.version>2.44.4</spotless.version>
-    <dgs.platform.version>10.1.2</dgs.platform.version>
+    <spotless.version>2.44.4</spotless.version>    
   </properties>
 
   <dependencyManagement>
@@ -144,18 +143,21 @@
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-reflect</artifactId>
         <version>1.9.23</version>
+      </dependency>      
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.15.2</version>
       </dependency>
       <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>2.19.0</version>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>2.15.2</version>
       </dependency>
       <dependency>
-        <groupId>com.netflix.graphql.dgs</groupId>
-        <artifactId>graphql-dgs-platform-dependencies</artifactId>
-        <version>${dgs.platform.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.15.2</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

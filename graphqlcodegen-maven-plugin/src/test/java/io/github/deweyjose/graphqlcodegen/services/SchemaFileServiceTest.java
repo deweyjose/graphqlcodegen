@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.deweyjose.graphqlcodegen.TestUtils;
@@ -22,12 +24,15 @@ class SchemaFileServiceTest {
 
   private SchemaManifestService schemaManifestService;
   private SchemaFileService schemaFileService;
+  private RemoteSchemaService remoteSchemaService;
 
   @BeforeEach
   void setUp() {
     File manifestDir = new File("target/test-classes/schema");
     schemaManifestService = mock(SchemaManifestService.class);
-    schemaFileService = new SchemaFileService(manifestDir, schemaManifestService);
+    remoteSchemaService = mock(RemoteSchemaService.class);
+    schemaFileService =
+        new SchemaFileService(manifestDir, schemaManifestService, remoteSchemaService);
   }
 
   @SneakyThrows
@@ -127,20 +132,26 @@ class SchemaFileServiceTest {
   @Test
   @SneakyThrows
   void testDownloadCodeGenConfig_fetchesRemoteSchema() {
-    String content = schemaFileService.fetchSchema(TestUtils.TEST_SCHEMA_URL);
+    String url = TestUtils.TEST_SCHEMA_URL;
+    String expectedContent = "type Query { hello: String }";
+    when(remoteSchemaService.getRemoteSchemaFile(url)).thenReturn(expectedContent);
+    String content = schemaFileService.fetchSchema(url);
     assertNotNull(content);
-    assertTrue(
-        content.contains("type") || content.contains("schema"), "Should contain GraphQL SDL");
+    assertEquals(expectedContent, content);
+    verify(remoteSchemaService, times(1)).getRemoteSchemaFile(url);
   }
 
   @Test
   @SneakyThrows
   void testSaveUrlToFile_createsFileWithContent(@TempDir Path tempDir) {
-    File outFile = schemaFileService.saveUrlToFile(TestUtils.TEST_SCHEMA_URL, tempDir.toFile());
+    String url = TestUtils.TEST_SCHEMA_URL;
+    String expectedContent = "type Query { hello: String }";
+    when(remoteSchemaService.getRemoteSchemaFile(url)).thenReturn(expectedContent);
+    File outFile = schemaFileService.saveUrlToFile(url, tempDir.toFile());
     assertTrue(outFile.exists());
     String content = java.nio.file.Files.readString(outFile.toPath());
-    assertTrue(
-        content.contains("type") || content.contains("schema"), "Should contain GraphQL SDL");
+    assertEquals(expectedContent, content);
+    verify(remoteSchemaService, times(1)).getRemoteSchemaFile(url);
   }
 
   @Test
