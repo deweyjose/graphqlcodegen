@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +26,7 @@ class DependencySchemaExtractorTest {
     Set<Artifact> artifacts = new HashSet<>();
     artifacts.add(artifact);
 
-    String[] deps = {"com.example:foo:1.0.0"};
+    Collection<String> deps = List.of("com.example:foo:1.0.0");
     List<File> result = DependencySchemaExtractor.extract(artifacts, deps);
 
     assertEquals(1, result.size());
@@ -36,7 +37,7 @@ class DependencySchemaExtractorTest {
   void extract_skipsEmptyEntries() {
     Set<Artifact> artifacts = Collections.emptySet();
 
-    String[] deps = {"   ", ""};
+    Collection<String> deps = List.of("   ", "");
     List<File> result = DependencySchemaExtractor.extract(artifacts, deps);
 
     assertTrue(result.isEmpty());
@@ -53,7 +54,7 @@ class DependencySchemaExtractorTest {
     Set<Artifact> artifacts = new HashSet<>();
     artifacts.add(artifact);
 
-    String[] deps = {"com.other:bar:2.0.0"};
+    Collection<String> deps = List.of("com.other:bar:2.0.0");
     List<File> result = DependencySchemaExtractor.extract(artifacts, deps);
 
     assertTrue(result.isEmpty());
@@ -63,7 +64,7 @@ class DependencySchemaExtractorTest {
   void extract_returnsEmptyListIfNoDependencies() {
     Set<Artifact> artifacts = Collections.emptySet();
 
-    String[] deps = {"com.example:foo:1.0.0"};
+    Collection<String> deps = List.of("com.example:foo:1.0.0");
     List<File> result = DependencySchemaExtractor.extract(artifacts, deps);
 
     assertTrue(result.isEmpty());

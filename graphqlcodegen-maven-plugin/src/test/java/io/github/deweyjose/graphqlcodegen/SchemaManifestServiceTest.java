@@ -1,16 +1,18 @@
 package io.github.deweyjose.graphqlcodegen;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -18,17 +20,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-@Slf4j
-class SchemaFileManifestTest {
+class SchemaManifestServiceTest {
 
   @TempDir Path tempFolder;
 
   @SneakyThrows
   @Test
   void testManifestNoChange() {
-
-    File bar = TestUtils.getFile("schema/bar.graphqls");
-    File foo = TestUtils.getFile("schema/foo.graphqls");
+    File bar = getFile("schema/bar.graphqls");
+    File foo = getFile("schema/foo.graphqls");
 
     Properties properties = new Properties();
     properties.put(
@@ -59,9 +59,8 @@ class SchemaFileManifestTest {
   @SneakyThrows
   @Test
   void testManifestRequiresChange() {
-
-    File bar = TestUtils.getFile("schema/bar.graphqls");
-    File foo = TestUtils.getFile("schema/foo.graphqls");
+    File bar = getFile("schema/bar.graphqls");
+    File foo = getFile("schema/foo.graphqls");
     File manifest = tempFolder.resolve("manifest.props").toFile();
 
     SchemaManifestService sfm =
@@ -85,15 +84,42 @@ class SchemaFileManifestTest {
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
   }
 
-  private static Stream<Arguments> checksumProvider() {
-    return Stream.of(
-        Arguments.of(TestUtils.getFile("schema/bar.graphqls"), "7cada13b5b8770e46f7a69e8856abdb9"),
-        Arguments.of(TestUtils.getFile("schema/foo.graphqls"), "61bbd2d58c22dfb3c664829ad116f7e9"));
+  @SneakyThrows
+  @Test
+  void testManifestDetectsChangedFileContent(@TempDir Path tempDir) {
+    // Create a file and write initial content
+    File file = tempDir.resolve("test.graphqls").toFile();
+    java.nio.file.Files.writeString(file.toPath(), "type Query { foo: String }");
+    File manifest = tempDir.resolve("manifest.props").toFile();
+
+    // Sync manifest with initial content
+    SchemaManifestService sfm =
+        new SchemaManifestService(new HashSet<>(List.of(file)), manifest, tempDir.toFile());
+    sfm.syncManifest();
+
+    // Change file content
+    java.nio.file.Files.writeString(file.toPath(), "type Query { bar: Int }");
+
+    // Now getChangedFiles should detect the file as changed
+    sfm = new SchemaManifestService(new HashSet<>(List.of(file)), manifest, tempDir.toFile());
+    Set<File> changed = sfm.getChangedFiles();
+    assertEquals(1, changed.size());
+    assertTrue(changed.contains(file));
   }
 
   @ParameterizedTest
   @MethodSource("checksumProvider")
   void testChecksum(File file, String checksum) {
     assertEquals(checksum, SchemaManifestService.generateChecksum(file));
+  }
+
+  private static File getFile(String path) {
+    return new File(SchemaManifestServiceTest.class.getClassLoader().getResource(path).getFile());
+  }
+
+  private static Stream<Arguments> checksumProvider() {
+    return Stream.of(
+        Arguments.of(getFile("schema/bar.graphqls"), "7cada13b5b8770e46f7a69e8856abdb9"),
+        Arguments.of(getFile("schema/foo.graphqls"), "61bbd2d58c22dfb3c664829ad116f7e9"));
   }
 }

@@ -16,7 +16,7 @@ import nu.studer.java.util.OrderedProperties.OrderedPropertiesBuilder;
 
 /** Manages a manifest of GraphQL schema files and their checksums for change detection. */
 @Slf4j
-public class SchemaFileManifest {
+public class SchemaManifestService {
   private Set<File> files;
   private final File manifestPath;
   private final File projectPath;
@@ -28,7 +28,7 @@ public class SchemaFileManifest {
    * @param manifestPath the manifest file path
    * @param projectPath the project base directory
    */
-  public SchemaFileManifest(Set<File> files, File manifestPath, File projectPath) {
+  public SchemaManifestService(Set<File> files, File manifestPath, File projectPath) {
     this.files = files;
     this.manifestPath = manifestPath;
     this.projectPath = projectPath;
@@ -40,8 +40,8 @@ public class SchemaFileManifest {
    * @param manifestPath the manifest file path
    * @param projectPath the project base directory
    */
-  public SchemaFileManifest(File manifestPath, File projectPath) {
-    this.manifestPath = manifestPath;
+  public SchemaManifestService(File manifestDir, File projectPath) {
+    this.manifestPath = new File(manifestDir, "schema-manifest.props");
     this.projectPath = projectPath;
   }
 
@@ -57,42 +57,6 @@ public class SchemaFileManifest {
     byte[] hash = MessageDigest.getInstance("MD5").digest(data);
     String checksum = new BigInteger(1, hash).toString(16);
     return checksum;
-  }
-
-  /**
-   * Returns true if the file is a GraphQL schema file (.graphql, .graphqls, .gqls).
-   *
-   * @param file the file to check
-   * @return true if the file is a GraphQL schema file
-   */
-  public static boolean isGraphqlFile(File file) {
-    return file.getName().endsWith(".graphqls")
-        || file.getName().endsWith(".graphql")
-        || file.getName().endsWith(".gqls");
-  }
-
-  /**
-   * Recursively finds all GraphQL schema files in a directory.
-   *
-   * @param directory the directory to search
-   * @return a set of GraphQL schema files
-   */
-  public static Set<File> findGraphQLSFiles(File directory) {
-    Set<File> result = new HashSet<>();
-
-    File[] contents = directory.listFiles();
-    if (contents != null) {
-      for (File content : contents) {
-        if (content.isFile() && isGraphqlFile(content)) {
-          result.add(content);
-        } else if (content.isDirectory()) {
-          Set<File> subdirectoryGraphQLSFiles = findGraphQLSFiles(content);
-          result.addAll(subdirectoryGraphQLSFiles);
-        }
-      }
-    }
-
-    return result;
   }
 
   /**
@@ -127,9 +91,7 @@ public class SchemaFileManifest {
     return changed;
   }
 
-  /**
-   * Clears the old manifest, computes new checksums for each file, and saves the properties file.
-   */
+  /** Syncs the manifest with the files. */
   @SneakyThrows
   public void syncManifest() {
     OrderedProperties manifest =
@@ -148,6 +110,11 @@ public class SchemaFileManifest {
     }
   }
 
+  /**
+   * Loads the manifest from the manifest path.
+   *
+   * @return the manifest
+   */
   @SneakyThrows
   private OrderedProperties loadManifest() {
     OrderedProperties properties =
@@ -160,6 +127,12 @@ public class SchemaFileManifest {
     return properties;
   }
 
+  /**
+   * Relativizes a file to the project path.
+   *
+   * @param file the file to relativize
+   * @return the relativized file path
+   */
   private String relativizeToProject(File file) {
     return projectPath.toPath().relativize(file.toPath()).toString();
   }

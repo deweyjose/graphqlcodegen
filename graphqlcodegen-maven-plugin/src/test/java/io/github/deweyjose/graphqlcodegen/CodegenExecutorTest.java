@@ -1,194 +1,143 @@
 package io.github.deweyjose.graphqlcodegen;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.maven.plugin.logging.Log;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
-class CodegenExecutorTest {
+class CodegenExecutorExecuteTest {
 
-  private Log log;
-  private CodegenExecutor executor;
+  @Test
+  void integrationTest_generateCodeFromSchema() throws java.io.IOException {
+    // Arrange
+    File schemaDir = new File(getClass().getClassLoader().getResource("schema").getFile());
+    File[] schemaPaths = {schemaDir};
+    File outputDir = new File("target/generated-test-codegen");
+    TestCodegenProvider config = new TestCodegenProvider();
+    config.setSchemaPaths(schemaPaths);
+    config.setOutputDir(outputDir);
+    config.setSchemaManifestOutputDir(outputDir);
+    Log log = new TestLog();
+    SchemaFileService schemaFileService =
+        new SchemaFileService(outputDir, new SchemaManifestService(outputDir, outputDir));
+    TypeMappingService typeMappingService = new TypeMappingService();
+    CodegenExecutor executor = new CodegenExecutor(log, schemaFileService, typeMappingService);
+    executor.execute(config, new HashSet<>(), new File("."));
 
-  @TempDir static Path classTempDir;
-  static File testJarFile;
-  static final String propsFileName = "test-type-mapping.properties";
-  static final String propsContent = "foo=bar\nhello=world\n";
+    // Assert that code generation produced output files
+    assertTrue(outputDir.exists() && outputDir.isDirectory(), "Output directory should exist");
+    File[] generatedFiles = outputDir.listFiles();
+    assertNotNull(generatedFiles, "Output directory should not be empty");
+    assertTrue(
+        generatedFiles.length > 0, "There should be generated files in the output directory");
 
-  @BeforeAll
-  static void createTestJar() throws Exception {
-    // Create the properties file
-    Path propsPath = classTempDir.resolve(propsFileName);
-    java.nio.file.Files.write(
-        propsPath, propsContent.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-    // Create the JAR file containing the properties file
-    testJarFile = classTempDir.resolve("test-artifact.jar").toFile();
-    try (java.util.jar.JarOutputStream jarOut =
-        new java.util.jar.JarOutputStream(new java.io.FileOutputStream(testJarFile))) {
-      java.util.jar.JarEntry entry = new java.util.jar.JarEntry(propsFileName);
-      jarOut.putNextEntry(entry);
-      byte[] bytes = java.nio.file.Files.readAllBytes(propsPath);
-      jarOut.write(bytes);
-      jarOut.closeEntry();
+    // Check for specific generated type files and their content
+    File typesDir = new File(outputDir, "com/example/types");
+    assertTrue(typesDir.exists() && typesDir.isDirectory(), "Types directory should exist");
+    String[] expectedTypeFiles = {"Show.java", "ShowInput.java", "Foo.java", "Actor.java"};
+    for (String fileName : expectedTypeFiles) {
+      File f = new File(typesDir, fileName);
+      assertTrue(f.exists(), fileName + " should be generated");
+      String content = java.nio.file.Files.readString(f.toPath());
+      String className = fileName.replace(".java", "");
+      assertTrue(
+          content.contains("public class " + className),
+          fileName + " should contain class definition");
+    }
+
+    // Check for datafetcher files
+    File datafetchersDir = new File(outputDir, "com/example/datafetchers");
+    assertTrue(
+        datafetchersDir.exists() && datafetchersDir.isDirectory(),
+        "Datafetchers directory should exist");
+    String[] expectedDatafetcherFiles = {"BarsDatafetcher.java", "ShowsDatafetcher.java"};
+    for (String fileName : expectedDatafetcherFiles) {
+      File f = new File(datafetchersDir, fileName);
+      assertTrue(f.exists(), fileName + " should be generated");
+      String content = java.nio.file.Files.readString(f.toPath());
+      String className = fileName.replace(".java", "");
+      assertTrue(
+          content.contains("public class " + className),
+          fileName + " should contain class definition");
     }
   }
 
-  @BeforeEach
-  void setUp() {
-    log = mock(Log.class);
-    executor = new CodegenExecutor(log);
-  }
-
   @Test
-  void testVerifyPackageNameThrowsOnNull() {
-    assertThrows(IllegalArgumentException.class, () -> CodegenExecutor.verifyPackageName(null));
-  }
+  void integrationTest_generateCodeFromSchemaWithRemoteSchema() throws java.io.IOException {
+    // Arrange
+    File outputDir = new File("target/generated-test-codegen-remote");
+    TestCodegenProvider config = new TestCodegenProvider();
+    config.setOutputDir(outputDir);
+    config.setSchemaManifestOutputDir(outputDir);
+    config.setSchemaUrls(new String[] {TestUtils.TEST_SCHEMA_URL});
+    config.setOnlyGenerateChanged(true);
+    Log log = new TestLog();
+    SchemaFileService schemaFileService =
+        new SchemaFileService(outputDir, new SchemaManifestService(outputDir, outputDir));
+    TypeMappingService typeMappingService = new TypeMappingService();
+    CodegenExecutor executor = new CodegenExecutor(log, schemaFileService, typeMappingService);
+    executor.execute(config, new HashSet<>(), new File("."));
 
-  @Test
-  void testVerifyPackageNameDoesNotThrow() {
-    assertDoesNotThrow(() -> CodegenExecutor.verifyPackageName("com.example"));
-  }
+    // Assert that code generation produced output files
+    assertTrue(outputDir.exists() && outputDir.isDirectory(), "Output directory should exist");
+    File[] generatedFiles = outputDir.listFiles();
+    assertNotNull(generatedFiles, "Output directory should not be empty");
+    assertTrue(
+        generatedFiles.length > 0, "There should be generated files in the output directory");
 
-  @Test
-  void testExpandSchemaPaths_withFilesAndDirs(@TempDir Path tempDir) throws IOException {
-    // Create a temporary schema file
-    File schemaFile = tempDir.resolve("test.graphqls").toFile();
-    schemaFile.createNewFile();
+    // Check for specific generated type files and their content
+    File typesDir = new File(outputDir, "com/example/types");
+    assertTrue(typesDir.exists() && typesDir.isDirectory(), "Types directory should exist");
+    String[] expectedTypeFiles = {"Foo.java"};
+    for (String fileName : expectedTypeFiles) {
+      File f = new File(typesDir, fileName);
+      assertTrue(f.exists(), fileName + " should be generated");
+      String content = java.nio.file.Files.readString(f.toPath());
+      String className = fileName.replace(".java", "");
+      assertTrue(
+          content.contains("public class " + className),
+          fileName + " should contain class definition");
+    }
 
-    // Create a temporary directory with schema files
-    File schemaDir = tempDir.resolve("schemas").toFile();
-    schemaDir.mkdir();
-    File schemaFile2 = new File(schemaDir, "test2.graphqls");
-    schemaFile2.createNewFile();
-    File schemaFile3 = new File(schemaDir, "test3.graphqls");
-    schemaFile3.createNewFile();
-
-    // Test with both files and directories
-    File[] schemaPaths = {schemaFile, schemaDir};
-    Set<File> result = CodegenExecutor.expandSchemaPaths(schemaPaths);
-
-    // Should find all 3 schema files
-    assertEquals(3, result.size());
-    assertTrue(result.contains(schemaFile));
-    assertTrue(result.contains(schemaFile2));
-    assertTrue(result.contains(schemaFile3));
-
-    // Test without recursive search
-    result = Arrays.stream(schemaPaths).collect(Collectors.toSet());
-    assertEquals(2, result.size());
-    assertTrue(result.contains(schemaFile));
-    assertTrue(result.contains(schemaDir));
-  }
-
-  @Test
-  void testFilterChangedSchemaFiles() {
-    Set<File> allFiles =
-        new HashSet<>(Arrays.asList(new File("a.graphqls"), new File("b.graphqls")));
-    SchemaFileManifest manifest = mock(SchemaFileManifest.class);
-    when(manifest.getChangedFiles()).thenReturn(Collections.singleton(new File("b.graphqls")));
-    Set<File> result = CodegenExecutor.filterChangedSchemaFiles(allFiles, manifest);
-    assertEquals(1, result.size());
-    assertTrue(result.contains(new File("b.graphqls")));
-    verify(manifest).setFiles(new HashSet<>(allFiles));
-  }
-
-  @Test
-  void testLoadPropertiesFile_validJarAndProperties(@TempDir Path tempDir) throws Exception {
-    // Call loadPropertiesFile using the shared test JAR
-    String[] props = {propsFileName};
-    Map<String, String> result = CodegenExecutor.loadPropertiesFile(testJarFile, props);
-    assertEquals("bar", result.get("foo"));
-    assertEquals("world", result.get("hello"));
-  }
-
-  @Test
-  void testVerifySchemaFilesThrowsOnEmpty() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> CodegenExecutor.verifySchemaFiles(Collections.emptySet(), new String[0]));
-  }
-
-  @Test
-  void testVerifySchemaFilesDoesNotThrow() {
-    Set<File> files = new HashSet<>();
-    files.add(new File("dummy.graphqls"));
-    assertDoesNotThrow(() -> CodegenExecutor.verifySchemaFiles(files, new String[0]));
-  }
-
-  @Test
-  void testMergeTypeMapping_userPrecedence(@TempDir Path tempDir) throws Exception {
-    // User map overlaps with JAR and adds a new key
-    Map<String, String> userMap = new java.util.HashMap<>();
-    userMap.put("foo", "userBar"); // overrides JAR
-    userMap.put("userOnly", "value");
-    String[] props = {propsFileName};
-    Set<org.apache.maven.artifact.Artifact> artifacts = new java.util.HashSet<>();
-    org.apache.maven.artifact.Artifact mockArtifact =
-        mock(org.apache.maven.artifact.Artifact.class);
-    when(mockArtifact.getFile()).thenReturn(testJarFile);
-    artifacts.add(mockArtifact);
-    CodegenExecutor exec = new CodegenExecutor(log);
-    Map<String, String> result = exec.mergeTypeMapping(userMap, props, artifacts);
-    // User value should win
-    assertEquals("userBar", result.get("foo"));
-    // JAR value should be present if not overridden
-    assertEquals("world", result.get("hello"));
-    // User-only value should be present
-    assertEquals("value", result.get("userOnly"));
+    // Check for datafetcher files
+    File datafetchersDir = new File(outputDir, "com/example/datafetchers");
+    assertTrue(
+        datafetchersDir.exists() && datafetchersDir.isDirectory(),
+        "Datafetchers directory should exist");
+    String[] expectedDatafetcherFiles = {"BarsDatafetcher.java", "ShowsDatafetcher.java"};
+    for (String fileName : expectedDatafetcherFiles) {
+      File f = new File(datafetchersDir, fileName);
+      assertTrue(f.exists(), fileName + " should be generated");
+      String content = java.nio.file.Files.readString(f.toPath());
+      String className = fileName.replace(".java", "");
+      assertTrue(
+          content.contains("public class " + className),
+          fileName + " should contain class definition");
+    }
   }
 
   @Test
   void testToSet_nullAndEmptyAndNormal() {
-    assertEquals(Collections.emptySet(), CodegenExecutor.toSet(null));
-    assertEquals(Collections.emptySet(), CodegenExecutor.toSet(new String[0]));
-    assertEquals(Set.of("a", "b"), CodegenExecutor.toSet(new String[] {"a", "b"}));
+    assertEquals(java.util.Collections.emptySet(), CodegenExecutor.toSet(null));
+    assertEquals(java.util.Collections.emptySet(), CodegenExecutor.toSet(new String[0]));
+    assertEquals(java.util.Set.of("a", "b"), CodegenExecutor.toSet(new String[] {"a", "b"}));
   }
 
   @Test
   void testToMap_nullAndEmptyAndNormal() {
-    assertEquals(Collections.emptyMap(), CodegenExecutor.toMap(null));
-    assertEquals(Collections.emptyMap(), CodegenExecutor.toMap(Collections.emptyMap()));
+    assertEquals(java.util.Collections.emptyMap(), CodegenExecutor.toMap(null));
+    assertEquals(
+        java.util.Collections.emptyMap(), CodegenExecutor.toMap(java.util.Collections.emptyMap()));
     ParameterMap paramMap = new ParameterMap();
-    Map<String, String> props = new HashMap<>();
+    java.util.Map<String, String> props = new java.util.HashMap<>();
     props.put("foo", "bar");
     paramMap.setProperties(props);
-    Map<String, ParameterMap> input = new HashMap<>();
+    java.util.Map<String, ParameterMap> input = new java.util.HashMap<>();
     input.put("key", paramMap);
-    Map<String, Map<String, String>> result = CodegenExecutor.toMap(input);
+    java.util.Map<String, java.util.Map<String, String>> result = CodegenExecutor.toMap(input);
     assertEquals(1, result.size());
-    assertEquals(Map.of("foo", "bar"), result.get("key"));
-  }
-
-  @Test
-  void testDownloadCodeGenConfig_fetchesRemoteSchema() throws Exception {
-    String content = CodegenExecutor.fetchSchema(TestUtils.TEST_SCHEMA_URL);
-    assertNotNull(content);
-    assertTrue(
-        content.contains("type") || content.contains("schema"), "Should contain GraphQL SDL");
-  }
-
-  @Test
-  void testSaveUrlToFile_createsFileWithContent(@TempDir java.nio.file.Path tempDir)
-      throws Exception {
-    // Arrange
-    File outFile = CodegenExecutor.saveUrlToFile(TestUtils.TEST_SCHEMA_URL, tempDir.toFile());
-    assertTrue(outFile.exists());
-    String content = java.nio.file.Files.readString(outFile.toPath());
-    assertTrue(
-        content.contains("type") || content.contains("schema"), "Should contain GraphQL SDL");
+    assertEquals(java.util.Map.of("foo", "bar"), result.get("key"));
   }
 }
