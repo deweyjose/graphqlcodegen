@@ -1,4 +1,4 @@
-package io.github.deweyjose.graphqlcodegen;
+package io.github.deweyjose.graphqlcodegen.parameters;
 
 import java.util.Map;
 import org.apache.maven.plugins.annotations.Parameter;

@@ -1,7 +1,11 @@
 package io.github.deweyjose.graphqlcodegen;
 
+import io.github.deweyjose.graphqlcodegen.parameters.IntrospectionRequest;
+import io.github.deweyjose.graphqlcodegen.parameters.ParameterMap;
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TestCodegenProvider implements CodegenConfigProvider {
@@ -54,6 +58,7 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   private boolean disableDatesInGeneratedAnnotation = false;
   private String[] schemaUrls = new String[0];
   private boolean autoAddSource = true;
+  private List<IntrospectionRequest> introspectionRequests = Collections.emptyList();
 
   // Setters for test customization
   public void setSchemaPaths(File[] schemaPaths) {
@@ -75,6 +80,10 @@ public class TestCodegenProvider implements CodegenConfigProvider {
 
   public void setOnlyGenerateChanged(boolean b) {
     this.onlyGenerateChanged = b;
+  }
+
+  public void setIntrospectionRequests(List<IntrospectionRequest> introspectionRequests) {
+    this.introspectionRequests = introspectionRequests;
   }
 
   // Add more setters as needed
@@ -322,5 +331,10 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   @Override
   public boolean isAutoAddSource() {
     return autoAddSource;
+  }
+
+  @Override
+  public List<IntrospectionRequest> getIntrospectionRequests() {
+    return introspectionRequests;
   }
 }

@@ -13,12 +13,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.deweyjose.graphqlcodegen.TestUtils;
+import io.github.deweyjose.graphqlcodegen.parameters.IntrospectionRequest;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.SneakyThrows;
+import org.apache.maven.artifact.Artifact;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -209,7 +212,7 @@ class SchemaFileServiceTest {
 
   @Test
   void extractSchemaFilesFromDependencies_returnsEmptyListIfNoDependencies() {
-    Set<org.apache.maven.artifact.Artifact> artifacts = java.util.Collections.emptySet();
+    Set<Artifact> artifacts = java.util.Collections.emptySet();
 
     java.util.Collection<String> deps = java.util.List.of("com.example:foo:1.0.0");
     java.util.List<File> result =
@@ -233,17 +236,15 @@ class SchemaFileServiceTest {
             eq(headers)))
         .thenReturn(expectedSDL);
 
-    SchemaFileService.SchemaIntrospectionRequest request =
-        SchemaFileService.SchemaIntrospectionRequest.builder()
-            .url(url)
-            .introspectionQuery(query)
-            .introspectionOperationName(operationName)
-            .headers(headers)
-            .build();
+    IntrospectionRequest request = new IntrospectionRequest();
+    request.setUrl(url);
+    request.setQuery(query);
+    request.setOperationName(operationName);
+    request.setHeaders(headers);
 
     SchemaFileService service =
         new SchemaFileService(tempDir.toFile(), schemaManifestService, remoteSchemaService);
-    service.loadIntrospectedSchemaUrls(java.util.List.of(request));
+    service.loadIntrospectedSchemas(List.of(request));
     Set<File> schemaPaths = service.getSchemaPaths();
     assertEquals(1, schemaPaths.size());
     File outFile = schemaPaths.iterator().next();

@@ -1,5 +1,6 @@
 package io.github.deweyjose.graphqlcodegen.services;
 
+import io.github.deweyjose.graphqlcodegen.parameters.IntrospectionRequest;
 import io.github.deweyjose.graphqlcodegen.services.RemoteSchemaService.IntrospectionOperation;
 import java.io.File;
 import java.io.IOException;
@@ -9,12 +10,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -30,15 +29,6 @@ public class SchemaFileService {
 
   private Set<File> schemaPaths;
   private List<File> schemaJarFilesFromDependencies;
-
-  @Builder
-  @Getter
-  public static class SchemaIntrospectionRequest {
-    public String url;
-    public String introspectionQuery;
-    public String introspectionOperationName;
-    public Map<String, String> headers;
-  }
 
   public SchemaFileService(File outputDir, SchemaManifestService manifest) {
     this(outputDir, manifest, new RemoteSchemaService());
@@ -102,16 +92,17 @@ public class SchemaFileService {
   }
 
   @SneakyThrows
-  public void loadIntrospectedSchemaUrls(List<SchemaIntrospectionRequest> schemaUrls) {
-    for (SchemaIntrospectionRequest request : schemaUrls) {
+  public void loadIntrospectedSchemas(Collection<IntrospectionRequest> schemaUrls) {
+    for (IntrospectionRequest request : schemaUrls) {
+      String query = Optional.ofNullable(request.getQuery()).orElse(Constants.DEFAULT_QUERY);
+      String operationName =
+          Optional.ofNullable(request.getOperationName()).orElse(Constants.DEFAULT_OPERATION_NAME);
       IntrospectionOperation operation =
-          IntrospectionOperation.builder()
-              .query(request.introspectionQuery)
-              .operationName(request.introspectionOperationName)
-              .build();
+          IntrospectionOperation.builder().query(query).operationName(operationName).build();
       String content =
-          remoteSchemaService.getIntrospectedSchemaFile(request.url, operation, request.headers);
-      schemaPaths.add(saveUrlToFile(request.url, content));
+          remoteSchemaService.getIntrospectedSchemaFile(
+              request.getUrl(), operation, request.getHeaders());
+      schemaPaths.add(saveUrlToFile(request.getUrl(), content));
     }
   }
 
