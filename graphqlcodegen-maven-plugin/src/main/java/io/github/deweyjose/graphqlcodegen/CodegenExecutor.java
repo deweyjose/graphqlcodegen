@@ -20,18 +20,11 @@ import org.apache.maven.plugin.logging.Log;
  * mapping.
  */
 public class CodegenExecutor {
-  private final Log log;
   private final SchemaFileService schemaFileService;
   private final TypeMappingService typeMappingService;
 
-  /**
-   * Constructs a CodegenExecutor with the given Maven logger.
-   *
-   * @param log the Maven logger
-   */
   public CodegenExecutor(
-      Log log, SchemaFileService schemaFileService, TypeMappingService typeMappingService) {
-    this.log = log;
+      SchemaFileService schemaFileService, TypeMappingService typeMappingService) {
     this.schemaFileService = schemaFileService;
     this.typeMappingService = typeMappingService;
   }
@@ -44,11 +37,14 @@ public class CodegenExecutor {
    * @param projectBaseDir the project base directory
    */
   @SneakyThrows
-  public void execute(CodegenConfigProvider request, Set<Artifact> artifacts, File projectBaseDir) {
+  public void execute(
+      CodegenConfigProvider request, Set<Artifact> artifacts, File projectBaseDir, Log mavenLog) {
+    Slf4jMavenLogger.registerMavenLog(mavenLog);
+
     // get the schema paths that might have changed or all of them.
     if (request.isOnlyGenerateChanged()) {
       schemaFileService.loadExpandedSchemaPaths(toSet(request.getSchemaPaths()));
-      log.info(String.format("expanded schema paths: %s", schemaFileService.getSchemaPaths()));
+      Slf4jMavenLogger.info("expanded schema paths: {}", schemaFileService.getSchemaPaths());
     } else {
       schemaFileService.setSchemaPaths(toSet(request.getSchemaPaths()));
     }
@@ -62,11 +58,11 @@ public class CodegenExecutor {
 
     if (request.isOnlyGenerateChanged()) {
       schemaFileService.filterChangedSchemaFiles();
-      log.info(String.format("changed schema files: %s", schemaFileService.getSchemaPaths()));
+      Slf4jMavenLogger.info("changed schema files: {}", schemaFileService.getSchemaPaths());
     }
 
     if (schemaFileService.noWorkToDo()) {
-      log.info("no files to generate");
+      Slf4jMavenLogger.info("no files to generate");
       return;
     }
 
@@ -126,7 +122,7 @@ public class CodegenExecutor {
             .setTrackInputFieldSet(request.isTrackInputFieldSet())
             .build();
 
-    log.info(String.format("Codegen config: \n%s", config));
+    Slf4jMavenLogger.info("Codegen config: \n{}", config);
     final CodeGen codeGen = new CodeGen(config);
     codeGen.generate();
 

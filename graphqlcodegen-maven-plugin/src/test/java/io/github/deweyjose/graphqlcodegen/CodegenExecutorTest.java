@@ -23,8 +23,8 @@ class CodegenExecutorExecuteTest {
     SchemaFileService schemaFileService =
         new SchemaFileService(outputDir, new SchemaManifestService(outputDir, outputDir));
     TypeMappingService typeMappingService = new TypeMappingService();
-    CodegenExecutor executor = new CodegenExecutor(log, schemaFileService, typeMappingService);
-    executor.execute(config, new HashSet<>(), new File("."));
+    CodegenExecutor executor = new CodegenExecutor(schemaFileService, typeMappingService);
+    executor.execute(config, new HashSet<>(), new File("."), log);
 
     // Assert that code generation produced output files
     assertTrue(outputDir.exists() && outputDir.isDirectory(), "Output directory should exist");
@@ -77,8 +77,8 @@ class CodegenExecutorExecuteTest {
     SchemaFileService schemaFileService =
         new SchemaFileService(outputDir, new SchemaManifestService(outputDir, outputDir));
     TypeMappingService typeMappingService = new TypeMappingService();
-    CodegenExecutor executor = new CodegenExecutor(log, schemaFileService, typeMappingService);
-    executor.execute(config, new HashSet<>(), new File("."));
+    CodegenExecutor executor = new CodegenExecutor(schemaFileService, typeMappingService);
+    executor.execute(config, new HashSet<>(), new File("."), log);
 
     // Assert that code generation produced output files
     assertTrue(outputDir.exists() && outputDir.isDirectory(), "Output directory should exist");

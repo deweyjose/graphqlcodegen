@@ -187,8 +187,10 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
 
   @Override
   public void execute() {
+    Slf4jMavenLogger.registerMavenLog(getLog());
+
     if (skip) {
-      getLog().info("Skipping code generation as requested (skip=true)");
+      Slf4jMavenLogger.info("Skipping code generation as requested (skip=true)");
       return;
     }
 
@@ -200,8 +202,8 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
     @SuppressWarnings("unchecked")
     Set<Artifact> artifacts = project.getArtifacts();
 
-    var executor = new CodegenExecutor(getLog(), schemaFileService, typeMappingService);
-    executor.execute(this, artifacts, project.getBasedir());
+    var executor = new CodegenExecutor(schemaFileService, typeMappingService);
+    executor.execute(this, artifacts, project.getBasedir(), getLog());
 
     if (autoAddSource) {
       project.addCompileSourceRoot(outputDir.getAbsolutePath());

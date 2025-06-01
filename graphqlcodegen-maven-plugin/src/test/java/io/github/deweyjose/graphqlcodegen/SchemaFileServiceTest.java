@@ -141,4 +141,64 @@ class SchemaFileServiceTest {
     assertTrue(
         content.contains("type") || content.contains("schema"), "Should contain GraphQL SDL");
   }
+
+  @Test
+  void extractSchemaFilesFromDependencies_returnsMatchingArtifactFile() {
+    org.apache.maven.artifact.Artifact artifact = mock(org.apache.maven.artifact.Artifact.class);
+    when(artifact.getGroupId()).thenReturn("com.example");
+    when(artifact.getArtifactId()).thenReturn("foo");
+    when(artifact.getVersion()).thenReturn("1.0.0");
+    File file = new File("foo-1.0.0.jar");
+    when(artifact.getFile()).thenReturn(file);
+
+    Set<org.apache.maven.artifact.Artifact> artifacts = new java.util.HashSet<>();
+    artifacts.add(artifact);
+
+    java.util.Collection<String> deps = java.util.List.of("com.example:foo:1.0.0");
+    java.util.List<File> result =
+        SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+
+    assertEquals(1, result.size());
+    assertEquals(file, result.get(0));
+  }
+
+  @Test
+  void extractSchemaFilesFromDependencies_skipsEmptyEntries() {
+    Set<org.apache.maven.artifact.Artifact> artifacts = java.util.Collections.emptySet();
+
+    java.util.Collection<String> deps = java.util.List.of("   ", "");
+    java.util.List<File> result =
+        SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void extractSchemaFilesFromDependencies_ignoresNonMatchingDependencies() {
+    org.apache.maven.artifact.Artifact artifact = mock(org.apache.maven.artifact.Artifact.class);
+    when(artifact.getGroupId()).thenReturn("com.example");
+    when(artifact.getArtifactId()).thenReturn("foo");
+    when(artifact.getVersion()).thenReturn("1.0.0");
+    when(artifact.getFile()).thenReturn(new File("foo-1.0.0.jar"));
+
+    Set<org.apache.maven.artifact.Artifact> artifacts = new java.util.HashSet<>();
+    artifacts.add(artifact);
+
+    java.util.Collection<String> deps = java.util.List.of("com.other:bar:2.0.0");
+    java.util.List<File> result =
+        SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void extractSchemaFilesFromDependencies_returnsEmptyListIfNoDependencies() {
+    Set<org.apache.maven.artifact.Artifact> artifacts = java.util.Collections.emptySet();
+
+    java.util.Collection<String> deps = java.util.List.of("com.example:foo:1.0.0");
+    java.util.List<File> result =
+        SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+
+    assertTrue(result.isEmpty());
+  }
 }

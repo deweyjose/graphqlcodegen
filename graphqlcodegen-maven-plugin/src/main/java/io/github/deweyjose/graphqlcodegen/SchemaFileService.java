@@ -59,7 +59,7 @@ public class SchemaFileService {
   public void loadSchemaJarFilesFromDependencies(
       Set<Artifact> artifacts, Collection<String> schemaJarFilesFromDependencies) {
     this.schemaJarFilesFromDependencies =
-        DependencySchemaExtractor.extract(artifacts, schemaJarFilesFromDependencies);
+        extractSchemaFilesFromDependencies(artifacts, schemaJarFilesFromDependencies);
   }
 
   /**
@@ -166,5 +166,57 @@ public class SchemaFileService {
     return file.getName().endsWith(".graphqls")
         || file.getName().endsWith(".graphql")
         || file.getName().endsWith(".gqls");
+  }
+
+  /**
+   * Extracts the schema files from the dependencies.
+   *
+   * @param dependencyArtifacts the set of dependency artifacts
+   * @param schemaJarFilesFromDependencies the schema jar files from dependencies
+   * @return the schema files
+   */
+  public static List<File> extractSchemaFilesFromDependencies(
+      Set<Artifact> dependencyArtifacts, Collection<String> schemaJarFilesFromDependencies) {
+    List<File> files = new java.util.ArrayList<>();
+
+    for (final String jarDep : schemaJarFilesFromDependencies) {
+      final String jarDepClean = jarDep.trim();
+      if (jarDepClean.isEmpty()) {
+        continue;
+      }
+
+      final java.util.Optional<Artifact> artifactOpt =
+          findArtifactFromDependencies(dependencyArtifacts, jarDepClean);
+      if (artifactOpt.isPresent()) {
+        final Artifact artifact = artifactOpt.get();
+        final File file = artifact.getFile();
+        files.add(file);
+      }
+    }
+
+    return files;
+  }
+
+  /**
+   * Finds the artifact from the dependencies.
+   *
+   * @param dependencyArtifacts the set of dependency artifacts
+   * @param artifactRef the artifact reference
+   * @return the artifact
+   */
+  private static java.util.Optional<Artifact> findArtifactFromDependencies(
+      Set<Artifact> dependencyArtifacts, final String artifactRef) {
+    final String cleanRef = artifactRef.trim();
+
+    for (final Artifact artifact : dependencyArtifacts) {
+      final String ref =
+          String.format(
+              "%s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
+
+      if (ref.equals(cleanRef)) {
+        return java.util.Optional.of(artifact);
+      }
+    }
+    return java.util.Optional.empty();
   }
 }
