@@ -173,6 +173,9 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   @Parameter(property = "disableDatesInGeneratedAnnotation", defaultValue = "false")
   private boolean disableDatesInGeneratedAnnotation;
 
+  @Parameter(property = "autoAddSource", defaultValue = "true")
+  private boolean autoAddSource;
+
   @Override
   public void execute() {
     SchemaManifestService manifest =
@@ -185,7 +188,17 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
 
     var executor = new CodegenExecutor(getLog(), schemaFileService, typeMappingService);
     executor.execute(this, artifacts, project.getBasedir());
+    if (autoAddSource) {
+      project.addCompileSourceRoot(outputDir.getAbsolutePath());
+    }
+  }
 
-    project.addCompileSourceRoot(outputDir.getAbsolutePath());
+  public File[] getSchemaPaths() {
+    return schemaPaths;
+  }
+
+  @Override
+  public String[] getSchemaUrls() {
+    return schemaUrls;
   }
 }
