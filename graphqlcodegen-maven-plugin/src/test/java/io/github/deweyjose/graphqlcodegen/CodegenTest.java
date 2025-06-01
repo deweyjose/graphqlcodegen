@@ -28,7 +28,7 @@ class CodegenTest {
     MavenProject project = mock(MavenProject.class);
     setField(codegen, "project", project);
     setField(codegen, "skip", true);
-    // Should not throw, should log skip
+    // Should not throw, should log skip (Slf4jMavenLogger will no-op if not registered)
     assertDoesNotThrow(codegen::execute);
   }
 
@@ -45,7 +45,7 @@ class CodegenTest {
     setField(codegen, "skip", false);
     setField(codegen, "outputDir", new File("target/test-generated"));
     setField(codegen, "schemaManifestOutputDir", new File("target/test-manifest"));
-    // Should not throw, should attempt codegen
+    // Should not throw, should attempt codegen (Slf4jMavenLogger will no-op if not registered)
     assertDoesNotThrow(codegen::execute);
   }
 }

@@ -11,7 +11,7 @@
   </parent>
 
   <artifactId>graphqlcodegen-maven-plugin</artifactId>
-  <version>3.2.0</version>
+  <version>3.3.0</version>
   <packaging>maven-plugin</packaging>
 
   <name>GraphQL Code Generator Maven Plugin</name>
@@ -72,14 +72,10 @@
     <dependency>
       <groupId>com.graphql-java</groupId>
       <artifactId>graphql-java</artifactId>
-    </dependency>
+    </dependency>    
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.netflix.graphql.dgs</groupId>
-      <artifactId>graphql-dgs-client</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>      
     </dependency>
   </dependencies>
 

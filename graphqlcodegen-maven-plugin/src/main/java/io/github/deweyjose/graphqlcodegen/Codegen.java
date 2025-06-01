@@ -1,5 +1,8 @@
 package io.github.deweyjose.graphqlcodegen;
 
+import io.github.deweyjose.graphqlcodegen.services.SchemaFileService;
+import io.github.deweyjose.graphqlcodegen.services.SchemaManifestService;
+import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
 import java.io.File;
 import java.util.Map;
 import java.util.Set;
@@ -187,8 +190,10 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
 
   @Override
   public void execute() {
+    Logger.registerMavenLog(getLog());
+
     if (skip) {
-      getLog().info("Skipping code generation as requested (skip=true)");
+      Logger.info("Skipping code generation as requested (skip=true)");
       return;
     }
 
@@ -200,7 +205,7 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
     @SuppressWarnings("unchecked")
     Set<Artifact> artifacts = project.getArtifacts();
 
-    var executor = new CodegenExecutor(getLog(), schemaFileService, typeMappingService);
+    var executor = new CodegenExecutor(schemaFileService, typeMappingService);
     executor.execute(this, artifacts, project.getBasedir());
 
     if (autoAddSource) {

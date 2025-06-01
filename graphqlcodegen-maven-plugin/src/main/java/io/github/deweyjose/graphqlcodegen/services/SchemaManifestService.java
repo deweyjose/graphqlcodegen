@@ -1,4 +1,4 @@
-package io.github.deweyjose.graphqlcodegen;
+package io.github.deweyjose.graphqlcodegen.services;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +24,7 @@ public class SchemaManifestService {
   /**
    * Constructs a SchemaFileManifest with a set of files, manifest path, and project path.
    *
-   * @param files the set of schema files
+   * @param files the set of schema files to track
    * @param manifestPath the manifest file path
    * @param projectPath the project base directory
    */
@@ -37,7 +37,7 @@ public class SchemaManifestService {
   /**
    * Constructs a SchemaFileManifest with a manifest path and project path.
    *
-   * @param manifestPath the manifest file path
+   * @param manifestDir the directory where the manifest file will be created
    * @param projectPath the project base directory
    */
   public SchemaManifestService(File manifestDir, File projectPath) {
@@ -50,6 +50,8 @@ public class SchemaManifestService {
    *
    * @param path the file to checksum
    * @return the checksum as a hex string
+   * @throws java.io.IOException if an I/O error occurs reading the file
+   * @throws java.security.NoSuchAlgorithmException if MD5 algorithm is not available
    */
   @SneakyThrows
   public static String generateChecksum(File path) {
@@ -62,7 +64,7 @@ public class SchemaManifestService {
   /**
    * Sets the files to be tracked by the manifest.
    *
-   * @param files the set of files
+   * @param files the set of files to track
    */
   public void setFiles(Set<File> files) {
     this.files = files;
@@ -91,7 +93,11 @@ public class SchemaManifestService {
     return changed;
   }
 
-  /** Syncs the manifest with the files. */
+  /**
+   * Syncs the manifest with the current set of files, writing their checksums to disk.
+   *
+   * @throws java.io.IOException if an I/O error occurs writing the manifest
+   */
   @SneakyThrows
   public void syncManifest() {
     OrderedProperties manifest =
@@ -111,9 +117,10 @@ public class SchemaManifestService {
   }
 
   /**
-   * Loads the manifest from the manifest path.
+   * Loads the manifest from the manifest path, or returns an empty manifest if it does not exist.
    *
-   * @return the manifest
+   * @return the loaded manifest properties
+   * @throws java.io.IOException if an I/O error occurs reading the manifest
    */
   @SneakyThrows
   private OrderedProperties loadManifest() {
@@ -128,10 +135,10 @@ public class SchemaManifestService {
   }
 
   /**
-   * Relativizes a file to the project path.
+   * Relativizes a file path to the project path.
    *
    * @param file the file to relativize
-   * @return the relativized file path
+   * @return the relativized file path as a string
    */
   private String relativizeToProject(File file) {
     return projectPath.toPath().relativize(file.toPath()).toString();

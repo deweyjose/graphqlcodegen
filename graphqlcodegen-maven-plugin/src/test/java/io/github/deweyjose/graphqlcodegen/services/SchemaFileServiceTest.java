@@ -1,4 +1,4 @@
-package io.github.deweyjose.graphqlcodegen;
+package io.github.deweyjose.graphqlcodegen.services;
 
 import static junit.framework.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -6,8 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.github.deweyjose.graphqlcodegen.TestUtils;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -21,12 +24,15 @@ class SchemaFileServiceTest {
 
   private SchemaManifestService schemaManifestService;
   private SchemaFileService schemaFileService;
+  private RemoteSchemaService remoteSchemaService;
 
   @BeforeEach
   void setUp() {
     File manifestDir = new File("target/test-classes/schema");
     schemaManifestService = mock(SchemaManifestService.class);
-    schemaFileService = new SchemaFileService(manifestDir, schemaManifestService);
+    remoteSchemaService = mock(RemoteSchemaService.class);
+    schemaFileService =
+        new SchemaFileService(manifestDir, schemaManifestService, remoteSchemaService);
   }
 
   @SneakyThrows
@@ -126,19 +132,85 @@ class SchemaFileServiceTest {
   @Test
   @SneakyThrows
   void testDownloadCodeGenConfig_fetchesRemoteSchema() {
-    String content = schemaFileService.fetchSchema(TestUtils.TEST_SCHEMA_URL);
+    String url = TestUtils.TEST_SCHEMA_URL;
+    String expectedContent = "type Query { hello: String }";
+    when(remoteSchemaService.getRemoteSchemaFile(url)).thenReturn(expectedContent);
+    String content = schemaFileService.fetchSchema(url);
     assertNotNull(content);
-    assertTrue(
-        content.contains("type") || content.contains("schema"), "Should contain GraphQL SDL");
+    assertEquals(expectedContent, content);
+    verify(remoteSchemaService, times(1)).getRemoteSchemaFile(url);
   }
 
   @Test
   @SneakyThrows
   void testSaveUrlToFile_createsFileWithContent(@TempDir Path tempDir) {
-    File outFile = schemaFileService.saveUrlToFile(TestUtils.TEST_SCHEMA_URL, tempDir.toFile());
+    String url = TestUtils.TEST_SCHEMA_URL;
+    String expectedContent = "type Query { hello: String }";
+    when(remoteSchemaService.getRemoteSchemaFile(url)).thenReturn(expectedContent);
+    File outFile = schemaFileService.saveUrlToFile(url, tempDir.toFile());
     assertTrue(outFile.exists());
     String content = java.nio.file.Files.readString(outFile.toPath());
-    assertTrue(
-        content.contains("type") || content.contains("schema"), "Should contain GraphQL SDL");
+    assertEquals(expectedContent, content);
+    verify(remoteSchemaService, times(1)).getRemoteSchemaFile(url);
+  }
+
+  @Test
+  void extractSchemaFilesFromDependencies_returnsMatchingArtifactFile() {
+    org.apache.maven.artifact.Artifact artifact = mock(org.apache.maven.artifact.Artifact.class);
+    when(artifact.getGroupId()).thenReturn("com.example");
+    when(artifact.getArtifactId()).thenReturn("foo");
+    when(artifact.getVersion()).thenReturn("1.0.0");
+    File file = new File("foo-1.0.0.jar");
+    when(artifact.getFile()).thenReturn(file);
+
+    Set<org.apache.maven.artifact.Artifact> artifacts = new java.util.HashSet<>();
+    artifacts.add(artifact);
+
+    java.util.Collection<String> deps = java.util.List.of("com.example:foo:1.0.0");
+    java.util.List<File> result =
+        SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+
+    assertEquals(1, result.size());
+    assertEquals(file, result.get(0));
+  }
+
+  @Test
+  void extractSchemaFilesFromDependencies_skipsEmptyEntries() {
+    Set<org.apache.maven.artifact.Artifact> artifacts = java.util.Collections.emptySet();
+
+    java.util.Collection<String> deps = java.util.List.of("   ", "");
+    java.util.List<File> result =
+        SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void extractSchemaFilesFromDependencies_ignoresNonMatchingDependencies() {
+    org.apache.maven.artifact.Artifact artifact = mock(org.apache.maven.artifact.Artifact.class);
+    when(artifact.getGroupId()).thenReturn("com.example");
+    when(artifact.getArtifactId()).thenReturn("foo");
+    when(artifact.getVersion()).thenReturn("1.0.0");
+    when(artifact.getFile()).thenReturn(new File("foo-1.0.0.jar"));
+
+    Set<org.apache.maven.artifact.Artifact> artifacts = new java.util.HashSet<>();
+    artifacts.add(artifact);
+
+    java.util.Collection<String> deps = java.util.List.of("com.other:bar:2.0.0");
+    java.util.List<File> result =
+        SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void extractSchemaFilesFromDependencies_returnsEmptyListIfNoDependencies() {
+    Set<org.apache.maven.artifact.Artifact> artifacts = java.util.Collections.emptySet();
+
+    java.util.Collection<String> deps = java.util.List.of("com.example:foo:1.0.0");
+    java.util.List<File> result =
+        SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+
+    assertTrue(result.isEmpty());
   }
 }

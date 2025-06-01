@@ -4,6 +4,8 @@ import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
 import com.netflix.graphql.dgs.codegen.Language;
 import io.github.deweyjose.codegen.generated.GeneratedCodeGenConfigBuilder;
+import io.github.deweyjose.graphqlcodegen.services.SchemaFileService;
+import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -13,25 +15,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.logging.Log;
 
 /**
  * Executes code generation and provides utility methods for schema expansion, manifest, and type
  * mapping.
  */
 public class CodegenExecutor {
-  private final Log log;
   private final SchemaFileService schemaFileService;
   private final TypeMappingService typeMappingService;
 
-  /**
-   * Constructs a CodegenExecutor with the given Maven logger.
-   *
-   * @param log the Maven logger
-   */
   public CodegenExecutor(
-      Log log, SchemaFileService schemaFileService, TypeMappingService typeMappingService) {
-    this.log = log;
+      SchemaFileService schemaFileService, TypeMappingService typeMappingService) {
     this.schemaFileService = schemaFileService;
     this.typeMappingService = typeMappingService;
   }
@@ -48,7 +42,7 @@ public class CodegenExecutor {
     // get the schema paths that might have changed or all of them.
     if (request.isOnlyGenerateChanged()) {
       schemaFileService.loadExpandedSchemaPaths(toSet(request.getSchemaPaths()));
-      log.info(String.format("expanded schema paths: %s", schemaFileService.getSchemaPaths()));
+      Logger.info("expanded schema paths: {}", schemaFileService.getSchemaPaths());
     } else {
       schemaFileService.setSchemaPaths(toSet(request.getSchemaPaths()));
     }
@@ -62,11 +56,11 @@ public class CodegenExecutor {
 
     if (request.isOnlyGenerateChanged()) {
       schemaFileService.filterChangedSchemaFiles();
-      log.info(String.format("changed schema files: %s", schemaFileService.getSchemaPaths()));
+      Logger.info("changed schema files: {}", schemaFileService.getSchemaPaths());
     }
 
     if (schemaFileService.noWorkToDo()) {
-      log.info("no files to generate");
+      Logger.info("no files to generate");
       return;
     }
 
@@ -126,7 +120,7 @@ public class CodegenExecutor {
             .setTrackInputFieldSet(request.isTrackInputFieldSet())
             .build();
 
-    log.info(String.format("Codegen config: \n%s", config));
+    Logger.info("Codegen config: \n{}", config);
     final CodeGen codeGen = new CodeGen(config);
     codeGen.generate();
 
