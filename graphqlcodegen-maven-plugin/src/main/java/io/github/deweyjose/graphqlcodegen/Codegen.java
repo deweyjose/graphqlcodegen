@@ -177,13 +177,4 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
     new CodegenExecutor(getLog(), new SchemaFileService(), new TypeMappingService())
         .execute(this, project.getArtifacts(), project.getBasedir());
   }
-
-  public File[] getSchemaPaths() {
-    return schemaPaths;
-  }
-
-  @Override
-  public String[] getSchemaUrls() {
-    return schemaUrls;
-  }
 }
