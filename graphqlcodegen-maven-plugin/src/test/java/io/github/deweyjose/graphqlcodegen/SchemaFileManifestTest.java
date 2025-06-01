@@ -2,11 +2,10 @@ package io.github.deweyjose.graphqlcodegen;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import io.github.deweyjose.graphqlcodegen.services.SchemaManifestService;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Properties;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
@@ -43,7 +42,9 @@ class SchemaFileManifestTest {
 
     SchemaManifestService sfm =
         new SchemaManifestService(
-            new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
+            new java.util.HashSet<>(java.util.Arrays.asList(foo, bar)),
+            manifest,
+            tempFolder.toFile());
 
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
 
@@ -51,7 +52,9 @@ class SchemaFileManifestTest {
 
     sfm =
         new SchemaManifestService(
-            new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
+            new java.util.HashSet<>(java.util.Arrays.asList(foo, bar)),
+            manifest,
+            tempFolder.toFile());
 
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
   }
@@ -66,7 +69,9 @@ class SchemaFileManifestTest {
 
     SchemaManifestService sfm =
         new SchemaManifestService(
-            new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
+            new java.util.HashSet<>(java.util.Arrays.asList(foo, bar)),
+            manifest,
+            tempFolder.toFile());
 
     Assertions.assertTrue(sfm.getChangedFiles().contains(foo));
 
@@ -75,13 +80,17 @@ class SchemaFileManifestTest {
 
     sfm =
         new SchemaManifestService(
-            new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
+            new java.util.HashSet<>(java.util.Arrays.asList(foo, bar)),
+            manifest,
+            tempFolder.toFile());
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
     sfm.syncManifest();
 
     sfm =
         new SchemaManifestService(
-            new HashSet<>(Arrays.asList(foo, bar)), manifest, tempFolder.toFile());
+            new java.util.HashSet<>(java.util.Arrays.asList(foo, bar)),
+            manifest,
+            tempFolder.toFile());
     Assertions.assertTrue(sfm.getChangedFiles().isEmpty());
   }
 

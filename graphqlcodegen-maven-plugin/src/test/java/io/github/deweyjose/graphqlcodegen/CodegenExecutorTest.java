@@ -2,6 +2,9 @@ package io.github.deweyjose.graphqlcodegen;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.github.deweyjose.graphqlcodegen.services.SchemaFileService;
+import io.github.deweyjose.graphqlcodegen.services.SchemaManifestService;
+import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
 import java.io.File;
 import java.util.HashSet;
 import org.apache.maven.plugin.logging.Log;

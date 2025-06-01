@@ -4,6 +4,8 @@ import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
 import com.netflix.graphql.dgs.codegen.Language;
 import io.github.deweyjose.codegen.generated.GeneratedCodeGenConfigBuilder;
+import io.github.deweyjose.graphqlcodegen.services.SchemaFileService;
+import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -40,7 +42,7 @@ public class CodegenExecutor {
     // get the schema paths that might have changed or all of them.
     if (request.isOnlyGenerateChanged()) {
       schemaFileService.loadExpandedSchemaPaths(toSet(request.getSchemaPaths()));
-      Slf4jMavenLogger.info("expanded schema paths: {}", schemaFileService.getSchemaPaths());
+      Logger.info("expanded schema paths: {}", schemaFileService.getSchemaPaths());
     } else {
       schemaFileService.setSchemaPaths(toSet(request.getSchemaPaths()));
     }
@@ -54,11 +56,11 @@ public class CodegenExecutor {
 
     if (request.isOnlyGenerateChanged()) {
       schemaFileService.filterChangedSchemaFiles();
-      Slf4jMavenLogger.info("changed schema files: {}", schemaFileService.getSchemaPaths());
+      Logger.info("changed schema files: {}", schemaFileService.getSchemaPaths());
     }
 
     if (schemaFileService.noWorkToDo()) {
-      Slf4jMavenLogger.info("no files to generate");
+      Logger.info("no files to generate");
       return;
     }
 
@@ -118,7 +120,7 @@ public class CodegenExecutor {
             .setTrackInputFieldSet(request.isTrackInputFieldSet())
             .build();
 
-    Slf4jMavenLogger.info("Codegen config: \n{}", config);
+    Logger.info("Codegen config: \n{}", config);
     final CodeGen codeGen = new CodeGen(config);
     codeGen.generate();
 

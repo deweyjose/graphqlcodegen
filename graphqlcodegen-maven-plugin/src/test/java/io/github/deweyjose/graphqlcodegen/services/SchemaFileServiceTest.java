@@ -1,4 +1,4 @@
-package io.github.deweyjose.graphqlcodegen;
+package io.github.deweyjose.graphqlcodegen.services;
 
 import static junit.framework.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import io.github.deweyjose.graphqlcodegen.TestUtils;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;

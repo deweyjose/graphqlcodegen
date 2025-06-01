@@ -1,4 +1,4 @@
-package io.github.deweyjose.graphqlcodegen;
+package io.github.deweyjose.graphqlcodegen.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
