@@ -223,20 +223,14 @@ public class SchemaFileService {
    */
   public static List<File> extractSchemaFilesFromDependencies(
       Set<Artifact> dependencyArtifacts, Collection<String> schemaJarFilesFromDependencies) {
-    List<File> files = new java.util.ArrayList<>();
-
-    for (final String jarDep : schemaJarFilesFromDependencies) {
-      final String jarDepClean = jarDep.trim();
-      if (jarDepClean.isEmpty()) {
-        continue;
-      }
-
-      findArtifactFromDependencies(dependencyArtifacts, jarDepClean)
-          .map(Artifact::getFile)
-          .ifPresent(files::add);
-    }
-
-    return files;
+    return schemaJarFilesFromDependencies.stream()
+        .map(String::trim)
+        .filter(jarDep -> !jarDep.isEmpty())
+        .map(jarDep -> findArtifactFromDependencies(dependencyArtifacts, jarDep))
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .map(Artifact::getFile)
+        .toList();
   }
 
   /**
