@@ -176,30 +176,36 @@ import org.apache.maven.project.MavenProject;
   @Parameter(property = &quot;autoAddSource&quot;, defaultValue = &quot;true&quot;)
   private boolean autoAddSource;
 
-  @Override
-  public void execute() {
-<span class="nc" id="L181">    SchemaManifestService manifest =</span>
-<span class="nc" id="L182">        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());</span>
-<span class="nc" id="L183">    TypeMappingService typeMappingService = new TypeMappingService();</span>
-<span class="nc" id="L184">    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest);</span>
-
-    @SuppressWarnings(&quot;unchecked&quot;)
-<span class="nc" id="L187">    Set&lt;Artifact&gt; artifacts = project.getArtifacts();</span>
-
-<span class="nc" id="L189">    var executor = new CodegenExecutor(getLog(), schemaFileService, typeMappingService);</span>
-<span class="nc" id="L190">    executor.execute(this, artifacts, project.getBasedir());</span>
-<span class="nc bnc" id="L191" title="All 2 branches missed.">    if (autoAddSource) {</span>
-<span class="nc" id="L192">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
-    }
-<span class="nc" id="L194">  }</span>
-
   public File[] getSchemaPaths() {
-<span class="nc" id="L197">    return schemaPaths;</span>
+<span class="nc" id="L180">    return schemaPaths;</span>
   }
 
   @Override
   public String[] getSchemaUrls() {
-<span class="nc" id="L202">    return schemaUrls;</span>
+<span class="nc" id="L185">    return schemaUrls;</span>
   }
+
+  @Override
+  public void execute() {
+<span class="nc bnc" id="L190" title="All 2 branches missed.">    if (skip) {</span>
+<span class="nc" id="L191">      getLog().info(&quot;Skipping code generation as requested (skip=true)&quot;);</span>
+<span class="nc" id="L192">      return;</span>
+    }
+
+<span class="nc" id="L195">    SchemaManifestService manifest =</span>
+<span class="nc" id="L196">        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());</span>
+<span class="nc" id="L197">    TypeMappingService typeMappingService = new TypeMappingService();</span>
+<span class="nc" id="L198">    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest);</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L201">    Set&lt;Artifact&gt; artifacts = project.getArtifacts();</span>
+
+<span class="nc" id="L203">    var executor = new CodegenExecutor(getLog(), schemaFileService, typeMappingService);</span>
+<span class="nc" id="L204">    executor.execute(this, artifacts, project.getBasedir());</span>
+
+<span class="nc bnc" id="L206" title="All 2 branches missed.">    if (autoAddSource) {</span>
+<span class="nc" id="L207">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
+    }
+<span class="nc" id="L209">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
