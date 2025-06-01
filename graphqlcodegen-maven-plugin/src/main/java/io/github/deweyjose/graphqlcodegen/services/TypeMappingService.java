@@ -12,6 +12,13 @@ import java.util.zip.ZipEntry;
 import org.apache.maven.artifact.Artifact;
 
 public class TypeMappingService {
+  /**
+   * Loads type mapping properties from the specified files inside a JAR file.
+   *
+   * @param artifactFile the JAR file to load properties from
+   * @param typeMappingPropertiesFiles the array of property file paths inside the JAR
+   * @return a map containing the type mappings loaded from the properties files
+   */
   public Map<String, String> loadPropertiesFile(
       File artifactFile, String[] typeMappingPropertiesFiles) {
     Map<String, String> typeMapping = new HashMap<>();
@@ -33,6 +40,16 @@ public class TypeMappingService {
     return typeMapping;
   }
 
+  /**
+   * Merges user-provided type mappings with those loaded from properties files in dependency
+   * artifacts.
+   *
+   * @param userTypeMapping the user-provided type mapping (may be null)
+   * @param typeMappingPropertiesFiles the array of property file paths to search for in
+   *     dependencies
+   * @param artifacts the set of Maven dependency artifacts to search for property files
+   * @return a map containing the merged type mappings, with user mappings taking precedence
+   */
   public Map<String, String> mergeTypeMapping(
       Map<String, String> userTypeMapping,
       String[] typeMappingPropertiesFiles,

@@ -37,9 +37,9 @@ public class SchemaFileService {
   }
 
   /**
-   * Loads the schema paths into the schema paths.
+   * Loads the schema paths, expanding directories to include all GraphQL schema files within them.
    *
-   * @param schemaPaths the schema paths to load
+   * @param schemaPaths the collection of files or directories to load as schema paths
    */
   public void loadExpandedSchemaPaths(Collection<File> schemaPaths) {
     setSchemaPaths(
@@ -56,6 +56,13 @@ public class SchemaFileService {
             .collect(Collectors.toSet()));
   }
 
+  /**
+   * Loads the schema jar files from dependencies into the internal list.
+   *
+   * @param artifacts the set of Maven artifacts (dependencies)
+   * @param schemaJarFilesFromDependencies the collection of dependency coordinates to extract
+   *     schema jars from
+   */
   public void loadSchemaJarFilesFromDependencies(
       Set<Artifact> artifacts, Collection<String> schemaJarFilesFromDependencies) {
     this.schemaJarFilesFromDependencies =
@@ -63,9 +70,12 @@ public class SchemaFileService {
   }
 
   /**
-   * Loads the schema URLs into the schema paths.
+   * Loads remote schema URLs and saves them as files in the output directory, adding them to
+   * schemaPaths.
    *
-   * @param schemaUrls the schema URLs to load
+   * @param schemaUrls the array of schema URLs to load
+   * @throws IOException if an I/O error occurs while saving the schema
+   * @throws InterruptedException if the thread is interrupted while fetching the schema
    */
   @SneakyThrows
   public void loadSchemaUrls(String[] schemaUrls) {
@@ -74,6 +84,11 @@ public class SchemaFileService {
     }
   }
 
+  /**
+   * Checks if there are any schema files or schema jars to generate. Throws if none are found.
+   *
+   * @throws IllegalArgumentException if no schema files or jars are found
+   */
   public void checkHasSchemaFiles() {
     if (getSchemaPaths().isEmpty()
         && Optional.ofNullable(getSchemaJarFilesFromDependencies())
@@ -83,10 +98,16 @@ public class SchemaFileService {
     }
   }
 
+  /**
+   * Returns true if there are no schema files or schema jars to process.
+   *
+   * @return true if there is no work to do, false otherwise
+   */
   public boolean noWorkToDo() {
     return getSchemaPaths().isEmpty() && getSchemaJarFilesFromDependencies().isEmpty();
   }
 
+  /** Syncs the manifest by writing the current state to disk. Prints stack trace on error. */
   public void syncManifest() {
     try {
       manifest.syncManifest();
@@ -95,6 +116,7 @@ public class SchemaFileService {
     }
   }
 
+  /** Filters schemaPaths to only include files that have changed according to the manifest. */
   public void filterChangedSchemaFiles() {
     manifest.setFiles(new HashSet<>(schemaPaths));
     Set<File> changed = new HashSet<>(schemaPaths);
@@ -102,6 +124,14 @@ public class SchemaFileService {
     setSchemaPaths(changed);
   }
 
+  /**
+   * Fetches the contents of a remote schema from the given URL as a string.
+   *
+   * @param url the URL to fetch the schema from
+   * @return the schema SDL as a string
+   * @throws IOException if an I/O error occurs
+   * @throws InterruptedException if the thread is interrupted
+   */
   public String fetchSchema(String url) throws IOException, InterruptedException {
     HttpClient client = HttpClient.newHttpClient();
     HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
@@ -109,6 +139,15 @@ public class SchemaFileService {
     return response.body();
   }
 
+  /**
+   * Downloads a remote schema from the given URL and saves it as a file in the output directory.
+   *
+   * @param url the URL to download the schema from
+   * @param outputDir the output directory to save the file in
+   * @return the File object representing the saved schema
+   * @throws IOException if an I/O error occurs
+   * @throws InterruptedException if the thread is interrupted
+   */
   public File saveUrlToFile(String url, File outputDir) throws IOException, InterruptedException {
     String content = fetchSchema(url);
     String fileName = "remote-schemas/" + md5Hex(url) + ".graphqls";
@@ -118,6 +157,12 @@ public class SchemaFileService {
     return outFile;
   }
 
+  /**
+   * Computes the MD5 hash of the input string and returns it as a hex string.
+   *
+   * @param input the input string
+   * @return the MD5 hash as a hex string
+   */
   private String md5Hex(String input) {
     try {
       MessageDigest md = MessageDigest.getInstance("MD5");
@@ -133,10 +178,10 @@ public class SchemaFileService {
   }
 
   /**
-   * Recursively finds all GraphQL schema files in a directory.
+   * Recursively finds all GraphQL schema files in a directory and its subdirectories.
    *
    * @param directory the directory to search
-   * @return a set of GraphQL schema files
+   * @return a set of GraphQL schema files found
    */
   public static Set<File> findGraphQLSFiles(File directory) {
     Set<File> result = new HashSet<>();
@@ -160,7 +205,7 @@ public class SchemaFileService {
    * Returns true if the file is a GraphQL schema file (.graphql, .graphqls, .gqls).
    *
    * @param file the file to check
-   * @return true if the file is a GraphQL schema file
+   * @return true if the file is a GraphQL schema file, false otherwise
    */
   public static boolean isGraphqlFile(File file) {
     return file.getName().endsWith(".graphqls")
@@ -169,11 +214,12 @@ public class SchemaFileService {
   }
 
   /**
-   * Extracts the schema files from the dependencies.
+   * Extracts schema files from the given set of dependency artifacts, matching the provided
+   * dependency coordinates.
    *
-   * @param dependencyArtifacts the set of dependency artifacts
-   * @param schemaJarFilesFromDependencies the schema jar files from dependencies
-   * @return the schema files
+   * @param dependencyArtifacts the set of Maven dependency artifacts
+   * @param schemaJarFilesFromDependencies the collection of dependency coordinates to match
+   * @return a list of schema files (jars) found in the dependencies
    */
   public static List<File> extractSchemaFilesFromDependencies(
       Set<Artifact> dependencyArtifacts, Collection<String> schemaJarFilesFromDependencies) {
@@ -198,11 +244,12 @@ public class SchemaFileService {
   }
 
   /**
-   * Finds the artifact from the dependencies.
+   * Finds a Maven artifact in the given set of dependencies matching the provided coordinate
+   * string.
    *
-   * @param dependencyArtifacts the set of dependency artifacts
-   * @param artifactRef the artifact reference
-   * @return the artifact
+   * @param dependencyArtifacts the set of Maven dependency artifacts
+   * @param artifactRef the Maven coordinate string (groupId:artifactId:version)
+   * @return an Optional containing the matching Artifact, or empty if not found
    */
   private static java.util.Optional<Artifact> findArtifactFromDependencies(
       Set<Artifact> dependencyArtifacts, final String artifactRef) {
