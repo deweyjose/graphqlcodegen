@@ -8,6 +8,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -150,31 +151,11 @@ public class SchemaFileService {
    */
   public File saveUrlToFile(String url, File outputDir) throws IOException, InterruptedException {
     String content = fetchSchema(url);
-    String fileName = "remote-schemas/" + md5Hex(url) + ".graphqls";
+    String fileName = "remote-schemas/" + Base64.getEncoder().encodeToString(url.getBytes()) + ".graphqls";
     File outFile = new File(outputDir, fileName);
     Files.createDirectories(outFile.getParentFile().toPath());
     Files.writeString(outFile.toPath(), content);
     return outFile;
-  }
-
-  /**
-   * Computes the MD5 hash of the input string and returns it as a hex string.
-   *
-   * @param input the input string
-   * @return the MD5 hash as a hex string
-   */
-  private String md5Hex(String input) {
-    try {
-      MessageDigest md = MessageDigest.getInstance("MD5");
-      byte[] digest = md.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-      StringBuilder sb = new StringBuilder();
-      for (byte b : digest) {
-        sb.append(String.format("%02x", b));
-      }
-      return sb.toString();
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to compute MD5 hash", e);
-    }
   }
 
   /**
