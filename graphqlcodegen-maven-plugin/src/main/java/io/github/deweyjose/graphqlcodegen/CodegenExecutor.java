@@ -37,10 +37,7 @@ public class CodegenExecutor {
    * @param projectBaseDir the project base directory
    */
   @SneakyThrows
-  public void execute(
-      CodegenConfigProvider request, Set<Artifact> artifacts, File projectBaseDir, Log mavenLog) {
-    Slf4jMavenLogger.registerMavenLog(mavenLog);
-
+  public void execute(CodegenConfigProvider request, Set<Artifact> artifacts, File projectBaseDir) {
     // get the schema paths that might have changed or all of them.
     if (request.isOnlyGenerateChanged()) {
       schemaFileService.loadExpandedSchemaPaths(toSet(request.getSchemaPaths()));
