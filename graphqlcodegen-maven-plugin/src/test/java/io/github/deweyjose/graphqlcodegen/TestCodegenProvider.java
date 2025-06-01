@@ -53,6 +53,7 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   private Map<String, ParameterMap> includeClassImports = new HashMap<>();
   private boolean disableDatesInGeneratedAnnotation = false;
   private String[] schemaUrls = new String[0];
+  private boolean autoAddSource = true;
 
   // Setters for test customization
   public void setSchemaPaths(File[] schemaPaths) {
@@ -316,5 +317,10 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   @Override
   public String[] getSchemaUrls() {
     return schemaUrls;
+  }
+
+  @Override
+  public boolean isAutoAddSource() {
+    return autoAddSource;
   }
 }
