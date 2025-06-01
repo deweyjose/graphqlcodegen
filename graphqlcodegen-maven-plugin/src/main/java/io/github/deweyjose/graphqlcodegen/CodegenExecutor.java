@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.logging.Log;
 
 /**
  * Executes code generation and provides utility methods for schema expansion, manifest, and type

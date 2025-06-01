@@ -203,7 +203,7 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
     Set<Artifact> artifacts = project.getArtifacts();
 
     var executor = new CodegenExecutor(schemaFileService, typeMappingService);
-    executor.execute(this, artifacts, project.getBasedir(), getLog());
+    executor.execute(this, artifacts, project.getBasedir());
 
     if (autoAddSource) {
       project.addCompileSourceRoot(outputDir.getAbsolutePath());
