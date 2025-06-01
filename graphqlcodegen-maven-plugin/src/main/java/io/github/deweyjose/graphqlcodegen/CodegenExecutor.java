@@ -52,6 +52,7 @@ public class CodegenExecutor {
         artifacts, toSet(request.getSchemaJarFilesFromDependencies()));
 
     schemaFileService.loadSchemaUrls(request.getSchemaUrls());
+    schemaFileService.loadIntrospectedSchemas(request.getIntrospectionRequests());
     schemaFileService.checkHasSchemaFiles();
 
     if (request.isOnlyGenerateChanged()) {
@@ -148,7 +149,7 @@ public class CodegenExecutor {
    * @return a map of string to string maps
    */
   public static Map<String, Map<String, String>> toMap(
-      Map<String, io.github.deweyjose.graphqlcodegen.ParameterMap> m) {
+      Map<String, io.github.deweyjose.graphqlcodegen.parameters.ParameterMap> m) {
     if (m == null) return Collections.emptyMap();
     return m.entrySet().stream()
         .collect(

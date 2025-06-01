@@ -5,17 +5,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.deweyjose.graphqlcodegen.TestUtils;
+import io.github.deweyjose.graphqlcodegen.parameters.IntrospectionRequest;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.SneakyThrows;
+import org.apache.maven.artifact.Artifact;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -100,7 +106,7 @@ class SchemaFileServiceTest {
   void testFindGraphqlFiles() {
     File directory = TestUtils.getFile("schema");
     Set<File> files = SchemaFileService.findGraphQLSFiles(directory);
-    assertEquals(2, files.size());
+    assertEquals(3, files.size());
   }
 
   @Test
@@ -143,11 +149,12 @@ class SchemaFileServiceTest {
 
   @Test
   @SneakyThrows
-  void testSaveUrlToFile_createsFileWithContent(@TempDir Path tempDir) {
+  void testLoadSchemaUrls_createsFileWithContent(@TempDir Path tempDir) {
     String url = TestUtils.TEST_SCHEMA_URL;
     String expectedContent = "type Query { hello: String }";
     when(remoteSchemaService.getRemoteSchemaFile(url)).thenReturn(expectedContent);
-    File outFile = schemaFileService.saveUrlToFile(url, tempDir.toFile());
+    schemaFileService.loadSchemaUrls(new String[] {url});
+    File outFile = schemaFileService.getSchemaPaths().iterator().next();
     assertTrue(outFile.exists());
     String content = java.nio.file.Files.readString(outFile.toPath());
     assertEquals(expectedContent, content);
@@ -205,12 +212,50 @@ class SchemaFileServiceTest {
 
   @Test
   void extractSchemaFilesFromDependencies_returnsEmptyListIfNoDependencies() {
-    Set<org.apache.maven.artifact.Artifact> artifacts = java.util.Collections.emptySet();
+    Set<Artifact> artifacts = java.util.Collections.emptySet();
 
     java.util.Collection<String> deps = java.util.List.of("com.example:foo:1.0.0");
     java.util.List<File> result =
         SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
 
     assertTrue(result.isEmpty());
+  }
+
+  @Test
+  @SneakyThrows
+  void testLoadIntrospectedSchemaUrls_createsFileWithContent(@TempDir Path tempDir) {
+    String url = "http://example.com/graphql";
+    String query = "query { __schema { types { name } } }";
+    String operationName = "IntrospectionQuery";
+    Map<String, String> headers = java.util.Map.of("Authorization", "Bearer token");
+    String expectedSDL = "type Query { hello: String }";
+    when(remoteSchemaService.getIntrospectedSchemaFile(
+            eq(url),
+            argThat(
+                op -> op.getQuery().equals(query) && op.getOperationName().equals(operationName)),
+            eq(headers)))
+        .thenReturn(expectedSDL);
+
+    IntrospectionRequest request = new IntrospectionRequest();
+    request.setUrl(url);
+    request.setQuery(query);
+    request.setOperationName(operationName);
+    request.setHeaders(headers);
+
+    SchemaFileService service =
+        new SchemaFileService(tempDir.toFile(), schemaManifestService, remoteSchemaService);
+    service.loadIntrospectedSchemas(List.of(request));
+    Set<File> schemaPaths = service.getSchemaPaths();
+    assertEquals(1, schemaPaths.size());
+    File outFile = schemaPaths.iterator().next();
+    assertTrue(outFile.exists());
+    String content = java.nio.file.Files.readString(outFile.toPath());
+    assertEquals(expectedSDL, content);
+    verify(remoteSchemaService, times(1))
+        .getIntrospectedSchemaFile(
+            eq(url),
+            argThat(
+                op -> op.getQuery().equals(query) && op.getOperationName().equals(operationName)),
+            eq(headers));
   }
 }

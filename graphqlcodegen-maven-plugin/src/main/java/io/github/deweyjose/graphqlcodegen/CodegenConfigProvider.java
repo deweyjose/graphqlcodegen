@@ -1,6 +1,9 @@
 package io.github.deweyjose.graphqlcodegen;
 
+import io.github.deweyjose.graphqlcodegen.parameters.IntrospectionRequest;
+import io.github.deweyjose.graphqlcodegen.parameters.ParameterMap;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 /** Interface for providing configuration to the GraphQL codegen plugin. */
@@ -249,4 +252,6 @@ public interface CodegenConfigProvider {
    * @return whether to auto add source
    */
   boolean isAutoAddSource();
+
+  List<IntrospectionRequest> getIntrospectionRequests();
 }
