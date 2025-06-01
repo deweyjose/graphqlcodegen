@@ -10,7 +10,9 @@ import io.github.deweyjose.graphqlcodegen.services.RemoteSchemaService.Introspec
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -116,5 +118,47 @@ class RemoteSchemaServiceTest {
               service.getRemoteSchemaFile(baseUrl + "/notfound");
             });
     assertTrue(ex.getMessage().contains("404"));
+  }
+
+  @Test
+  void testIntrospectionRequest_sendsCustomHeaders() throws Exception {
+    // 1. Start local HTTP server
+    HttpServer server = HttpServer.create(new InetSocketAddress(0), 0);
+    List<String> receivedHeaderValues = new ArrayList<>();
+    server.createContext(
+        "/graphql",
+        exchange -> {
+          // 2. Capture header
+          receivedHeaderValues.add(exchange.getRequestHeaders().getFirst("X-Custom-Header"));
+          byte[] resp = INTROSPECTION_RESPONSE.getBytes();
+          exchange.sendResponseHeaders(200, resp.length);
+          try (OutputStream os = exchange.getResponseBody()) {
+            os.write(resp);
+          }
+        });
+    server.start();
+    int port = server.getAddress().getPort();
+
+    // 3. Prepare and send request
+    String url = "http://localhost:" + port + "/graphql";
+    Map<String, String> headers = Map.of("X-Custom-Header", "expected-value");
+
+    RemoteSchemaService service = new RemoteSchemaService();
+    String query = INTROSPECTION_QUERY;
+    IntrospectionOperation operation =
+        IntrospectionOperation.builder().query(query).operationName("IntrospectionQuery").build();
+    String result = service.getIntrospectedSchemaFile(url, operation, headers);
+
+    // 4. Assert
+    assertTrue(receivedHeaderValues.contains("expected-value"));
+    assertTrue(result.contains("type Query"), "Should contain type Query");
+    assertTrue(result.contains("type Mutation"), "Should contain type Mutation");
+    assertTrue(result.contains("type Subscription"), "Should contain type Subscription");
+    assertTrue(result.contains("type Actor"), "Should contain type Actor");
+    assertTrue(result.contains("type Comment"), "Should contain type Comment");
+    assertTrue(result.contains("type Show"), "Should contain type Show");
+    assertTrue(result.contains("type _Service"), "Should contain type _Service");
+    assertTrue(result.contains("enum ErrorDetail"), "Should contain enum ErrorDetail");
+    server.stop(0);
   }
 }

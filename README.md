@@ -769,6 +769,38 @@ Example
 <disableDatesInGeneratedAnnotation>true</disableDatesInGeneratedAnnotation>
 ```
 
+## introspectionRequests
+
+> **Experimental:** This is a new feature and may change in future releases.
+
+Allows you to generate code from a GraphQL schema fetched via introspection at build time. You can specify one or more endpoints, queries, operation names, and custom HTTP headers for dynamic schema fetching.
+
+- Type: array of objects (introspectionRequest)
+- Required: false
+- Default: []
+
+Each `introspectionRequest` supports:
+- `url` (string, required): The GraphQL endpoint URL
+- `query` (string, optional): Path to a custom introspection query file (defaults to standard introspection query)
+- `operationName` (string, optional): The operation name for the introspection query
+- `headers` (map<string, string>, optional): HTTP headers to include in the request
+
+Example:
+
+```xml
+<introspectionRequests>
+  <introspectionRequest>
+    <url>https://your-graphql-endpoint/graphql</url>
+    <query>{ __schema { queryType { name } } }</query>
+    <operationName>IntrospectionQuery</operationName>
+    <headers>
+      <Authorization>Bearer ${env.YOUR_TOKEN}</Authorization>
+      <X-Custom-Header>value</X-Custom-Header>
+    </headers>
+  </introspectionRequest>
+</introspectionRequests>
+```
+
 # AI Stories & Project History
 
 Below is a curated set of AI-generated documentation and project history, summarizing key architectural changes, automation, and major improvements. These documents provide context for contributors and maintainers.
