@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RemoteSchemaService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">GraphQL Code Generator Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">io.github.deweyjose.graphqlcodegen.services</a> &gt; <span class="el_source">RemoteSchemaService.java</span></div><h1>RemoteSchemaService.java</h1><pre class="source lang-java linenums">package io.github.deweyjose.graphqlcodegen.services;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import graphql.ExecutionResult;
+import graphql.introspection.IntrospectionResultToSchema;
+import graphql.language.Document;
+import graphql.schema.idl.SchemaPrinter;
+import io.github.deweyjose.graphqlcodegen.Logger;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Map;
+import lombok.SneakyThrows;
+
+public class RemoteSchemaService {
+  private final HttpClient httpClient;
+<span class="fc" id="L20">  private final ObjectMapper objectMapper = new ObjectMapper();</span>
+
+<span class="fc" id="L22">  public RemoteSchemaService() {</span>
+<span class="fc" id="L23">    this.httpClient = HttpClient.newHttpClient();</span>
+<span class="fc" id="L24">  }</span>
+
+  public String getRemoteSchemaFile(String url) throws IOException, InterruptedException {
+<span class="fc" id="L27">    HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();</span>
+<span class="fc" id="L28">    HttpResponse&lt;String&gt; response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());</span>
+<span class="fc" id="L29">    Logger.debug(&quot;Remote schema file: {}&quot;, response.body());</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">    if (response.statusCode() != 200) {</span>
+<span class="fc" id="L31">      throw new IOException(&quot;Failed to get remote schema file: &quot; + response.statusCode());</span>
+    }
+<span class="fc" id="L33">    return response.body();</span>
+  }
+
+<span class="nc" id="L36">  @SneakyThrows</span>
+  public String getIntrospectedSchemaFile(String url, String query, Map&lt;String, String&gt; headers) {
+<span class="fc" id="L38">    String requestBody = &quot;{\&quot;query\&quot;: &quot; + escapeJson(query) + &quot;}&quot;;</span>
+    HttpRequest.Builder builder =
+<span class="fc" id="L40">        HttpRequest.newBuilder()</span>
+<span class="fc" id="L41">            .uri(URI.create(url))</span>
+<span class="fc" id="L42">            .POST(HttpRequest.BodyPublishers.ofString(requestBody))</span>
+<span class="fc" id="L43">            .header(&quot;Content-Type&quot;, &quot;application/json&quot;);</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">    if (headers != null) {</span>
+<span class="fc" id="L45">      headers.forEach(builder::header);</span>
+    }
+<span class="fc" id="L47">    HttpRequest request = builder.build();</span>
+<span class="fc" id="L48">    HttpResponse&lt;String&gt; response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());</span>
+<span class="fc" id="L49">    Logger.debug(&quot;Introspection results: {}&quot;, response.body());</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">    if (response.statusCode() != 200) {</span>
+<span class="nc" id="L51">      throw new IOException(&quot;Failed to get introspection results: &quot; + response.statusCode());</span>
+    }
+<span class="fc" id="L53">    Map&lt;String, Object&gt; introspection =</span>
+<span class="fc" id="L54">        objectMapper.readValue(response.body(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {});</span>
+<span class="fc" id="L55">    return convertIntrospectionToSchema(introspection);</span>
+  }
+
+  public String convertIntrospectionToSchema(Map&lt;String, Object&gt; introspection) {
+<span class="fc" id="L59">    IntrospectionResultToSchema introspectionResultToSchema = new IntrospectionResultToSchema();</span>
+    ExecutionResult executionResult =
+<span class="fc" id="L61">        ExecutionResult.newExecutionResult().data(introspection.get(&quot;data&quot;)).build();</span>
+<span class="fc" id="L62">    Document schema = introspectionResultToSchema.createSchemaDefinition(executionResult);</span>
+<span class="fc" id="L63">    SchemaPrinter schemaPrinter = new SchemaPrinter();</span>
+<span class="fc" id="L64">    String sdl = schemaPrinter.print(schema);</span>
+<span class="fc" id="L65">    return sdl;</span>
+  }
+
+  private String escapeJson(String query) {
+    // Simple JSON string escape for query
+<span class="fc" id="L70">    return &quot;\&quot;&quot; + query.replace(&quot;\\&quot;, &quot;\\\\&quot;).replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;) + &quot;\&quot;&quot;;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

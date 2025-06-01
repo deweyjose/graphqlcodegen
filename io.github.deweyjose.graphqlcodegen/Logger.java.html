@@ -19,10 +19,10 @@ public class Logger {
 <span class="fc" id="L19">  }</span>
 
   public static void debug(String format, Object... args) {
-<span class="nc bnc" id="L22" title="All 2 branches missed.">    if (mavenLog != null) {</span>
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">    if (mavenLog != null) {</span>
 <span class="nc" id="L23">      mavenLog.debug(MessageFormatter.arrayFormat(format, args).getMessage());</span>
     }
-<span class="nc" id="L25">  }</span>
+<span class="fc" id="L25">  }</span>
 
   public static void warn(String format, Object... args) {
 <span class="nc bnc" id="L28" title="All 2 branches missed.">    if (mavenLog != null) {</span>
