@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import io.github.deweyjose.graphqlcodegen.TestUtils;
+import io.github.deweyjose.graphqlcodegen.services.RemoteSchemaService.IntrospectionOperation;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -88,7 +89,9 @@ class RemoteSchemaServiceTest {
     String query = INTROSPECTION_QUERY;
     Map<String, String> headers = new HashMap<>();
     headers.put("X-Test-Header", "test");
-    String result = service.getIntrospectedSchemaFile(baseUrl + "/introspect", query, headers);
+    IntrospectionOperation operation =
+        IntrospectionOperation.builder().query(query).operationName("IntrospectionQuery").build();
+    String result = service.getIntrospectedSchemaFile(baseUrl + "/introspect", operation, headers);
     assertTrue(result.contains("type Query"), "Should contain type Query");
     assertTrue(result.contains("type Mutation"), "Should contain type Mutation");
     assertTrue(result.contains("type Subscription"), "Should contain type Subscription");

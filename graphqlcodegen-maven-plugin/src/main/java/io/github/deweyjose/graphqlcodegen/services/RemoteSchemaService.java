@@ -13,11 +13,25 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.SneakyThrows;
 
 public class RemoteSchemaService {
   private final HttpClient httpClient;
   private final ObjectMapper objectMapper = new ObjectMapper();
+
+  @Builder
+  @Getter
+  public static class IntrospectionOperation {
+    private String query;
+    private String operationName;
+  }
+
+  public static class IntrospectionRequest {
+    public IntrospectionOperation operation;
+    public Map<String, Object> variables;
+  }
 
   public RemoteSchemaService() {
     this.httpClient = HttpClient.newHttpClient();
@@ -34,16 +48,18 @@ public class RemoteSchemaService {
   }
 
   @SneakyThrows
-  public String getIntrospectedSchemaFile(String url, String query, Map<String, String> headers) {
-    String requestBody = "{\"query\": " + escapeJson(query) + "}";
+  public String getIntrospectedSchemaFile(
+      String url, IntrospectionOperation operation, Map<String, String> headers) {
     HttpRequest.Builder builder =
         HttpRequest.newBuilder()
             .uri(URI.create(url))
-            .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+            .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(operation)))
             .header("Content-Type", "application/json");
-    if (headers != null) {
+
+    if (!headers.isEmpty()) {
       headers.forEach(builder::header);
     }
+
     HttpRequest request = builder.build();
     HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     Logger.debug("Introspection results: {}", response.body());
@@ -63,10 +79,5 @@ public class RemoteSchemaService {
     SchemaPrinter schemaPrinter = new SchemaPrinter();
     String sdl = schemaPrinter.print(schema);
     return sdl;
-  }
-
-  private String escapeJson(String query) {
-    // Simple JSON string escape for query
-    return "\"" + query.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
   }
 }
