@@ -40,8 +40,8 @@ public class SchemaManifestService {
    * @param manifestPath the manifest file path
    * @param projectPath the project base directory
    */
-  public SchemaManifestService(File manifestPath, File projectPath) {
-    this.manifestPath = manifestPath;
+  public SchemaManifestService(File manifestDir, File projectPath) {
+    this.manifestPath = new File(manifestDir, "schema-manifest.props");
     this.projectPath = projectPath;
   }
 
@@ -57,42 +57,6 @@ public class SchemaManifestService {
     byte[] hash = MessageDigest.getInstance("MD5").digest(data);
     String checksum = new BigInteger(1, hash).toString(16);
     return checksum;
-  }
-
-  /**
-   * Returns true if the file is a GraphQL schema file (.graphql, .graphqls, .gqls).
-   *
-   * @param file the file to check
-   * @return true if the file is a GraphQL schema file
-   */
-  public static boolean isGraphqlFile(File file) {
-    return file.getName().endsWith(".graphqls")
-        || file.getName().endsWith(".graphql")
-        || file.getName().endsWith(".gqls");
-  }
-
-  /**
-   * Recursively finds all GraphQL schema files in a directory.
-   *
-   * @param directory the directory to search
-   * @return a set of GraphQL schema files
-   */
-  public static Set<File> findGraphQLSFiles(File directory) {
-    Set<File> result = new HashSet<>();
-
-    File[] contents = directory.listFiles();
-    if (contents != null) {
-      for (File content : contents) {
-        if (content.isFile() && isGraphqlFile(content)) {
-          result.add(content);
-        } else if (content.isDirectory()) {
-          Set<File> subdirectoryGraphQLSFiles = findGraphQLSFiles(content);
-          result.addAll(subdirectoryGraphQLSFiles);
-        }
-      }
-    }
-
-    return result;
   }
 
   /**
@@ -127,9 +91,7 @@ public class SchemaManifestService {
     return changed;
   }
 
-  /**
-   * Clears the old manifest, computes new checksums for each file, and saves the properties file.
-   */
+  /** Syncs the manifest with the files. */
   @SneakyThrows
   public void syncManifest() {
     OrderedProperties manifest =
@@ -148,6 +110,11 @@ public class SchemaManifestService {
     }
   }
 
+  /**
+   * Loads the manifest from the manifest path.
+   *
+   * @return the manifest
+   */
   @SneakyThrows
   private OrderedProperties loadManifest() {
     OrderedProperties properties =
@@ -160,6 +127,12 @@ public class SchemaManifestService {
     return properties;
   }
 
+  /**
+   * Relativizes a file to the project path.
+   *
+   * @param file the file to relativize
+   * @return the relativized file path
+   */
   private String relativizeToProject(File file) {
     return projectPath.toPath().relativize(file.toPath()).toString();
   }

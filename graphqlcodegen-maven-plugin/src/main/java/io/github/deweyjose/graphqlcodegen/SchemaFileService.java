@@ -8,39 +8,98 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
+import org.apache.maven.artifact.Artifact;
 
+/** Service for managing schema files. */
+@Getter
+@Setter
 public class SchemaFileService {
-  public Set<File> expandSchemaPaths(File[] schemaPaths) {
-    Set<File> configuredSchemaPaths =
-        java.util.Arrays.stream(schemaPaths).collect(Collectors.toSet());
-    Set<File> expandedSchemaPaths = new HashSet<>();
-    for (File path : configuredSchemaPaths) {
-      if (path.isFile()) {
-        expandedSchemaPaths.add(path);
-      } else {
-        expandedSchemaPaths.addAll(SchemaManifestService.findGraphQLSFiles(path));
-      }
-    }
-    return expandedSchemaPaths;
+  private final File outputDir;
+  private final SchemaManifestService manifest;
+  private Set<File> schemaPaths;
+  private List<File> schemaJarFilesFromDependencies;
+
+  public SchemaFileService(File outputDir, SchemaManifestService manifest) {
+    this.schemaPaths = new HashSet<>();
+    this.outputDir = outputDir;
+    this.manifest = manifest;
   }
 
-  public void verifySchemaFiles(
-      Set<File> fullSchemaPaths, String[] schemaJarFilesFromDependencies) {
-    if (fullSchemaPaths.isEmpty()
-        && (schemaJarFilesFromDependencies == null || schemaJarFilesFromDependencies.length < 1)) {
+  /**
+   * Loads the schema paths into the schema paths.
+   *
+   * @param schemaPaths the schema paths to load
+   */
+  public void loadExpandedSchemaPaths(Collection<File> schemaPaths) {
+    setSchemaPaths(
+        schemaPaths.stream()
+            .map(
+                path -> {
+                  if (path.isFile()) {
+                    return Stream.of(path);
+                  } else {
+                    return findGraphQLSFiles(path).stream();
+                  }
+                })
+            .flatMap(stream -> stream)
+            .collect(Collectors.toSet()));
+  }
+
+  public void loadSchemaJarFilesFromDependencies(
+      Set<Artifact> artifacts, Collection<String> schemaJarFilesFromDependencies) {
+    this.schemaJarFilesFromDependencies =
+        DependencySchemaExtractor.extract(artifacts, schemaJarFilesFromDependencies);
+  }
+
+  /**
+   * Loads the schema URLs into the schema paths.
+   *
+   * @param schemaUrls the schema URLs to load
+   */
+  @SneakyThrows
+  public void loadSchemaUrls(String[] schemaUrls) {
+    for (String url : schemaUrls) {
+      schemaPaths.add(saveUrlToFile(url, outputDir));
+    }
+  }
+
+  public void checkHasSchemaFiles() {
+    if (getSchemaPaths().isEmpty()
+        && Optional.ofNullable(getSchemaJarFilesFromDependencies())
+            .orElse(Collections.emptyList())
+            .isEmpty()) {
       throw new IllegalArgumentException("No schema files found. Please check your configuration.");
     }
   }
 
-  public Set<File> filterChangedSchemaFiles(
-      Set<File> allSchemaFiles, SchemaManifestService manifest) {
-    manifest.setFiles(new HashSet<>(allSchemaFiles));
-    Set<File> changed = new HashSet<>(allSchemaFiles);
+  public boolean noWorkToDo() {
+    return getSchemaPaths().isEmpty() && getSchemaJarFilesFromDependencies().isEmpty();
+  }
+
+  public void syncManifest() {
+    try {
+      manifest.syncManifest();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void filterChangedSchemaFiles() {
+    manifest.setFiles(new HashSet<>(schemaPaths));
+    Set<File> changed = new HashSet<>(schemaPaths);
     changed.retainAll(manifest.getChangedFiles());
-    return changed;
+    setSchemaPaths(changed);
   }
 
   public String fetchSchema(String url) throws IOException, InterruptedException {
@@ -71,5 +130,41 @@ public class SchemaFileService {
     } catch (Exception e) {
       throw new RuntimeException("Failed to compute MD5 hash", e);
     }
+  }
+
+  /**
+   * Recursively finds all GraphQL schema files in a directory.
+   *
+   * @param directory the directory to search
+   * @return a set of GraphQL schema files
+   */
+  public static Set<File> findGraphQLSFiles(File directory) {
+    Set<File> result = new HashSet<>();
+
+    File[] contents = directory.listFiles();
+    if (contents != null) {
+      for (File content : contents) {
+        if (content.isFile() && isGraphqlFile(content)) {
+          result.add(content);
+        } else if (content.isDirectory()) {
+          Set<File> subdirectoryGraphQLSFiles = findGraphQLSFiles(content);
+          result.addAll(subdirectoryGraphQLSFiles);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Returns true if the file is a GraphQL schema file (.graphql, .graphqls, .gqls).
+   *
+   * @param file the file to check
+   * @return true if the file is a GraphQL schema file
+   */
+  public static boolean isGraphqlFile(File file) {
+    return file.getName().endsWith(".graphqls")
+        || file.getName().endsWith(".graphql")
+        || file.getName().endsWith(".gqls");
   }
 }

@@ -2,7 +2,9 @@ package io.github.deweyjose.graphqlcodegen;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -173,8 +175,17 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
 
   @Override
   public void execute() {
+    SchemaManifestService manifest =
+        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());
+    TypeMappingService typeMappingService = new TypeMappingService();
+    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest);
+
+    @SuppressWarnings("unchecked")
+    Set<Artifact> artifacts = project.getArtifacts();
+
+    var executor = new CodegenExecutor(getLog(), schemaFileService, typeMappingService);
+    executor.execute(this, artifacts, project.getBasedir());
+
     project.addCompileSourceRoot(outputDir.getAbsolutePath());
-    new CodegenExecutor(getLog(), new SchemaFileService(), new TypeMappingService())
-        .execute(this, project.getArtifacts(), project.getBasedir());
   }
 }

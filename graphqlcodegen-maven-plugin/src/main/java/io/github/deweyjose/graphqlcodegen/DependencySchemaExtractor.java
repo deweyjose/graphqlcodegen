@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -20,7 +21,7 @@ public class DependencySchemaExtractor {
    * @return the schema files
    */
   public static List<File> extract(
-      Set<Artifact> dependencyArtifacts, String[] schemaJarFilesFromDependencies) {
+      Set<Artifact> dependencyArtifacts, Collection<String> schemaJarFilesFromDependencies) {
     List<File> files = new ArrayList<>();
 
     for (final String jarDep : schemaJarFilesFromDependencies) {

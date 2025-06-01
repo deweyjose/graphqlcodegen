@@ -1,7 +1,5 @@
 package io.github.deweyjose.graphqlcodegen;
 
-import static java.util.Arrays.stream;
-
 import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
 import com.netflix.graphql.dgs.codegen.Language;
@@ -9,7 +7,6 @@ import io.github.deweyjose.codegen.generated.GeneratedCodeGenConfigBuilder;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -53,34 +50,27 @@ public class CodegenExecutor {
       return;
     }
 
-    final Set<File> fullSchemaPaths;
-
+    // get the schema paths that might have changed or all of them.
     if (request.isOnlyGenerateChanged()) {
-      fullSchemaPaths = schemaFileService.expandSchemaPaths(request.getSchemaPaths());
-      log.info(String.format("expanded schema paths: %s", fullSchemaPaths));
+      schemaFileService.loadExpandedSchemaPaths(toSet(request.getSchemaPaths()));
+      log.info(String.format("expanded schema paths: %s", schemaFileService.getSchemaPaths()));
     } else {
-      fullSchemaPaths = stream(request.getSchemaPaths()).collect(Collectors.toSet());
+      schemaFileService.setSchemaPaths(toSet(request.getSchemaPaths()));
     }
 
-    for (String url : request.getSchemaUrls()) {
-      fullSchemaPaths.add(
-          schemaFileService.saveUrlToFile(url, request.getSchemaManifestOutputDir()));
-    }
-    schemaFileService.verifySchemaFiles(
-        fullSchemaPaths, request.getSchemaJarFilesFromDependencies());
+    // load the schema jar files from dependencies
+    schemaFileService.loadSchemaJarFilesFromDependencies(
+        artifacts, toSet(request.getSchemaJarFilesFromDependencies()));
 
-    SchemaManifestService manifest =
-        new SchemaManifestService(
-            new File(request.getSchemaManifestOutputDir(), "schema-manifest.props"),
-            projectBaseDir);
+    schemaFileService.loadSchemaUrls(request.getSchemaUrls());
+    schemaFileService.checkHasSchemaFiles();
 
-    Set<File> filteredSchemaFiles = fullSchemaPaths;
     if (request.isOnlyGenerateChanged()) {
-      filteredSchemaFiles = schemaFileService.filterChangedSchemaFiles(fullSchemaPaths, manifest);
-      log.info(String.format("changed schema files: %s", filteredSchemaFiles));
+      schemaFileService.filterChangedSchemaFiles();
+      log.info(String.format("changed schema files: %s", schemaFileService.getSchemaPaths()));
     }
 
-    if (filteredSchemaFiles.isEmpty() && request.getSchemaJarFilesFromDependencies().length < 1) {
+    if (schemaFileService.noWorkToDo()) {
       log.info("no files to generate");
       return;
     }
@@ -89,14 +79,12 @@ public class CodegenExecutor {
         typeMappingService.mergeTypeMapping(
             request.getTypeMapping(), request.getTypeMappingPropertiesFiles(), artifacts);
 
-    List<File> schemaJarFiles =
-        DependencySchemaExtractor.extract(artifacts, request.getSchemaJarFilesFromDependencies());
-
     final CodeGenConfig config =
         new GeneratedCodeGenConfigBuilder()
             .setSchemas(Collections.emptySet())
-            .setSchemaFiles(filteredSchemaFiles)
-            .setSchemaJarFilesFromDependencies(schemaJarFiles)
+            .setSchemaFiles(schemaFileService.getSchemaPaths())
+            .setSchemaJarFilesFromDependencies(
+                schemaFileService.getSchemaJarFilesFromDependencies())
             .setOutputDir(request.getOutputDir().toPath())
             .setExamplesOutputDir(request.getExamplesOutputDir().toPath())
             .setWriteToFiles(request.isWriteToFiles())
@@ -146,12 +134,9 @@ public class CodegenExecutor {
     log.info(String.format("Codegen config: \n%s", config));
     final CodeGen codeGen = new CodeGen(config);
     codeGen.generate();
+
     if (request.isOnlyGenerateChanged()) {
-      try {
-        manifest.syncManifest();
-      } catch (Exception e) {
-        log.warn("error syncing manifest", e);
-      }
+      schemaFileService.syncManifest();
     }
   }
 
@@ -161,7 +146,7 @@ public class CodegenExecutor {
    * @param arr the array
    * @return a set of strings
    */
-  public static Set<String> toSet(String[] arr) {
+  public static <T> Set<T> toSet(T[] arr) {
     return Optional.ofNullable(arr)
         .map(a -> java.util.Arrays.stream(a).collect(Collectors.toSet()))
         .orElse(Collections.emptySet());
