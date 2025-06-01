@@ -1,7 +1,6 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,RemoteSchemaService.IntrospectionRequest,3,0,0,0,1,0,1,0,1,0
 GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,RemoteSchemaService.new TypeReference() {...},0,6,0,0,0,1,0,1,0,1
-GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,SchemaFileService,19,354,7,29,4,82,6,32,0,20
+GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,SchemaFileService,12,311,7,27,2,76,6,30,0,19
 GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,SchemaManifestService,9,189,0,12,2,48,0,15,0,9
 GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,TypeMappingService,3,106,2,14,2,24,2,10,0,4
 GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,RemoteSchemaService,10,135,2,4,2,29,2,5,0,4

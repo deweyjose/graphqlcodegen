@@ -3,7 +3,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -151,31 +151,12 @@ public class SchemaFileService {
    */
   public File saveUrlToFile(String url, File outputDir) throws IOException, InterruptedException {
 <span class="fc" id="L153">    String content = remoteSchemaService.getRemoteSchemaFile(url);</span>
-<span class="fc" id="L154">    String fileName = &quot;remote-schemas/&quot; + md5Hex(url) + &quot;.graphqls&quot;;</span>
-<span class="fc" id="L155">    File outFile = new File(outputDir, fileName);</span>
-<span class="fc" id="L156">    Files.createDirectories(outFile.getParentFile().toPath());</span>
-<span class="fc" id="L157">    Files.writeString(outFile.toPath(), content);</span>
-<span class="fc" id="L158">    return outFile;</span>
-  }
-
-  /**
-   * Computes the MD5 hash of the input string and returns it as a hex string.
-   *
-   * @param input the input string
-   * @return the MD5 hash as a hex string
-   */
-  private String md5Hex(String input) {
-    try {
-<span class="fc" id="L169">      MessageDigest md = MessageDigest.getInstance(&quot;MD5&quot;);</span>
-<span class="fc" id="L170">      byte[] digest = md.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));</span>
-<span class="fc" id="L171">      StringBuilder sb = new StringBuilder();</span>
-<span class="fc bfc" id="L172" title="All 2 branches covered.">      for (byte b : digest) {</span>
-<span class="fc" id="L173">        sb.append(String.format(&quot;%02x&quot;, b));</span>
-      }
-<span class="fc" id="L175">      return sb.toString();</span>
-<span class="nc" id="L176">    } catch (Exception e) {</span>
-<span class="nc" id="L177">      throw new RuntimeException(&quot;Failed to compute MD5 hash&quot;, e);</span>
-    }
+    String fileName =
+<span class="fc" id="L155">        &quot;remote-schemas/&quot; + Base64.getEncoder().encodeToString(url.getBytes()) + &quot;.graphqls&quot;;</span>
+<span class="fc" id="L156">    File outFile = new File(outputDir, fileName);</span>
+<span class="fc" id="L157">    Files.createDirectories(outFile.getParentFile().toPath());</span>
+<span class="fc" id="L158">    Files.writeString(outFile.toPath(), content);</span>
+<span class="fc" id="L159">    return outFile;</span>
   }
 
   /**
@@ -185,21 +166,21 @@ public class SchemaFileService {
    * @return a set of GraphQL schema files found
    */
   public static Set&lt;File&gt; findGraphQLSFiles(File directory) {
-<span class="fc" id="L188">    Set&lt;File&gt; result = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L169">    Set&lt;File&gt; result = new HashSet&lt;&gt;();</span>
 
-<span class="fc" id="L190">    File[] contents = directory.listFiles();</span>
-<span class="pc bpc" id="L191" title="1 of 2 branches missed.">    if (contents != null) {</span>
-<span class="fc bfc" id="L192" title="All 2 branches covered.">      for (File content : contents) {</span>
-<span class="pc bpc" id="L193" title="1 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
-<span class="fc" id="L194">          result.add(content);</span>
-<span class="pc bpc" id="L195" title="1 of 2 branches missed.">        } else if (content.isDirectory()) {</span>
-<span class="fc" id="L196">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
-<span class="fc" id="L197">          result.addAll(subdirectoryGraphQLSFiles);</span>
+<span class="fc" id="L171">    File[] contents = directory.listFiles();</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">    if (contents != null) {</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">      for (File content : contents) {</span>
+<span class="pc bpc" id="L174" title="1 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
+<span class="fc" id="L175">          result.add(content);</span>
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">        } else if (content.isDirectory()) {</span>
+<span class="fc" id="L177">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
+<span class="fc" id="L178">          result.addAll(subdirectoryGraphQLSFiles);</span>
         }
       }
     }
 
-<span class="fc" id="L202">    return result;</span>
+<span class="fc" id="L183">    return result;</span>
   }
 
   /**
@@ -209,9 +190,9 @@ public class SchemaFileService {
    * @return true if the file is a GraphQL schema file, false otherwise
    */
   public static boolean isGraphqlFile(File file) {
-<span class="fc bfc" id="L212" title="All 2 branches covered.">    return file.getName().endsWith(&quot;.graphqls&quot;)</span>
-<span class="fc bfc" id="L213" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.graphql&quot;)</span>
-<span class="fc bfc" id="L214" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.gqls&quot;);</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">    return file.getName().endsWith(&quot;.graphqls&quot;)</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.graphql&quot;)</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.gqls&quot;);</span>
   }
 
   /**
@@ -224,14 +205,14 @@ public class SchemaFileService {
    */
   public static List&lt;File&gt; extractSchemaFilesFromDependencies(
       Set&lt;Artifact&gt; dependencyArtifacts, Collection&lt;String&gt; schemaJarFilesFromDependencies) {
-<span class="fc" id="L227">    return schemaJarFilesFromDependencies.stream()</span>
-<span class="fc" id="L228">        .map(String::trim)</span>
-<span class="fc bfc" id="L229" title="All 2 branches covered.">        .filter(jarDep -&gt; !jarDep.isEmpty())</span>
-<span class="fc" id="L230">        .map(jarDep -&gt; findArtifactFromDependencies(dependencyArtifacts, jarDep))</span>
-<span class="fc" id="L231">        .filter(Optional::isPresent)</span>
-<span class="fc" id="L232">        .map(Optional::get)</span>
-<span class="fc" id="L233">        .map(Artifact::getFile)</span>
-<span class="fc" id="L234">        .toList();</span>
+<span class="fc" id="L208">    return schemaJarFilesFromDependencies.stream()</span>
+<span class="fc" id="L209">        .map(String::trim)</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        .filter(jarDep -&gt; !jarDep.isEmpty())</span>
+<span class="fc" id="L211">        .map(jarDep -&gt; findArtifactFromDependencies(dependencyArtifacts, jarDep))</span>
+<span class="fc" id="L212">        .filter(Optional::isPresent)</span>
+<span class="fc" id="L213">        .map(Optional::get)</span>
+<span class="fc" id="L214">        .map(Artifact::getFile)</span>
+<span class="fc" id="L215">        .toList();</span>
   }
 
   /**
@@ -244,18 +225,18 @@ public class SchemaFileService {
    */
   private static Optional&lt;Artifact&gt; findArtifactFromDependencies(
       Set&lt;Artifact&gt; dependencyArtifacts, final String artifactRef) {
-<span class="fc" id="L247">    final String cleanRef = artifactRef.trim();</span>
+<span class="fc" id="L228">    final String cleanRef = artifactRef.trim();</span>
 
-<span class="fc bfc" id="L249" title="All 2 branches covered.">    for (final Artifact artifact : dependencyArtifacts) {</span>
-<span class="fc" id="L250">      final String ref =</span>
-<span class="fc" id="L251">          String.format(</span>
-<span class="fc" id="L252">              &quot;%s:%s:%s&quot;, artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">    for (final Artifact artifact : dependencyArtifacts) {</span>
+<span class="fc" id="L231">      final String ref =</span>
+<span class="fc" id="L232">          String.format(</span>
+<span class="fc" id="L233">              &quot;%s:%s:%s&quot;, artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());</span>
 
-<span class="fc bfc" id="L254" title="All 2 branches covered.">      if (ref.equals(cleanRef)) {</span>
-<span class="fc" id="L255">        return java.util.Optional.of(artifact);</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">      if (ref.equals(cleanRef)) {</span>
+<span class="fc" id="L236">        return java.util.Optional.of(artifact);</span>
       }
-<span class="fc" id="L257">    }</span>
-<span class="fc" id="L258">    return Optional.empty();</span>
+<span class="fc" id="L238">    }</span>
+<span class="fc" id="L239">    return Optional.empty();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
