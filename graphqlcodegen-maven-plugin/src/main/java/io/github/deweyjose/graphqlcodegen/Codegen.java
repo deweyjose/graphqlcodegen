@@ -1,9 +1,12 @@
 package io.github.deweyjose.graphqlcodegen;
 
+import io.github.deweyjose.graphqlcodegen.parameters.IntrospectionRequest;
+import io.github.deweyjose.graphqlcodegen.parameters.ParameterMap;
 import io.github.deweyjose.graphqlcodegen.services.SchemaFileService;
 import io.github.deweyjose.graphqlcodegen.services.SchemaManifestService;
 import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.Getter;
@@ -179,14 +182,8 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   @Parameter(property = "autoAddSource", defaultValue = "true")
   private boolean autoAddSource;
 
-  public File[] getSchemaPaths() {
-    return schemaPaths;
-  }
-
-  @Override
-  public String[] getSchemaUrls() {
-    return schemaUrls;
-  }
+  @Parameter(property = "introspectionRequests")
+  private List<IntrospectionRequest> introspectionRequests;
 
   @Override
   public void execute() {

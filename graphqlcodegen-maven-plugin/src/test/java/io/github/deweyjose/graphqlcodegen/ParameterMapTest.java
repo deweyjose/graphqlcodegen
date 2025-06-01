@@ -2,6 +2,7 @@ package io.github.deweyjose.graphqlcodegen;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.github.deweyjose.graphqlcodegen.parameters.ParameterMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
