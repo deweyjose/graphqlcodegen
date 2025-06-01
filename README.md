@@ -791,7 +791,7 @@ Example:
 <introspectionRequests>
   <introspectionRequest>
     <url>https://your-graphql-endpoint/graphql</url>
-    <query>${project.basedir}/src/main/resources/introspection.query</query>
+    <query>{ __schema { queryType { name } } }</query>
     <operationName>IntrospectionQuery</operationName>
     <headers>
       <Authorization>Bearer ${env.YOUR_TOKEN}</Authorization>
