@@ -24,8 +24,6 @@ class RemoteSchemaServiceTest {
       TestUtils.getFileContent("introspection/query.response");
   private static final String INTROSPECTION_QUERY =
       TestUtils.getFileContent("introspection/query.graphqls");
-  private static final String INTROSPECTED_SCHEMA =
-      TestUtils.getFileContent("introspection/schema.graphqls");
 
   @BeforeAll
   static void startServer() throws IOException {
