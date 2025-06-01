@@ -1,33 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CodegenExecutor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">GraphQL Code Generator Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">io.github.deweyjose.graphqlcodegen</a> &gt; <span class="el_source">CodegenExecutor.java</span></div><h1>CodegenExecutor.java</h1><pre class="source lang-java linenums">package io.github.deweyjose.graphqlcodegen;
 
-import static java.util.Arrays.stream;
-import static java.util.Objects.isNull;
-
 import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
 import com.netflix.graphql.dgs.codegen.Language;
 import io.github.deweyjose.codegen.generated.GeneratedCodeGenConfigBuilder;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.Set;
-import java.util.jar.JarFile;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
 import lombok.SneakyThrows;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.logging.Log;
@@ -38,15 +21,20 @@ import org.apache.maven.plugin.logging.Log;
  */
 public class CodegenExecutor {
   private final Log log;
+  private final SchemaFileService schemaFileService;
+  private final TypeMappingService typeMappingService;
 
   /**
    * Constructs a CodegenExecutor with the given Maven logger.
    *
    * @param log the Maven logger
    */
-<span class="fc" id="L47">  public CodegenExecutor(Log log) {</span>
-<span class="fc" id="L48">    this.log = log;</span>
-<span class="fc" id="L49">  }</span>
+  public CodegenExecutor(
+<span class="fc" id="L33">      Log log, SchemaFileService schemaFileService, TypeMappingService typeMappingService) {</span>
+<span class="fc" id="L34">    this.log = log;</span>
+<span class="fc" id="L35">    this.schemaFileService = schemaFileService;</span>
+<span class="fc" id="L36">    this.typeMappingService = typeMappingService;</span>
+<span class="fc" id="L37">  }</span>
 
   /**
    * Executes the code generation.
@@ -55,233 +43,102 @@ public class CodegenExecutor {
    * @param artifacts the artifacts
    * @param projectBaseDir the project base directory
    */
-<span class="pc" id="L58">  @SneakyThrows</span>
+<span class="pc" id="L46">  @SneakyThrows</span>
   public void execute(CodegenConfigProvider request, Set&lt;Artifact&gt; artifacts, File projectBaseDir) {
-<span class="pc bpc" id="L60" title="1 of 2 branches missed.">    if (request.isSkip()) {</span>
-<span class="nc" id="L61">      log.info(&quot;Skipping code generation as requested (skip=true)&quot;);</span>
-<span class="nc" id="L62">      return;</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">    if (request.isSkip()) {</span>
+<span class="nc" id="L49">      log.info(&quot;Skipping code generation as requested (skip=true)&quot;);</span>
+<span class="nc" id="L50">      return;</span>
     }
 
-    final Set&lt;File&gt; fullSchemaPaths;
-
-<span class="fc bfc" id="L67" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="fc" id="L68">      fullSchemaPaths = expandSchemaPaths(request.getSchemaPaths());</span>
-<span class="fc" id="L69">      log.info(String.format(&quot;expanded schema paths: %s&quot;, fullSchemaPaths));</span>
+    // get the schema paths that might have changed or all of them.
+<span class="fc bfc" id="L54" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="fc" id="L55">      schemaFileService.loadExpandedSchemaPaths(toSet(request.getSchemaPaths()));</span>
+<span class="fc" id="L56">      log.info(String.format(&quot;expanded schema paths: %s&quot;, schemaFileService.getSchemaPaths()));</span>
     } else {
-<span class="fc" id="L71">      fullSchemaPaths = stream(request.getSchemaPaths()).collect(Collectors.toSet());</span>
+<span class="fc" id="L58">      schemaFileService.setSchemaPaths(toSet(request.getSchemaPaths()));</span>
     }
 
-<span class="fc bfc" id="L74" title="All 2 branches covered.">    for (String url : request.getSchemaUrls()) {</span>
-<span class="fc" id="L75">      fullSchemaPaths.add(saveUrlToFile(url, request.getSchemaManifestOutputDir()));</span>
-    }
-<span class="fc" id="L77">    verifySchemaFiles(fullSchemaPaths, request.getSchemaJarFilesFromDependencies());</span>
+    // load the schema jar files from dependencies
+<span class="fc" id="L62">    schemaFileService.loadSchemaJarFilesFromDependencies(</span>
+<span class="fc" id="L63">        artifacts, toSet(request.getSchemaJarFilesFromDependencies()));</span>
 
-<span class="fc" id="L79">    SchemaFileManifest manifest =</span>
-        new SchemaFileManifest(
-<span class="fc" id="L81">            new File(request.getSchemaManifestOutputDir(), &quot;schema-manifest.props&quot;),</span>
-            projectBaseDir);
+<span class="fc" id="L65">    schemaFileService.loadSchemaUrls(request.getSchemaUrls());</span>
+<span class="fc" id="L66">    schemaFileService.checkHasSchemaFiles();</span>
 
-<span class="fc" id="L84">    Set&lt;File&gt; filteredSchemaFiles = fullSchemaPaths;</span>
-<span class="fc bfc" id="L85" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="fc" id="L86">      filteredSchemaFiles = filterChangedSchemaFiles(fullSchemaPaths, manifest);</span>
-<span class="fc" id="L87">      log.info(String.format(&quot;changed schema files: %s&quot;, filteredSchemaFiles));</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="fc" id="L69">      schemaFileService.filterChangedSchemaFiles();</span>
+<span class="fc" id="L70">      log.info(String.format(&quot;changed schema files: %s&quot;, schemaFileService.getSchemaPaths()));</span>
     }
 
-<span class="pc bpc" id="L90" title="3 of 4 branches missed.">    if (filteredSchemaFiles.isEmpty() &amp;&amp; request.getSchemaJarFilesFromDependencies().length &lt; 1) {</span>
-<span class="nc" id="L91">      log.info(&quot;no files to generate&quot;);</span>
-<span class="nc" id="L92">      return;</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">    if (schemaFileService.noWorkToDo()) {</span>
+<span class="nc" id="L74">      log.info(&quot;no files to generate&quot;);</span>
+<span class="nc" id="L75">      return;</span>
     }
 
-<span class="fc" id="L95">    Map&lt;String, String&gt; typeMapping =</span>
-<span class="fc" id="L96">        mergeTypeMapping(</span>
-<span class="fc" id="L97">            request.getTypeMapping(), request.getTypeMappingPropertiesFiles(), artifacts);</span>
+<span class="fc" id="L78">    Map&lt;String, String&gt; typeMapping =</span>
+<span class="fc" id="L79">        typeMappingService.mergeTypeMapping(</span>
+<span class="fc" id="L80">            request.getTypeMapping(), request.getTypeMappingPropertiesFiles(), artifacts);</span>
 
-<span class="fc" id="L99">    List&lt;File&gt; schemaJarFiles =</span>
-<span class="fc" id="L100">        DependencySchemaExtractor.extract(artifacts, request.getSchemaJarFilesFromDependencies());</span>
-
-<span class="fc" id="L102">    final CodeGenConfig config =</span>
+<span class="fc" id="L82">    final CodeGenConfig config =</span>
         new GeneratedCodeGenConfigBuilder()
-<span class="fc" id="L104">            .setSchemas(Collections.emptySet())</span>
-<span class="fc" id="L105">            .setSchemaFiles(filteredSchemaFiles)</span>
-<span class="fc" id="L106">            .setSchemaJarFilesFromDependencies(schemaJarFiles)</span>
-<span class="fc" id="L107">            .setOutputDir(request.getOutputDir().toPath())</span>
-<span class="fc" id="L108">            .setExamplesOutputDir(request.getExamplesOutputDir().toPath())</span>
-<span class="fc" id="L109">            .setWriteToFiles(request.isWriteToFiles())</span>
-<span class="fc" id="L110">            .setPackageName(request.getPackageName())</span>
-<span class="fc" id="L111">            .setSubPackageNameClient(request.getSubPackageNameClient())</span>
-<span class="fc" id="L112">            .setSubPackageNameDatafetchers(request.getSubPackageNameDatafetchers())</span>
-<span class="fc" id="L113">            .setSubPackageNameTypes(request.getSubPackageNameTypes())</span>
-<span class="fc" id="L114">            .setSubPackageNameDocs(request.getSubPackageNameDocs())</span>
-<span class="fc" id="L115">            .setLanguage(Language.valueOf(request.getLanguage().toUpperCase()))</span>
-<span class="fc" id="L116">            .setGenerateBoxedTypes(request.isGenerateBoxedTypes())</span>
-<span class="fc" id="L117">            .setGenerateIsGetterForPrimitiveBooleanFields(</span>
-<span class="fc" id="L118">                request.isGenerateIsGetterForPrimitiveBooleanFields())</span>
-<span class="fc" id="L119">            .setGenerateClientApi(request.isGenerateClientApi())</span>
-<span class="fc" id="L120">            .setGenerateClientApiv2(request.isGenerateClientApiv2())</span>
-<span class="fc" id="L121">            .setGenerateInterfaces(request.isGenerateInterfaces())</span>
-<span class="fc" id="L122">            .setGenerateKotlinNullableClasses(request.isGenerateKotlinNullableClasses())</span>
-<span class="fc" id="L123">            .setGenerateKotlinClosureProjections(request.isGenerateKotlinClosureProjections())</span>
-<span class="fc" id="L124">            .setTypeMapping(typeMapping)</span>
-<span class="fc" id="L125">            .setIncludeQueries(toSet(request.getIncludeQueries()))</span>
-<span class="fc" id="L126">            .setIncludeMutations(toSet(request.getIncludeMutations()))</span>
-<span class="fc" id="L127">            .setIncludeSubscriptions(toSet(request.getIncludeSubscriptions()))</span>
-<span class="fc" id="L128">            .setSkipEntityQueries(request.isSkipEntityQueries())</span>
-<span class="fc" id="L129">            .setShortProjectionNames(request.isShortProjectionNames())</span>
-<span class="fc" id="L130">            .setGenerateDataTypes(request.isGenerateDataTypes())</span>
-<span class="fc" id="L131">            .setOmitNullInputFields(request.isOmitNullInputFields())</span>
-<span class="fc" id="L132">            .setMaxProjectionDepth(request.getMaxProjectionDepth())</span>
-<span class="fc" id="L133">            .setKotlinAllFieldsOptional(request.isKotlinAllFieldsOptional())</span>
-<span class="fc" id="L134">            .setSnakeCaseConstantNames(request.isSnakeCaseConstantNames())</span>
-<span class="fc" id="L135">            .setGenerateInterfaceSetters(request.isGenerateInterfaceSetters())</span>
-<span class="fc" id="L136">            .setGenerateInterfaceMethodsForInterfaceFields(</span>
-<span class="fc" id="L137">                request.isGenerateInterfaceMethodsForInterfaceFields())</span>
-<span class="fc" id="L138">            .setGenerateDocs(request.getGenerateDocs())</span>
-<span class="fc" id="L139">            .setGeneratedDocsFolder(Paths.get(request.getGeneratedDocsFolder()))</span>
-<span class="fc" id="L140">            .setIncludeImports(</span>
-<span class="fc" id="L141">                Optional.ofNullable(request.getIncludeImports()).orElse(Collections.emptyMap()))</span>
-<span class="fc" id="L142">            .setIncludeEnumImports(toMap(request.getIncludeEnumImports()))</span>
-<span class="fc" id="L143">            .setIncludeClassImports(toMap(request.getIncludeClassImports()))</span>
-<span class="fc" id="L144">            .setGenerateCustomAnnotations(request.isGenerateCustomAnnotations())</span>
-<span class="fc" id="L145">            .setJavaGenerateAllConstructor(request.isJavaGenerateAllConstructor())</span>
-<span class="fc" id="L146">            .setImplementSerializable(request.isImplementSerializable())</span>
-<span class="fc" id="L147">            .setAddGeneratedAnnotation(request.isAddGeneratedAnnotation())</span>
-<span class="fc" id="L148">            .setDisableDatesInGeneratedAnnotation(request.isDisableDatesInGeneratedAnnotation())</span>
-<span class="fc" id="L149">            .setAddDeprecatedAnnotation(request.isAddDeprecatedAnnotation())</span>
-<span class="fc" id="L150">            .setTrackInputFieldSet(request.isTrackInputFieldSet())</span>
-<span class="fc" id="L151">            .build();</span>
+<span class="fc" id="L84">            .setSchemas(Collections.emptySet())</span>
+<span class="fc" id="L85">            .setSchemaFiles(schemaFileService.getSchemaPaths())</span>
+<span class="fc" id="L86">            .setSchemaJarFilesFromDependencies(</span>
+<span class="fc" id="L87">                schemaFileService.getSchemaJarFilesFromDependencies())</span>
+<span class="fc" id="L88">            .setOutputDir(request.getOutputDir().toPath())</span>
+<span class="fc" id="L89">            .setExamplesOutputDir(request.getExamplesOutputDir().toPath())</span>
+<span class="fc" id="L90">            .setWriteToFiles(request.isWriteToFiles())</span>
+<span class="fc" id="L91">            .setPackageName(request.getPackageName())</span>
+<span class="fc" id="L92">            .setSubPackageNameClient(request.getSubPackageNameClient())</span>
+<span class="fc" id="L93">            .setSubPackageNameDatafetchers(request.getSubPackageNameDatafetchers())</span>
+<span class="fc" id="L94">            .setSubPackageNameTypes(request.getSubPackageNameTypes())</span>
+<span class="fc" id="L95">            .setSubPackageNameDocs(request.getSubPackageNameDocs())</span>
+<span class="fc" id="L96">            .setLanguage(Language.valueOf(request.getLanguage().toUpperCase()))</span>
+<span class="fc" id="L97">            .setGenerateBoxedTypes(request.isGenerateBoxedTypes())</span>
+<span class="fc" id="L98">            .setGenerateIsGetterForPrimitiveBooleanFields(</span>
+<span class="fc" id="L99">                request.isGenerateIsGetterForPrimitiveBooleanFields())</span>
+<span class="fc" id="L100">            .setGenerateClientApi(request.isGenerateClientApi())</span>
+<span class="fc" id="L101">            .setGenerateClientApiv2(request.isGenerateClientApiv2())</span>
+<span class="fc" id="L102">            .setGenerateInterfaces(request.isGenerateInterfaces())</span>
+<span class="fc" id="L103">            .setGenerateKotlinNullableClasses(request.isGenerateKotlinNullableClasses())</span>
+<span class="fc" id="L104">            .setGenerateKotlinClosureProjections(request.isGenerateKotlinClosureProjections())</span>
+<span class="fc" id="L105">            .setTypeMapping(typeMapping)</span>
+<span class="fc" id="L106">            .setIncludeQueries(toSet(request.getIncludeQueries()))</span>
+<span class="fc" id="L107">            .setIncludeMutations(toSet(request.getIncludeMutations()))</span>
+<span class="fc" id="L108">            .setIncludeSubscriptions(toSet(request.getIncludeSubscriptions()))</span>
+<span class="fc" id="L109">            .setSkipEntityQueries(request.isSkipEntityQueries())</span>
+<span class="fc" id="L110">            .setShortProjectionNames(request.isShortProjectionNames())</span>
+<span class="fc" id="L111">            .setGenerateDataTypes(request.isGenerateDataTypes())</span>
+<span class="fc" id="L112">            .setOmitNullInputFields(request.isOmitNullInputFields())</span>
+<span class="fc" id="L113">            .setMaxProjectionDepth(request.getMaxProjectionDepth())</span>
+<span class="fc" id="L114">            .setKotlinAllFieldsOptional(request.isKotlinAllFieldsOptional())</span>
+<span class="fc" id="L115">            .setSnakeCaseConstantNames(request.isSnakeCaseConstantNames())</span>
+<span class="fc" id="L116">            .setGenerateInterfaceSetters(request.isGenerateInterfaceSetters())</span>
+<span class="fc" id="L117">            .setGenerateInterfaceMethodsForInterfaceFields(</span>
+<span class="fc" id="L118">                request.isGenerateInterfaceMethodsForInterfaceFields())</span>
+<span class="fc" id="L119">            .setGenerateDocs(request.getGenerateDocs())</span>
+<span class="fc" id="L120">            .setGeneratedDocsFolder(Paths.get(request.getGeneratedDocsFolder()))</span>
+<span class="fc" id="L121">            .setIncludeImports(</span>
+<span class="fc" id="L122">                Optional.ofNullable(request.getIncludeImports()).orElse(Collections.emptyMap()))</span>
+<span class="fc" id="L123">            .setIncludeEnumImports(toMap(request.getIncludeEnumImports()))</span>
+<span class="fc" id="L124">            .setIncludeClassImports(toMap(request.getIncludeClassImports()))</span>
+<span class="fc" id="L125">            .setGenerateCustomAnnotations(request.isGenerateCustomAnnotations())</span>
+<span class="fc" id="L126">            .setJavaGenerateAllConstructor(request.isJavaGenerateAllConstructor())</span>
+<span class="fc" id="L127">            .setImplementSerializable(request.isImplementSerializable())</span>
+<span class="fc" id="L128">            .setAddGeneratedAnnotation(request.isAddGeneratedAnnotation())</span>
+<span class="fc" id="L129">            .setDisableDatesInGeneratedAnnotation(request.isDisableDatesInGeneratedAnnotation())</span>
+<span class="fc" id="L130">            .setAddDeprecatedAnnotation(request.isAddDeprecatedAnnotation())</span>
+<span class="fc" id="L131">            .setTrackInputFieldSet(request.isTrackInputFieldSet())</span>
+<span class="fc" id="L132">            .build();</span>
 
-<span class="fc" id="L153">    log.info(String.format(&quot;Codegen config: \n%s&quot;, config));</span>
-<span class="fc" id="L154">    final CodeGen codeGen = new CodeGen(config);</span>
-<span class="fc" id="L155">    codeGen.generate();</span>
-<span class="fc bfc" id="L156" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
-      try {
-<span class="fc" id="L158">        manifest.syncManifest();</span>
-<span class="nc" id="L159">      } catch (Exception e) {</span>
-<span class="nc" id="L160">        log.warn(&quot;error syncing manifest&quot;, e);</span>
-<span class="fc" id="L161">      }</span>
+<span class="fc" id="L134">    log.info(String.format(&quot;Codegen config: \n%s&quot;, config));</span>
+<span class="fc" id="L135">    final CodeGen codeGen = new CodeGen(config);</span>
+<span class="fc" id="L136">    codeGen.generate();</span>
+
+<span class="fc bfc" id="L138" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="fc" id="L139">      schemaFileService.syncManifest();</span>
     }
-<span class="fc" id="L163">  }</span>
-
-  /**
-   * Expands the schema paths to include all schema files in the directories.
-   *
-   * @param schemaPaths the schema paths
-   * @return the expanded schema paths
-   */
-  public static Set&lt;File&gt; expandSchemaPaths(File[] schemaPaths) {
-<span class="fc" id="L172">    Set&lt;File&gt; configuredSchemaPaths = stream(schemaPaths).collect(Collectors.toSet());</span>
-<span class="fc" id="L173">    Set&lt;File&gt; expandedSchemaPaths = new HashSet&lt;&gt;();</span>
-<span class="fc bfc" id="L174" title="All 2 branches covered.">    for (File path : configuredSchemaPaths) {</span>
-<span class="fc bfc" id="L175" title="All 2 branches covered.">      if (path.isFile()) {</span>
-<span class="fc" id="L176">        expandedSchemaPaths.add(path);</span>
-      } else {
-<span class="fc" id="L178">        expandedSchemaPaths.addAll(SchemaFileManifest.findGraphQLSFiles(path));</span>
-      }
-<span class="fc" id="L180">    }</span>
-
-<span class="fc" id="L182">    return expandedSchemaPaths;</span>
-  }
-
-  /**
-   * Loads the type mapping from the properties file in the artifact.
-   *
-   * @param artifactFile the artifact file
-   * @param typeMappingPropertiesFiles the type mapping properties files
-   * @return the type mapping
-   */
-  public static Map&lt;String, String&gt; loadPropertiesFile(
-      File artifactFile, String[] typeMappingPropertiesFiles) {
-<span class="fc" id="L194">    Map&lt;String, String&gt; typeMapping = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L195">    try (JarFile jarFile = new JarFile(artifactFile)) {</span>
-
-<span class="fc bfc" id="L197" title="All 2 branches covered.">      for (String file : typeMappingPropertiesFiles) {</span>
-<span class="fc" id="L198">        ZipEntry entry = jarFile.getEntry(file);</span>
-<span class="pc bpc" id="L199" title="1 of 2 branches missed.">        if (entry != null) {</span>
-<span class="fc" id="L200">          try (InputStream inputStream = jarFile.getInputStream(entry)) {</span>
-<span class="fc" id="L201">            Properties typeMappingProperties = new Properties();</span>
-<span class="fc" id="L202">            typeMappingProperties.load(inputStream);</span>
-<span class="fc" id="L203">            typeMappingProperties.forEach(</span>
-                (k, v) -&gt; {
-<span class="fc" id="L205">                  typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v));</span>
-<span class="fc" id="L206">                });</span>
-          }
-        }
-      }
-<span class="nc" id="L210">    } catch (IOException e) {</span>
-<span class="nc" id="L211">      e.printStackTrace();</span>
-<span class="fc" id="L212">    }</span>
-<span class="fc" id="L213">    return typeMapping;</span>
-  }
-
-  /**
-   * Verifies that the package name is not null.
-   *
-   * @param packageName the package name
-   */
-  public static void verifyPackageName(String packageName) {
-<span class="fc bfc" id="L222" title="All 2 branches covered.">    if (isNull(packageName)) {</span>
-<span class="fc" id="L223">      throw new IllegalArgumentException(&quot;Please specify a packageName&quot;);</span>
-    }
-<span class="fc" id="L225">  }</span>
-
-  /**
-   * Verifies that there are schema files to generate. If there are no schema files and no schema
-   * jar files from dependencies, an error is logged and an exception is thrown.
-   *
-   * @param fullSchemaPaths the full schema paths
-   * @param schemaJarFilesFromDependencies the schema jar files from dependencies
-   */
-  public static void verifySchemaFiles(
-      Set&lt;File&gt; fullSchemaPaths, String[] schemaJarFilesFromDependencies) {
-<span class="pc bpc" id="L236" title="2 of 6 branches missed.">    if (fullSchemaPaths.isEmpty()</span>
-        &amp;&amp; (schemaJarFilesFromDependencies == null || schemaJarFilesFromDependencies.length &lt; 1)) {
-<span class="fc" id="L238">      throw new IllegalArgumentException(&quot;No schema files found. Please check your configuration.&quot;);</span>
-    }
-<span class="fc" id="L240">  }</span>
-
-  /**
-   * Merges user-supplied typeMapping with type mappings loaded from JAR properties files.
-   * User-supplied values always take precedence over JAR values.
-   *
-   * @param userTypeMapping the user-supplied type mapping
-   * @param typeMappingPropertiesFiles the type mapping properties files
-   * @param artifacts the artifacts
-   * @return the merged type mapping
-   */
-  public static Map&lt;String, String&gt; mergeTypeMapping(
-      Map&lt;String, String&gt; userTypeMapping,
-      String[] typeMappingPropertiesFiles,
-      Set&lt;Artifact&gt; artifacts) {
-<span class="fc" id="L255">    Map&lt;String, String&gt; jarTypeMapping = new HashMap&lt;&gt;();</span>
-<span class="pc bpc" id="L256" title="1 of 4 branches missed.">    if (typeMappingPropertiesFiles != null &amp;&amp; typeMappingPropertiesFiles.length &gt; 0) {</span>
-<span class="fc bfc" id="L257" title="All 2 branches covered.">      for (Artifact dependency : artifacts) {</span>
-<span class="fc" id="L258">        File artifactFile = dependency.getFile();</span>
-<span class="pc bpc" id="L259" title="2 of 4 branches missed.">        if (artifactFile != null &amp;&amp; artifactFile.isFile()) {</span>
-<span class="fc" id="L260">          jarTypeMapping.putAll(loadPropertiesFile(artifactFile, typeMappingPropertiesFiles));</span>
-        }
-<span class="fc" id="L262">      }</span>
-    }
-<span class="fc" id="L264">    Map&lt;String, String&gt; finalTypeMapping = new HashMap&lt;&gt;(jarTypeMapping);</span>
-<span class="pc bpc" id="L265" title="1 of 2 branches missed.">    if (userTypeMapping != null) {</span>
-<span class="fc" id="L266">      finalTypeMapping.putAll(userTypeMapping);</span>
-    }
-<span class="fc" id="L268">    return finalTypeMapping;</span>
-  }
-
-  /**
-   * Returns only the changed schema files, using the manifest.
-   *
-   * @param allSchemaFiles the full schema paths
-   * @param manifest the schema manifest
-   * @return the changed schema files
-   */
-  public static Set&lt;File&gt; filterChangedSchemaFiles(
-      Set&lt;File&gt; allSchemaFiles, SchemaFileManifest manifest) {
-<span class="fc" id="L280">    manifest.setFiles(new HashSet&lt;&gt;(allSchemaFiles));</span>
-<span class="fc" id="L281">    Set&lt;File&gt; changed = new HashSet&lt;&gt;(allSchemaFiles);</span>
-<span class="fc" id="L282">    changed.retainAll(manifest.getChangedFiles());</span>
-<span class="fc" id="L283">    return changed;</span>
-  }
+<span class="fc" id="L141">  }</span>
 
   /**
    * Converts an array of strings to a set.
@@ -289,10 +146,10 @@ public class CodegenExecutor {
    * @param arr the array
    * @return a set of strings
    */
-  public static Set&lt;String&gt; toSet(String[] arr) {
-<span class="fc" id="L293">    return Optional.ofNullable(arr)</span>
-<span class="fc" id="L294">        .map(a -&gt; java.util.Arrays.stream(a).collect(Collectors.toSet()))</span>
-<span class="fc" id="L295">        .orElse(Collections.emptySet());</span>
+  public static &lt;T&gt; Set&lt;T&gt; toSet(T[] arr) {
+<span class="fc" id="L150">    return Optional.ofNullable(arr)</span>
+<span class="fc" id="L151">        .map(a -&gt; java.util.Arrays.stream(a).collect(Collectors.toSet()))</span>
+<span class="fc" id="L152">        .orElse(Collections.emptySet());</span>
   }
 
   /**
@@ -303,67 +160,12 @@ public class CodegenExecutor {
    */
   public static Map&lt;String, Map&lt;String, String&gt;&gt; toMap(
       Map&lt;String, io.github.deweyjose.graphqlcodegen.ParameterMap&gt; m) {
-<span class="fc bfc" id="L306" title="All 2 branches covered.">    if (m == null) return Collections.emptyMap();</span>
-<span class="fc" id="L307">    return m.entrySet().stream()</span>
-<span class="fc" id="L308">        .collect(</span>
-<span class="fc" id="L309">            Collectors.toMap(</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">    if (m == null) return Collections.emptyMap();</span>
+<span class="fc" id="L164">    return m.entrySet().stream()</span>
+<span class="fc" id="L165">        .collect(</span>
+<span class="fc" id="L166">            Collectors.toMap(</span>
                 Map.Entry::getKey,
-<span class="pc bpc" id="L311" title="1 of 2 branches missed.">                e -&gt; e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));</span>
-  }
-
-  /**
-   * Fetches the contents of a remote schema URL.
-   *
-   * @param url the URL to fetch
-   * @return the schema contents as a string
-   * @throws IOException if an I/O error occurs
-   * @throws InterruptedException if the operation is interrupted
-   */
-  public static String fetchSchema(String url) throws IOException, InterruptedException {
-<span class="fc" id="L323">    HttpClient client = HttpClient.newHttpClient();</span>
-<span class="fc" id="L324">    HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();</span>
-<span class="fc" id="L325">    HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());</span>
-<span class="fc" id="L326">    String body = response.body();</span>
-<span class="fc" id="L327">    return body;</span>
-  }
-
-  /**
-   * Downloads a remote schema and saves it to a file.
-   *
-   * @param url the schema URL
-   * @param outputDir the output directory
-   * @return the file containing the downloaded schema
-   * @throws IOException if an I/O error occurs
-   * @throws InterruptedException if the operation is interrupted
-   */
-  public static File saveUrlToFile(String url, File outputDir)
-      throws IOException, InterruptedException {
-<span class="fc" id="L341">    String content = fetchSchema(url);</span>
-<span class="fc" id="L342">    String fileName = &quot;remote-schemas/&quot; + md5Hex(url) + &quot;.graphqls&quot;;</span>
-<span class="fc" id="L343">    File outFile = new File(outputDir, fileName);</span>
-<span class="fc" id="L344">    Files.createDirectories(outFile.getParentFile().toPath());</span>
-<span class="fc" id="L345">    Files.writeString(outFile.toPath(), content);</span>
-<span class="fc" id="L346">    return outFile;</span>
-  }
-
-  /**
-   * Computes the MD5 hash of a string and returns it as a hex string.
-   *
-   * @param input the input string
-   * @return the MD5 hash as a hex string
-   */
-  private static String md5Hex(String input) {
-    try {
-<span class="fc" id="L357">      MessageDigest md = MessageDigest.getInstance(&quot;MD5&quot;);</span>
-<span class="fc" id="L358">      byte[] digest = md.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));</span>
-<span class="fc" id="L359">      StringBuilder sb = new StringBuilder();</span>
-<span class="fc bfc" id="L360" title="All 2 branches covered.">      for (byte b : digest) {</span>
-<span class="fc" id="L361">        sb.append(String.format(&quot;%02x&quot;, b));</span>
-      }
-<span class="fc" id="L363">      return sb.toString();</span>
-<span class="nc" id="L364">    } catch (Exception e) {</span>
-<span class="nc" id="L365">      throw new RuntimeException(&quot;Failed to compute MD5 hash&quot;, e);</span>
-    }
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">                e -&gt; e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TypeMappingService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">GraphQL Code Generator Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">io.github.deweyjose.graphqlcodegen</a> &gt; <span class="el_source">TypeMappingService.java</span></div><h1>TypeMappingService.java</h1><pre class="source lang-java linenums">package io.github.deweyjose.graphqlcodegen;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
+import org.apache.maven.artifact.Artifact;
+
+<span class="fc" id="L14">public class TypeMappingService {</span>
+  public Map&lt;String, String&gt; loadPropertiesFile(
+      File artifactFile, String[] typeMappingPropertiesFiles) {
+<span class="fc" id="L17">    Map&lt;String, String&gt; typeMapping = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L18">    try (JarFile jarFile = new JarFile(artifactFile)) {</span>
+<span class="fc bfc" id="L19" title="All 2 branches covered.">      for (String file : typeMappingPropertiesFiles) {</span>
+<span class="fc" id="L20">        ZipEntry entry = jarFile.getEntry(file);</span>
+<span class="fc bfc" id="L21" title="All 2 branches covered.">        if (entry != null) {</span>
+<span class="fc" id="L22">          try (InputStream inputStream = jarFile.getInputStream(entry)) {</span>
+<span class="fc" id="L23">            Properties typeMappingProperties = new Properties();</span>
+<span class="fc" id="L24">            typeMappingProperties.load(inputStream);</span>
+<span class="fc" id="L25">            typeMappingProperties.forEach(</span>
+<span class="fc" id="L26">                (k, v) -&gt; typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v)));</span>
+          }
+        }
+      }
+<span class="nc" id="L30">    } catch (IOException e) {</span>
+<span class="nc" id="L31">      e.printStackTrace();</span>
+<span class="fc" id="L32">    }</span>
+<span class="fc" id="L33">    return typeMapping;</span>
+  }
+
+  public Map&lt;String, String&gt; mergeTypeMapping(
+      Map&lt;String, String&gt; userTypeMapping,
+      String[] typeMappingPropertiesFiles,
+      Set&lt;Artifact&gt; artifacts) {
+<span class="fc" id="L40">    Map&lt;String, String&gt; jarTypeMapping = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L41" title="All 4 branches covered.">    if (typeMappingPropertiesFiles != null &amp;&amp; typeMappingPropertiesFiles.length &gt; 0) {</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">      for (Artifact dependency : artifacts) {</span>
+<span class="fc" id="L43">        File artifactFile = dependency.getFile();</span>
+<span class="pc bpc" id="L44" title="2 of 4 branches missed.">        if (artifactFile != null &amp;&amp; artifactFile.isFile()) {</span>
+<span class="fc" id="L45">          jarTypeMapping.putAll(loadPropertiesFile(artifactFile, typeMappingPropertiesFiles));</span>
+        }
+<span class="fc" id="L47">      }</span>
+    }
+<span class="fc" id="L49">    Map&lt;String, String&gt; finalTypeMapping = new HashMap&lt;&gt;(jarTypeMapping);</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">    if (userTypeMapping != null) {</span>
+<span class="fc" id="L51">      finalTypeMapping.putAll(userTypeMapping);</span>
+    }
+<span class="fc" id="L53">    return finalTypeMapping;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

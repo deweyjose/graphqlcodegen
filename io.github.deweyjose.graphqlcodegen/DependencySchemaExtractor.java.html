@@ -4,13 +4,14 @@ import static java.lang.String.format;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.maven.artifact.Artifact;
 
 /** Utility for extracting schema files from Maven dependency artifacts. */
-<span class="nc" id="L13">public class DependencySchemaExtractor {</span>
+<span class="nc" id="L14">public class DependencySchemaExtractor {</span>
 
   /**
    * Extracts the schema files from the dependencies.
@@ -20,24 +21,24 @@ import org.apache.maven.artifact.Artifact;
    * @return the schema files
    */
   public static List&lt;File&gt; extract(
-      Set&lt;Artifact&gt; dependencyArtifacts, String[] schemaJarFilesFromDependencies) {
-<span class="fc" id="L24">    List&lt;File&gt; files = new ArrayList&lt;&gt;();</span>
+      Set&lt;Artifact&gt; dependencyArtifacts, Collection&lt;String&gt; schemaJarFilesFromDependencies) {
+<span class="fc" id="L25">    List&lt;File&gt; files = new ArrayList&lt;&gt;();</span>
 
-<span class="fc bfc" id="L26" title="All 2 branches covered.">    for (final String jarDep : schemaJarFilesFromDependencies) {</span>
-<span class="fc" id="L27">      final String jarDepClean = jarDep.trim();</span>
-<span class="fc bfc" id="L28" title="All 2 branches covered.">      if (jarDepClean.isEmpty()) {</span>
-<span class="fc" id="L29">        continue;</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">    for (final String jarDep : schemaJarFilesFromDependencies) {</span>
+<span class="fc" id="L28">      final String jarDepClean = jarDep.trim();</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">      if (jarDepClean.isEmpty()) {</span>
+<span class="fc" id="L30">        continue;</span>
       }
 
-<span class="fc" id="L32">      final Optional&lt;Artifact&gt; artifactOpt = findFromDependencies(dependencyArtifacts, jarDepClean);</span>
-<span class="fc bfc" id="L33" title="All 2 branches covered.">      if (artifactOpt.isPresent()) {</span>
-<span class="fc" id="L34">        final Artifact artifact = artifactOpt.get();</span>
-<span class="fc" id="L35">        final File file = artifact.getFile();</span>
-<span class="fc" id="L36">        files.add(file);</span>
+<span class="fc" id="L33">      final Optional&lt;Artifact&gt; artifactOpt = findFromDependencies(dependencyArtifacts, jarDepClean);</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">      if (artifactOpt.isPresent()) {</span>
+<span class="fc" id="L35">        final Artifact artifact = artifactOpt.get();</span>
+<span class="fc" id="L36">        final File file = artifact.getFile();</span>
+<span class="fc" id="L37">        files.add(file);</span>
       }
-    }
+<span class="fc" id="L39">    }</span>
 
-<span class="fc" id="L40">    return files;</span>
+<span class="fc" id="L41">    return files;</span>
   }
 
   /**
@@ -49,18 +50,18 @@ import org.apache.maven.artifact.Artifact;
    */
   private static Optional&lt;Artifact&gt; findFromDependencies(
       Set&lt;Artifact&gt; dependencyArtifacts, final String artifactRef) {
-<span class="fc" id="L52">    final String cleanRef = artifactRef.trim();</span>
+<span class="fc" id="L53">    final String cleanRef = artifactRef.trim();</span>
 
-<span class="fc bfc" id="L54" title="All 2 branches covered.">    for (final Artifact artifact : dependencyArtifacts) {</span>
-<span class="fc" id="L55">      final String ref =</span>
-<span class="fc" id="L56">          format(</span>
-<span class="fc" id="L57">              &quot;%s:%s:%s&quot;, artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">    for (final Artifact artifact : dependencyArtifacts) {</span>
+<span class="fc" id="L56">      final String ref =</span>
+<span class="fc" id="L57">          format(</span>
+<span class="fc" id="L58">              &quot;%s:%s:%s&quot;, artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());</span>
 
-<span class="fc bfc" id="L59" title="All 2 branches covered.">      if (ref.equals(cleanRef)) {</span>
-<span class="fc" id="L60">        return Optional.of(artifact);</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">      if (ref.equals(cleanRef)) {</span>
+<span class="fc" id="L61">        return Optional.of(artifact);</span>
       }
-<span class="fc" id="L62">    }</span>
-<span class="fc" id="L63">    return Optional.empty();</span>
+<span class="fc" id="L63">    }</span>
+<span class="fc" id="L64">    return Optional.empty();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

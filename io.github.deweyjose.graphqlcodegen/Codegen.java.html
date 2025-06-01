@@ -2,7 +2,9 @@
 
 import java.io.File;
 import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -16,7 +18,7 @@ import org.apache.maven.project.MavenProject;
     name = &quot;generate&quot;,
     defaultPhase = LifecyclePhase.GENERATE_SOURCES,
     requiresDependencyResolution = ResolutionScope.COMPILE)
-<span class="nc" id="L19">public class Codegen extends AbstractMojo implements CodegenConfigProvider {</span>
+<span class="nc" id="L21">public class Codegen extends AbstractMojo implements CodegenConfigProvider {</span>
 
   @Parameter(defaultValue = &quot;${project}&quot;)
   private MavenProject project;
@@ -176,20 +178,28 @@ import org.apache.maven.project.MavenProject;
 
   @Override
   public void execute() {
-<span class="nc" id="L179">    new CodegenExecutor(getLog()).execute(this, project.getArtifacts(), project.getBasedir());</span>
+<span class="nc" id="L181">    SchemaManifestService manifest =</span>
+<span class="nc" id="L182">        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());</span>
+<span class="nc" id="L183">    TypeMappingService typeMappingService = new TypeMappingService();</span>
+<span class="nc" id="L184">    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest);</span>
 
-<span class="nc bnc" id="L181" title="All 2 branches missed.">    if (autoAddSource) {</span>
-<span class="nc" id="L182">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
+    @SuppressWarnings(&quot;unchecked&quot;)
+<span class="nc" id="L187">    Set&lt;Artifact&gt; artifacts = project.getArtifacts();</span>
+
+<span class="nc" id="L189">    var executor = new CodegenExecutor(getLog(), schemaFileService, typeMappingService);</span>
+<span class="nc" id="L190">    executor.execute(this, artifacts, project.getBasedir());</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">    if (autoAddSource) {</span>
+<span class="nc" id="L192">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
     }
-<span class="nc" id="L184">  }</span>
+<span class="nc" id="L194">  }</span>
 
   public File[] getSchemaPaths() {
-<span class="nc" id="L187">    return schemaPaths;</span>
+<span class="nc" id="L197">    return schemaPaths;</span>
   }
 
   @Override
   public String[] getSchemaUrls() {
-<span class="nc" id="L192">    return schemaUrls;</span>
+<span class="nc" id="L202">    return schemaUrls;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

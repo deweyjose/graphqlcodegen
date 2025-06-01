@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SchemaFileService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">GraphQL Code Generator Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">io.github.deweyjose.graphqlcodegen</a> &gt; <span class="el_source">SchemaFileService.java</span></div><h1>SchemaFileService.java</h1><pre class="source lang-java linenums">package io.github.deweyjose.graphqlcodegen;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
+import org.apache.maven.artifact.Artifact;
+
+/** Service for managing schema files. */
+@Getter
+@Setter
+public class SchemaFileService {
+  private final File outputDir;
+  private final SchemaManifestService manifest;
+  private Set&lt;File&gt; schemaPaths;
+  private List&lt;File&gt; schemaJarFilesFromDependencies;
+
+<span class="fc" id="L33">  public SchemaFileService(File outputDir, SchemaManifestService manifest) {</span>
+<span class="fc" id="L34">    this.schemaPaths = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L35">    this.outputDir = outputDir;</span>
+<span class="fc" id="L36">    this.manifest = manifest;</span>
+<span class="fc" id="L37">  }</span>
+
+  /**
+   * Loads the schema paths into the schema paths.
+   *
+   * @param schemaPaths the schema paths to load
+   */
+  public void loadExpandedSchemaPaths(Collection&lt;File&gt; schemaPaths) {
+<span class="fc" id="L45">    setSchemaPaths(</span>
+<span class="fc" id="L46">        schemaPaths.stream()</span>
+<span class="fc" id="L47">            .map(</span>
+                path -&gt; {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">                  if (path.isFile()) {</span>
+<span class="fc" id="L50">                    return Stream.of(path);</span>
+                  } else {
+<span class="fc" id="L52">                    return findGraphQLSFiles(path).stream();</span>
+                  }
+                })
+<span class="fc" id="L55">            .flatMap(stream -&gt; stream)</span>
+<span class="fc" id="L56">            .collect(Collectors.toSet()));</span>
+<span class="fc" id="L57">  }</span>
+
+  public void loadSchemaJarFilesFromDependencies(
+      Set&lt;Artifact&gt; artifacts, Collection&lt;String&gt; schemaJarFilesFromDependencies) {
+<span class="fc" id="L61">    this.schemaJarFilesFromDependencies =</span>
+<span class="fc" id="L62">        DependencySchemaExtractor.extract(artifacts, schemaJarFilesFromDependencies);</span>
+<span class="fc" id="L63">  }</span>
+
+  /**
+   * Loads the schema URLs into the schema paths.
+   *
+   * @param schemaUrls the schema URLs to load
+   */
+<span class="pc" id="L70">  @SneakyThrows</span>
+  public void loadSchemaUrls(String[] schemaUrls) {
+<span class="fc bfc" id="L72" title="All 2 branches covered.">    for (String url : schemaUrls) {</span>
+<span class="fc" id="L73">      schemaPaths.add(saveUrlToFile(url, outputDir));</span>
+    }
+<span class="fc" id="L75">  }</span>
+
+  public void checkHasSchemaFiles() {
+<span class="fc bfc" id="L78" title="All 2 branches covered.">    if (getSchemaPaths().isEmpty()</span>
+<span class="fc" id="L79">        &amp;&amp; Optional.ofNullable(getSchemaJarFilesFromDependencies())</span>
+<span class="fc" id="L80">            .orElse(Collections.emptyList())</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">            .isEmpty()) {</span>
+<span class="fc" id="L82">      throw new IllegalArgumentException(&quot;No schema files found. Please check your configuration.&quot;);</span>
+    }
+<span class="fc" id="L84">  }</span>
+
+  public boolean noWorkToDo() {
+<span class="pc bpc" id="L87" title="3 of 4 branches missed.">    return getSchemaPaths().isEmpty() &amp;&amp; getSchemaJarFilesFromDependencies().isEmpty();</span>
+  }
+
+  public void syncManifest() {
+    try {
+<span class="fc" id="L92">      manifest.syncManifest();</span>
+<span class="nc" id="L93">    } catch (Exception e) {</span>
+<span class="nc" id="L94">      e.printStackTrace();</span>
+<span class="fc" id="L95">    }</span>
+<span class="fc" id="L96">  }</span>
+
+  public void filterChangedSchemaFiles() {
+<span class="fc" id="L99">    manifest.setFiles(new HashSet&lt;&gt;(schemaPaths));</span>
+<span class="fc" id="L100">    Set&lt;File&gt; changed = new HashSet&lt;&gt;(schemaPaths);</span>
+<span class="fc" id="L101">    changed.retainAll(manifest.getChangedFiles());</span>
+<span class="fc" id="L102">    setSchemaPaths(changed);</span>
+<span class="fc" id="L103">  }</span>
+
+  public String fetchSchema(String url) throws IOException, InterruptedException {
+<span class="fc" id="L106">    HttpClient client = HttpClient.newHttpClient();</span>
+<span class="fc" id="L107">    HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();</span>
+<span class="fc" id="L108">    HttpResponse&lt;String&gt; response = client.send(request, HttpResponse.BodyHandlers.ofString());</span>
+<span class="fc" id="L109">    return response.body();</span>
+  }
+
+  public File saveUrlToFile(String url, File outputDir) throws IOException, InterruptedException {
+<span class="fc" id="L113">    String content = fetchSchema(url);</span>
+<span class="fc" id="L114">    String fileName = &quot;remote-schemas/&quot; + md5Hex(url) + &quot;.graphqls&quot;;</span>
+<span class="fc" id="L115">    File outFile = new File(outputDir, fileName);</span>
+<span class="fc" id="L116">    Files.createDirectories(outFile.getParentFile().toPath());</span>
+<span class="fc" id="L117">    Files.writeString(outFile.toPath(), content);</span>
+<span class="fc" id="L118">    return outFile;</span>
+  }
+
+  private String md5Hex(String input) {
+    try {
+<span class="fc" id="L123">      MessageDigest md = MessageDigest.getInstance(&quot;MD5&quot;);</span>
+<span class="fc" id="L124">      byte[] digest = md.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));</span>
+<span class="fc" id="L125">      StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">      for (byte b : digest) {</span>
+<span class="fc" id="L127">        sb.append(String.format(&quot;%02x&quot;, b));</span>
+      }
+<span class="fc" id="L129">      return sb.toString();</span>
+<span class="nc" id="L130">    } catch (Exception e) {</span>
+<span class="nc" id="L131">      throw new RuntimeException(&quot;Failed to compute MD5 hash&quot;, e);</span>
+    }
+  }
+
+  /**
+   * Recursively finds all GraphQL schema files in a directory.
+   *
+   * @param directory the directory to search
+   * @return a set of GraphQL schema files
+   */
+  public static Set&lt;File&gt; findGraphQLSFiles(File directory) {
+<span class="fc" id="L142">    Set&lt;File&gt; result = new HashSet&lt;&gt;();</span>
+
+<span class="fc" id="L144">    File[] contents = directory.listFiles();</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">    if (contents != null) {</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">      for (File content : contents) {</span>
+<span class="pc bpc" id="L147" title="2 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
+<span class="fc" id="L148">          result.add(content);</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        } else if (content.isDirectory()) {</span>
+<span class="nc" id="L150">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
+<span class="nc" id="L151">          result.addAll(subdirectoryGraphQLSFiles);</span>
+        }
+      }
+    }
+
+<span class="fc" id="L156">    return result;</span>
+  }
+
+  /**
+   * Returns true if the file is a GraphQL schema file (.graphql, .graphqls, .gqls).
+   *
+   * @param file the file to check
+   * @return true if the file is a GraphQL schema file
+   */
+  public static boolean isGraphqlFile(File file) {
+<span class="fc bfc" id="L166" title="All 2 branches covered.">    return file.getName().endsWith(&quot;.graphqls&quot;)</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.graphql&quot;)</span>
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        || file.getName().endsWith(&quot;.gqls&quot;);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
