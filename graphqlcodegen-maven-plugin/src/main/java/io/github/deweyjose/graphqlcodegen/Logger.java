@@ -3,15 +3,11 @@ package io.github.deweyjose.graphqlcodegen;
 import org.apache.maven.plugin.logging.Log;
 import org.slf4j.helpers.MessageFormatter;
 
-/**
- * Logger class for logging messages to the Maven logger.
- */
+/** Logger class for logging messages to the Maven logger. */
 public class Logger {
   private static volatile Log mavenLog;
 
-  /**
-   * Private constructor to prevent instantiation.
-   */
+  /** Private constructor to prevent instantiation. */
   private Logger() {}
 
   /**
@@ -61,6 +57,7 @@ public class Logger {
 
   /**
    * Logs an error message.
+   *
    * @param format
    * @param args
    */

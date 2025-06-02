@@ -1,7 +1,17 @@
 package io.github.deweyjose.graphqlcodegen.services;
 
+/**
+ * Constants for the GraphQL code generator.
+ */
 public class Constants {
+  /**
+   * The default operation name for the introspection query.
+   */
   public static final String DEFAULT_OPERATION_NAME = "IntrospectionQuery";
+
+  /**
+   * The default query for the introspection query.
+   */
   public static final String DEFAULT_QUERY =
       """
 query IntrospectionQuery {

@@ -49,9 +49,7 @@ public class SchemaManifestService {
    * Generates an MD5 checksum for the given file.
    *
    * @param path the file to checksum
-   * @return the checksum as a hex string
-   * @throws java.io.IOException if an I/O error occurs reading the file
-   * @throws java.security.NoSuchAlgorithmException if MD5 algorithm is not available
+   * @return the checksum as a hex string   
    */
   @SneakyThrows
   public static String generateChecksum(File path) {
@@ -94,9 +92,7 @@ public class SchemaManifestService {
   }
 
   /**
-   * Syncs the manifest with the current set of files, writing their checksums to disk.
-   *
-   * @throws java.io.IOException if an I/O error occurs writing the manifest
+   * Syncs the manifest with the files.
    */
   @SneakyThrows
   public void syncManifest() {

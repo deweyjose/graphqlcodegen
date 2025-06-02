@@ -75,7 +75,6 @@ public class RemoteSchemaService {
    * @param operation the introspection operation (query and operation name)
    * @param headers additional HTTP headers to include in the request
    * @return the GraphQL schema SDL as a String
-   * @throws IOException if the request fails or returns a non-200 status
    */
   @SneakyThrows
   public String getIntrospectedSchemaFile(

@@ -30,10 +30,23 @@ public class SchemaFileService {
   private Set<File> schemaPaths;
   private List<File> schemaJarFilesFromDependencies;
 
+  /**
+   * Constructs a new SchemaFileService with the given output directory and manifest.
+   *
+   * @param outputDir the output directory to save the schema files
+   * @param manifest the manifest service to use
+   */
   public SchemaFileService(File outputDir, SchemaManifestService manifest) {
     this(outputDir, manifest, new RemoteSchemaService());
   }
 
+  /**
+   * Constructs a new SchemaFileService with the given output directory, manifest, and remote schema service.
+   *
+   * @param outputDir the output directory to save the schema files
+   * @param manifest the manifest service to use
+   * @param remoteSchemaService the remote schema service to use
+   */
   public SchemaFileService(
       File outputDir, SchemaManifestService manifest, RemoteSchemaService remoteSchemaService) {
     this.schemaPaths = new HashSet<>();
@@ -80,8 +93,6 @@ public class SchemaFileService {
    * schemaPaths.
    *
    * @param schemaUrls the array of schema URLs to load
-   * @throws IOException if an I/O error occurs while saving the schema
-   * @throws InterruptedException if the thread is interrupted while fetching the schema
    */
   @SneakyThrows
   public void loadSchemaUrls(String[] schemaUrls) {
@@ -95,8 +106,6 @@ public class SchemaFileService {
    * Loads introspected schemas from the given collection of IntrospectionRequest objects.
    *
    * @param schemaUrls the collection of IntrospectionRequest objects to load
-   * @throws IOException if an I/O error occurs while saving the schema
-   * @throws InterruptedException if the thread is interrupted while fetching the schema
    */
   @SneakyThrows
   public void loadIntrospectedSchemas(Collection<IntrospectionRequest> schemaUrls) {
