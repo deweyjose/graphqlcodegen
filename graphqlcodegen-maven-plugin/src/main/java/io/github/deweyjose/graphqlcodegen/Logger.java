@@ -58,8 +58,8 @@ public class Logger {
   /**
    * Logs an error message.
    *
-   * @param format
-   * @param args
+   * @param format the format string
+   * @param args the arguments
    */
   public static void error(String format, Object... args) {
     if (mavenLog != null) {
