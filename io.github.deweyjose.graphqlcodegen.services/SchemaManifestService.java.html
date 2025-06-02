@@ -50,15 +50,13 @@ public class SchemaManifestService {
    *
    * @param path the file to checksum
    * @return the checksum as a hex string
-   * @throws java.io.IOException if an I/O error occurs reading the file
-   * @throws java.security.NoSuchAlgorithmException if MD5 algorithm is not available
    */
-<span class="nc" id="L56">  @SneakyThrows</span>
+<span class="nc" id="L54">  @SneakyThrows</span>
   public static String generateChecksum(File path) {
-<span class="fc" id="L58">    byte[] data = Files.readAllBytes(Paths.get(path.toURI()));</span>
-<span class="fc" id="L59">    byte[] hash = MessageDigest.getInstance(&quot;MD5&quot;).digest(data);</span>
-<span class="fc" id="L60">    String checksum = new BigInteger(1, hash).toString(16);</span>
-<span class="fc" id="L61">    return checksum;</span>
+<span class="fc" id="L56">    byte[] data = Files.readAllBytes(Paths.get(path.toURI()));</span>
+<span class="fc" id="L57">    byte[] hash = MessageDigest.getInstance(&quot;MD5&quot;).digest(data);</span>
+<span class="fc" id="L58">    String checksum = new BigInteger(1, hash).toString(16);</span>
+<span class="fc" id="L59">    return checksum;</span>
   }
 
   /**
@@ -67,8 +65,8 @@ public class SchemaManifestService {
    * @param files the set of files to track
    */
   public void setFiles(Set&lt;File&gt; files) {
-<span class="fc" id="L70">    this.files = files;</span>
-<span class="fc" id="L71">  }</span>
+<span class="fc" id="L68">    this.files = files;</span>
+<span class="fc" id="L69">  }</span>
 
   /**
    * Computes the set of files that have changed or are new and need to trigger code generation.
@@ -76,45 +74,41 @@ public class SchemaManifestService {
    * @return a set of changed or new files
    */
   public Set&lt;File&gt; getChangedFiles() {
-<span class="fc" id="L79">    Set&lt;File&gt; changed = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L80">    OrderedProperties manifest = loadManifest();</span>
-<span class="fc bfc" id="L81" title="All 2 branches covered.">    for (File file : files) {</span>
-<span class="fc" id="L82">      String oldChecksum = manifest.getProperty(relativizeToProject(file));</span>
-<span class="fc bfc" id="L83" title="All 2 branches covered.">      if (oldChecksum == null) {</span>
-<span class="fc" id="L84">        log.info(&quot;{} is new, will generate code&quot;, file.getName());</span>
-<span class="fc bfc" id="L85" title="All 2 branches covered.">      } else if (!oldChecksum.equals(generateChecksum(file))) {</span>
-<span class="fc" id="L86">        log.info(&quot;{} has changed, will generate code&quot;, file.getName());</span>
+<span class="fc" id="L77">    Set&lt;File&gt; changed = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L78">    OrderedProperties manifest = loadManifest();</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">    for (File file : files) {</span>
+<span class="fc" id="L80">      String oldChecksum = manifest.getProperty(relativizeToProject(file));</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">      if (oldChecksum == null) {</span>
+<span class="fc" id="L82">        log.info(&quot;{} is new, will generate code&quot;, file.getName());</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">      } else if (!oldChecksum.equals(generateChecksum(file))) {</span>
+<span class="fc" id="L84">        log.info(&quot;{} has changed, will generate code&quot;, file.getName());</span>
       } else {
-<span class="fc" id="L88">        log.info(&quot;{} has not changed, will not generate code&quot;, file.getName());</span>
-<span class="fc" id="L89">        continue;</span>
+<span class="fc" id="L86">        log.info(&quot;{} has not changed, will not generate code&quot;, file.getName());</span>
+<span class="fc" id="L87">        continue;</span>
       }
-<span class="fc" id="L91">      changed.add(file);</span>
-<span class="fc" id="L92">    }</span>
-<span class="fc" id="L93">    return changed;</span>
+<span class="fc" id="L89">      changed.add(file);</span>
+<span class="fc" id="L90">    }</span>
+<span class="fc" id="L91">    return changed;</span>
   }
 
-  /**
-   * Syncs the manifest with the current set of files, writing their checksums to disk.
-   *
-   * @throws java.io.IOException if an I/O error occurs writing the manifest
-   */
-<span class="pc" id="L101">  @SneakyThrows</span>
+  /** Syncs the manifest with the files. */
+<span class="pc" id="L95">  @SneakyThrows</span>
   public void syncManifest() {
-<span class="fc" id="L103">    OrderedProperties manifest =</span>
-<span class="fc" id="L104">        new OrderedPropertiesBuilder().withSuppressDateInComment(true).build();</span>
-<span class="fc bfc" id="L105" title="All 2 branches covered.">    for (File file : files) {</span>
-<span class="fc" id="L106">      manifest.setProperty(relativizeToProject(file), generateChecksum(file));</span>
-<span class="fc" id="L107">    }</span>
+<span class="fc" id="L97">    OrderedProperties manifest =</span>
+<span class="fc" id="L98">        new OrderedPropertiesBuilder().withSuppressDateInComment(true).build();</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">    for (File file : files) {</span>
+<span class="fc" id="L100">      manifest.setProperty(relativizeToProject(file), generateChecksum(file));</span>
+<span class="fc" id="L101">    }</span>
 
-<span class="fc bfc" id="L109" title="All 2 branches covered.">    if (!manifestPath.exists()) {</span>
-<span class="fc" id="L110">      manifestPath.getParentFile().mkdirs();</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">    if (!manifestPath.exists()) {</span>
+<span class="fc" id="L104">      manifestPath.getParentFile().mkdirs();</span>
     }
 
-<span class="fc" id="L113">    try (FileOutputStream fos = new FileOutputStream(manifestPath)) {</span>
-<span class="fc" id="L114">      manifest.store(fos, &quot;Schema Manifest&quot;);</span>
-<span class="fc" id="L115">      fos.flush();</span>
+<span class="fc" id="L107">    try (FileOutputStream fos = new FileOutputStream(manifestPath)) {</span>
+<span class="fc" id="L108">      manifest.store(fos, &quot;Schema Manifest&quot;);</span>
+<span class="fc" id="L109">      fos.flush();</span>
     }
-<span class="fc" id="L117">  }</span>
+<span class="fc" id="L111">  }</span>
 
   /**
    * Loads the manifest from the manifest path, or returns an empty manifest if it does not exist.
@@ -122,16 +116,16 @@ public class SchemaManifestService {
    * @return the loaded manifest properties
    * @throws java.io.IOException if an I/O error occurs reading the manifest
    */
-<span class="nc" id="L125">  @SneakyThrows</span>
+<span class="nc" id="L119">  @SneakyThrows</span>
   private OrderedProperties loadManifest() {
-<span class="fc" id="L127">    OrderedProperties properties =</span>
-<span class="fc" id="L128">        new OrderedPropertiesBuilder().withSuppressDateInComment(true).build();</span>
-<span class="fc bfc" id="L129" title="All 2 branches covered.">    if (manifestPath.exists()) {</span>
-<span class="fc" id="L130">      try (FileInputStream fis = new FileInputStream(manifestPath)) {</span>
-<span class="fc" id="L131">        properties.load(fis);</span>
+<span class="fc" id="L121">    OrderedProperties properties =</span>
+<span class="fc" id="L122">        new OrderedPropertiesBuilder().withSuppressDateInComment(true).build();</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">    if (manifestPath.exists()) {</span>
+<span class="fc" id="L124">      try (FileInputStream fis = new FileInputStream(manifestPath)) {</span>
+<span class="fc" id="L125">        properties.load(fis);</span>
       }
     }
-<span class="fc" id="L134">    return properties;</span>
+<span class="fc" id="L128">    return properties;</span>
   }
 
   /**
@@ -141,7 +135,7 @@ public class SchemaManifestService {
    * @return the relativized file path as a string
    */
   private String relativizeToProject(File file) {
-<span class="fc" id="L144">    return projectPath.toPath().relativize(file.toPath()).toString();</span>
+<span class="fc" id="L138">    return projectPath.toPath().relativize(file.toPath()).toString();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

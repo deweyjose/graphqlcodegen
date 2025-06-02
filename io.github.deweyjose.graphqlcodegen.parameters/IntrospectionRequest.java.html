@@ -4,14 +4,23 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
+/** Represents a request for introspection of a GraphQL schema. */
 @Getter
 @Setter
 public class IntrospectionRequest {
+  /** The URL of the GraphQL endpoint to introspect. */
   private String url;
+
+  /** The query to use for the introspection. */
   private String query;
+
+  /** The operation name for the introspection query. */
   private String operationName;
+
+  /** Additional HTTP headers to include in the introspection request. */
   private Map&lt;String, String&gt; headers;
 
-<span class="fc" id="L15">  public IntrospectionRequest() {}</span>
+  /** Constructs a new IntrospectionRequest. */
+<span class="fc" id="L24">  public IntrospectionRequest() {}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

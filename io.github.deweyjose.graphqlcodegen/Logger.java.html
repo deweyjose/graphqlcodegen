@@ -3,37 +3,68 @@
 import org.apache.maven.plugin.logging.Log;
 import org.slf4j.helpers.MessageFormatter;
 
+/** Logger class for logging messages to the Maven logger. */
 public class Logger {
   private static volatile Log mavenLog;
 
+  /** Private constructor to prevent instantiation. */
   private Logger() {}
 
+  /**
+   * Registers the Maven logger.
+   *
+   * @param log the Maven logger
+   */
   public static void registerMavenLog(Log log) {
-<span class="nc" id="L12">    mavenLog = log;</span>
-<span class="nc" id="L13">  }</span>
+<span class="nc" id="L19">    mavenLog = log;</span>
+<span class="nc" id="L20">  }</span>
 
+  /**
+   * Logs an info message.
+   *
+   * @param format the format string
+   * @param args the arguments
+   */
   public static void info(String format, Object... args) {
-<span class="pc bpc" id="L16" title="1 of 2 branches missed.">    if (mavenLog != null) {</span>
-<span class="nc" id="L17">      mavenLog.info(MessageFormatter.arrayFormat(format, args).getMessage());</span>
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">    if (mavenLog != null) {</span>
+<span class="nc" id="L30">      mavenLog.info(MessageFormatter.arrayFormat(format, args).getMessage());</span>
     }
-<span class="fc" id="L19">  }</span>
+<span class="fc" id="L32">  }</span>
 
+  /**
+   * Logs a debug message.
+   *
+   * @param format the format string
+   * @param args the arguments
+   */
   public static void debug(String format, Object... args) {
-<span class="pc bpc" id="L22" title="1 of 2 branches missed.">    if (mavenLog != null) {</span>
-<span class="nc" id="L23">      mavenLog.debug(MessageFormatter.arrayFormat(format, args).getMessage());</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">    if (mavenLog != null) {</span>
+<span class="nc" id="L42">      mavenLog.debug(MessageFormatter.arrayFormat(format, args).getMessage());</span>
     }
-<span class="fc" id="L25">  }</span>
+<span class="fc" id="L44">  }</span>
 
+  /**
+   * Logs a warning message.
+   *
+   * @param format the format string
+   * @param args the arguments
+   */
   public static void warn(String format, Object... args) {
-<span class="nc bnc" id="L28" title="All 2 branches missed.">    if (mavenLog != null) {</span>
-<span class="nc" id="L29">      mavenLog.warn(MessageFormatter.arrayFormat(format, args).getMessage());</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">    if (mavenLog != null) {</span>
+<span class="nc" id="L54">      mavenLog.warn(MessageFormatter.arrayFormat(format, args).getMessage());</span>
     }
-<span class="nc" id="L31">  }</span>
+<span class="nc" id="L56">  }</span>
 
+  /**
+   * Logs an error message.
+   *
+   * @param format the format string
+   * @param args the arguments
+   */
   public static void error(String format, Object... args) {
-<span class="nc bnc" id="L34" title="All 2 branches missed.">    if (mavenLog != null) {</span>
-<span class="nc" id="L35">      mavenLog.error(MessageFormatter.arrayFormat(format, args).getMessage());</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">    if (mavenLog != null) {</span>
+<span class="nc" id="L66">      mavenLog.error(MessageFormatter.arrayFormat(format, args).getMessage());</span>
     }
-<span class="nc" id="L37">  }</span>
+<span class="nc" id="L68">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
