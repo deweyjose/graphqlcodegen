@@ -41,7 +41,8 @@ public class SchemaFileService {
   }
 
   /**
-   * Constructs a new SchemaFileService with the given output directory, manifest, and remote schema service.
+   * Constructs a new SchemaFileService with the given output directory, manifest, and remote schema
+   * service.
    *
    * @param outputDir the output directory to save the schema files
    * @param manifest the manifest service to use

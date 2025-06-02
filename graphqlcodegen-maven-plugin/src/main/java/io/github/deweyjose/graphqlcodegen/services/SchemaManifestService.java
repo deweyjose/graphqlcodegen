@@ -49,7 +49,7 @@ public class SchemaManifestService {
    * Generates an MD5 checksum for the given file.
    *
    * @param path the file to checksum
-   * @return the checksum as a hex string   
+   * @return the checksum as a hex string
    */
   @SneakyThrows
   public static String generateChecksum(File path) {
@@ -91,9 +91,7 @@ public class SchemaManifestService {
     return changed;
   }
 
-  /**
-   * Syncs the manifest with the files.
-   */
+  /** Syncs the manifest with the files. */
   @SneakyThrows
   public void syncManifest() {
     OrderedProperties manifest =
