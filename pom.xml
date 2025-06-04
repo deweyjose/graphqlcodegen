@@ -49,7 +49,6 @@
     <maven-plugin-plugin.version>3.15.1</maven-plugin-plugin.version>
     <maven-plugin-api.version>3.9.9</maven-plugin-api.version>
     <maven-plugin-annotations.version>3.15.1</maven-plugin-annotations.version>
-    <maven-project.version>2.2.1</maven-project.version>
     <maven-release-plugin.version>3.0.0-M4</maven-release-plugin.version>
     <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
     <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
@@ -58,7 +57,8 @@
     <junit.version>5.12.2</junit.version>
     <lombok.version>1.18.38</lombok.version>
     <kotlinpoet-jvm.version>1.18.1</kotlinpoet-jvm.version>
-    <spotless.version>2.44.4</spotless.version>    
+    <spotless.version>2.44.4</spotless.version>
+    <maven-core.version>3.9.9</maven-core.version>
   </properties>
 
   <dependencyManagement>
@@ -85,8 +85,8 @@
       </dependency>
       <dependency>
         <groupId>org.apache.maven</groupId>
-        <artifactId>maven-project</artifactId>
-        <version>${maven-project.version}</version>
+        <artifactId>maven-core</artifactId>
+        <version>${maven-core.version}</version>
       </dependency>
       <dependency>
         <groupId>com.netflix.graphql.dgs.codegen</groupId>
