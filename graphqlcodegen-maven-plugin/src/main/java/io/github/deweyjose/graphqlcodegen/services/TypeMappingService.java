@@ -47,8 +47,7 @@ public class TypeMappingService {
    * artifacts.
    *
    * @param userTypeMapping the user-provided type mapping (may be null)
-   * @param typeMappingPropertiesFiles the list of property file paths to search for in
-   *     dependencies
+   * @param typeMappingPropertiesFiles the list of property file paths to search for in dependencies
    * @param artifacts the set of Maven dependency artifacts to search for property files
    * @return a map containing the merged type mappings, with user mappings taking precedence
    */

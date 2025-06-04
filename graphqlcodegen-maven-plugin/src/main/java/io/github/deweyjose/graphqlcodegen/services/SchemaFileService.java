@@ -80,8 +80,8 @@ public class SchemaFileService {
    * Loads the schema jar files from dependencies into the internal list.
    *
    * @param artifacts the set of Maven artifacts (dependencies)
-   * @param schemaJarFilesFromDependencies the set of dependency coordinates to extract
-   *     schema jars from
+   * @param schemaJarFilesFromDependencies the set of dependency coordinates to extract schema jars
+   *     from
    */
   public void loadSchemaJarFilesFromDependencies(
       Set<Artifact> artifacts, Set<String> schemaJarFilesFromDependencies) {
