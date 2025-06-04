@@ -4,6 +4,7 @@ import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
 import com.netflix.graphql.dgs.codegen.Language;
 import io.github.deweyjose.codegen.generated.GeneratedCodeGenConfigBuilder;
+import io.github.deweyjose.graphqlcodegen.parameters.ParameterMap;
 import io.github.deweyjose.graphqlcodegen.services.SchemaFileService;
 import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
 import java.io.File;
@@ -137,26 +138,12 @@ public class CodegenExecutor {
   }
 
   /**
-   * Converts an array of strings to a set.
-   *
-   * @param <T> the type of the elements in the array
-   * @param arr the array
-   * @return a set of strings
-   */
-  public static <T> Set<T> toSet(T[] arr) {
-    return Optional.ofNullable(arr)
-        .map(a -> java.util.Arrays.stream(a).collect(Collectors.toSet()))
-        .orElse(Collections.emptySet());
-  }
-
-  /**
    * Converts a map of ParameterMap to a map of string-to-string maps.
    *
    * @param m the map to convert
    * @return a map of string to string maps
    */
-  public static Map<String, Map<String, String>> toMap(
-      Map<String, io.github.deweyjose.graphqlcodegen.parameters.ParameterMap> m) {
+  public static Map<String, Map<String, String>> toMap(Map<String, ParameterMap> m) {
     if (m == null) return Collections.emptyMap();
     return m.entrySet().stream()
         .collect(

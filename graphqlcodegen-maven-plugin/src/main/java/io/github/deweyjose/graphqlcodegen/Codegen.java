@@ -199,7 +199,6 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
     TypeMappingService typeMappingService = new TypeMappingService();
     SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest);
 
-    @SuppressWarnings("unchecked")
     Set<Artifact> artifacts = project.getArtifacts();
 
     var executor = new CodegenExecutor(schemaFileService, typeMappingService);
@@ -208,35 +207,5 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
     if (autoAddSource) {
       project.addCompileSourceRoot(outputDir.getAbsolutePath());
     }
-  }
-
-  @Override
-  public List<String> getSchemaUrls() {
-    return schemaUrls;
-  }
-
-  @Override
-  public Set<String> getSchemaJarFilesFromDependencies() {
-    return schemaJarFilesFromDependencies;
-  }
-
-  @Override
-  public List<String> getTypeMappingPropertiesFiles() {
-    return typeMappingPropertiesFiles;
-  }
-
-  @Override
-  public Set<String> getIncludeQueries() {
-    return includeQueries;
-  }
-
-  @Override
-  public Set<String> getIncludeMutations() {
-    return includeMutations;
-  }
-
-  @Override
-  public Set<String> getIncludeSubscriptions() {
-    return includeSubscriptions;
   }
 }

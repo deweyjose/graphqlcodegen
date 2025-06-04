@@ -126,13 +126,6 @@ class CodegenExecutorExecuteTest {
   }
 
   @Test
-  void testToSet_nullAndEmptyAndNormal() {
-    assertEquals(java.util.Collections.emptySet(), CodegenExecutor.toSet(null));
-    assertEquals(java.util.Collections.emptySet(), CodegenExecutor.toSet(new String[0]));
-    assertEquals(java.util.Set.of("a", "b"), CodegenExecutor.toSet(new String[] {"a", "b"}));
-  }
-
-  @Test
   void testToMap_nullAndEmptyAndNormal() {
     assertEquals(java.util.Collections.emptyMap(), CodegenExecutor.toMap(null));
     assertEquals(
