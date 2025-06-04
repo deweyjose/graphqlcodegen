@@ -80,11 +80,11 @@ public class SchemaFileService {
    * Loads the schema jar files from dependencies into the internal list.
    *
    * @param artifacts the set of Maven artifacts (dependencies)
-   * @param schemaJarFilesFromDependencies the collection of dependency coordinates to extract
-   *     schema jars from
+   * @param schemaJarFilesFromDependencies the set of dependency coordinates to extract schema jars
+   *     from
    */
   public void loadSchemaJarFilesFromDependencies(
-      Set&lt;Artifact&gt; artifacts, Collection&lt;String&gt; schemaJarFilesFromDependencies) {
+      Set&lt;Artifact&gt; artifacts, Set&lt;String&gt; schemaJarFilesFromDependencies) {
 <span class="fc" id="L88">    this.schemaJarFilesFromDependencies =</span>
 <span class="fc" id="L89">        extractSchemaFilesFromDependencies(artifacts, schemaJarFilesFromDependencies);</span>
 <span class="fc" id="L90">  }</span>
@@ -93,14 +93,14 @@ public class SchemaFileService {
    * Loads remote schema URLs and saves them as files in the output directory, adding them to
    * schemaPaths.
    *
-   * @param schemaUrls the array of schema URLs to load
+   * @param schemaUrls the list of schema URLs to load
    */
 <span class="pc" id="L98">  @SneakyThrows</span>
-  public void loadSchemaUrls(String[] schemaUrls) {
+  public void loadSchemaUrls(List&lt;String&gt; schemaUrls) {
 <span class="fc bfc" id="L100" title="All 2 branches covered.">    for (String url : schemaUrls) {</span>
 <span class="fc" id="L101">      String content = remoteSchemaService.getRemoteSchemaFile(url);</span>
 <span class="fc" id="L102">      schemaPaths.add(saveUrlToFile(url, content));</span>
-    }
+<span class="fc" id="L103">    }</span>
 <span class="fc" id="L104">  }</span>
 
   /**

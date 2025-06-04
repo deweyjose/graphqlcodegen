@@ -47,15 +47,15 @@ public class CodegenExecutor {
   public void execute(CodegenConfigProvider request, Set&lt;Artifact&gt; artifacts, File projectBaseDir) {
     // get the schema paths that might have changed or all of them.
 <span class="fc bfc" id="L49" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="fc" id="L50">      schemaFileService.loadExpandedSchemaPaths(toSet(request.getSchemaPaths()));</span>
+<span class="fc" id="L50">      schemaFileService.loadExpandedSchemaPaths(request.getSchemaPaths());</span>
 <span class="fc" id="L51">      Logger.info(&quot;expanded schema paths: {}&quot;, schemaFileService.getSchemaPaths());</span>
     } else {
-<span class="fc" id="L53">      schemaFileService.setSchemaPaths(toSet(request.getSchemaPaths()));</span>
+<span class="fc" id="L53">      schemaFileService.setSchemaPaths(request.getSchemaPaths());</span>
     }
 
     // load the schema jar files from dependencies
 <span class="fc" id="L57">    schemaFileService.loadSchemaJarFilesFromDependencies(</span>
-<span class="fc" id="L58">        artifacts, toSet(request.getSchemaJarFilesFromDependencies()));</span>
+<span class="fc" id="L58">        artifacts, request.getSchemaJarFilesFromDependencies());</span>
 
 <span class="fc" id="L60">    schemaFileService.loadSchemaUrls(request.getSchemaUrls());</span>
 <span class="fc" id="L61">    schemaFileService.loadIntrospectedSchemas(request.getIntrospectionRequests());</span>
@@ -99,9 +99,9 @@ public class CodegenExecutor {
 <span class="fc" id="L99">            .setGenerateKotlinNullableClasses(request.isGenerateKotlinNullableClasses())</span>
 <span class="fc" id="L100">            .setGenerateKotlinClosureProjections(request.isGenerateKotlinClosureProjections())</span>
 <span class="fc" id="L101">            .setTypeMapping(typeMapping)</span>
-<span class="fc" id="L102">            .setIncludeQueries(toSet(request.getIncludeQueries()))</span>
-<span class="fc" id="L103">            .setIncludeMutations(toSet(request.getIncludeMutations()))</span>
-<span class="fc" id="L104">            .setIncludeSubscriptions(toSet(request.getIncludeSubscriptions()))</span>
+<span class="fc" id="L102">            .setIncludeQueries(request.getIncludeQueries())</span>
+<span class="fc" id="L103">            .setIncludeMutations(request.getIncludeMutations())</span>
+<span class="fc" id="L104">            .setIncludeSubscriptions(request.getIncludeSubscriptions())</span>
 <span class="fc" id="L105">            .setSkipEntityQueries(request.isSkipEntityQueries())</span>
 <span class="fc" id="L106">            .setShortProjectionNames(request.isShortProjectionNames())</span>
 <span class="fc" id="L107">            .setGenerateDataTypes(request.isGenerateDataTypes())</span>

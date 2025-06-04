@@ -32,13 +32,13 @@ import org.apache.maven.project.MavenProject;
   @Parameter(
       property = &quot;schemaPaths&quot;,
       defaultValue = &quot;${project.basedir}/src/main/resources/schema&quot;)
-  private File[] schemaPaths;
+  private Set&lt;File&gt; schemaPaths;
 
   @Parameter(property = &quot;schemaUrls&quot;)
-  private String[] schemaUrls;
+  private List&lt;String&gt; schemaUrls;
 
   @Parameter(alias = &quot;schemaJarFilesFromDependencies&quot;, property = &quot;schemaJarFilesFromDependencies&quot;)
-  private String[] schemaJarFilesFromDependencies;
+  private Set&lt;String&gt; schemaJarFilesFromDependencies;
 
   @Parameter(
       property = &quot;schemaManifestOutputDir&quot;,
@@ -49,7 +49,7 @@ import org.apache.maven.project.MavenProject;
   private boolean onlyGenerateChanged;
 
   @Parameter(property = &quot;typeMappingPropertiesFiles&quot;)
-  private String[] typeMappingPropertiesFiles;
+  private List&lt;String&gt; typeMappingPropertiesFiles;
 
   @Parameter(property = &quot;dgs.codegen.skip&quot;, defaultValue = &quot;false&quot;, required = false)
   private boolean skip;
@@ -108,13 +108,13 @@ import org.apache.maven.project.MavenProject;
   private boolean generateKotlinClosureProjections;
 
   @Parameter(property = &quot;includeQueries&quot;)
-  private String[] includeQueries;
+  private Set&lt;String&gt; includeQueries;
 
   @Parameter(property = &quot;includeMutations&quot;)
-  private String[] includeMutations;
+  private Set&lt;String&gt; includeMutations;
 
   @Parameter(property = &quot;includeSubscriptions&quot;)
-  private String[] includeSubscriptions;
+  private Set&lt;String&gt; includeSubscriptions;
 
   @Parameter(property = &quot;skipEntityQueries&quot;, defaultValue = &quot;false&quot;)
   private boolean skipEntityQueries;
@@ -209,5 +209,35 @@ import org.apache.maven.project.MavenProject;
 <span class="nc" id="L209">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
     }
 <span class="nc" id="L211">  }</span>
+
+  @Override
+  public List&lt;String&gt; getSchemaUrls() {
+<span class="nc" id="L215">    return schemaUrls;</span>
+  }
+
+  @Override
+  public Set&lt;String&gt; getSchemaJarFilesFromDependencies() {
+<span class="nc" id="L220">    return schemaJarFilesFromDependencies;</span>
+  }
+
+  @Override
+  public List&lt;String&gt; getTypeMappingPropertiesFiles() {
+<span class="nc" id="L225">    return typeMappingPropertiesFiles;</span>
+  }
+
+  @Override
+  public Set&lt;String&gt; getIncludeQueries() {
+<span class="nc" id="L230">    return includeQueries;</span>
+  }
+
+  @Override
+  public Set&lt;String&gt; getIncludeMutations() {
+<span class="nc" id="L235">    return includeMutations;</span>
+  }
+
+  @Override
+  public Set&lt;String&gt; getIncludeSubscriptions() {
+<span class="nc" id="L240">    return includeSubscriptions;</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
