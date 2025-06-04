@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
@@ -49,7 +50,7 @@ class TypeMappingServiceTest {
   void loadPropertiesFile_readsPropertiesFromJar() {
     TypeMappingService service = new TypeMappingService();
     Map<String, String> result =
-        service.loadPropertiesFile(tempJar, new String[] {"type-mapping.properties"});
+        service.loadPropertiesFile(tempJar, List.of("type-mapping.properties"));
     assertEquals(2, result.size());
     assertEquals("bar", result.get("foo"));
     assertEquals("world", result.get("hello"));
@@ -59,7 +60,7 @@ class TypeMappingServiceTest {
   void loadPropertiesFile_returnsEmptyMapIfNoFile() {
     TypeMappingService service = new TypeMappingService();
     Map<String, String> result =
-        service.loadPropertiesFile(tempJar, new String[] {"does-not-exist.properties"});
+        service.loadPropertiesFile(tempJar, List.of("does-not-exist.properties"));
     assertTrue(result.isEmpty());
   }
 
@@ -74,7 +75,7 @@ class TypeMappingServiceTest {
     userMap.put("foo", "override");
     userMap.put("user", "value");
     Map<String, String> result =
-        service.mergeTypeMapping(userMap, new String[] {"type-mapping.properties"}, artifacts);
+        service.mergeTypeMapping(userMap, List.of("type-mapping.properties"), artifacts);
     assertEquals(3, result.size());
     assertEquals("override", result.get("foo")); // user map overrides jar
     assertEquals("world", result.get("hello"));
@@ -88,7 +89,7 @@ class TypeMappingServiceTest {
     userMap.put("foo", "bar");
     Map<String, String> result =
         service.mergeTypeMapping(
-            userMap, new String[] {"type-mapping.properties"}, Collections.emptySet());
+            userMap, List.of("type-mapping.properties"), Collections.emptySet());
     assertEquals(1, result.size());
     assertEquals("bar", result.get("foo"));
   }
