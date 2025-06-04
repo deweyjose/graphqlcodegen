@@ -153,7 +153,7 @@ class SchemaFileServiceTest {
     String url = TestUtils.TEST_SCHEMA_URL;
     String expectedContent = "type Query { hello: String }";
     when(remoteSchemaService.getRemoteSchemaFile(url)).thenReturn(expectedContent);
-    schemaFileService.loadSchemaUrls(new String[] {url});
+    schemaFileService.loadSchemaUrls(java.util.List.of(url));
     File outFile = schemaFileService.getSchemaPaths().iterator().next();
     assertTrue(outFile.exists());
     String content = java.nio.file.Files.readString(outFile.toPath());

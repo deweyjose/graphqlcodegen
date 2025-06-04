@@ -47,15 +47,15 @@ public class CodegenExecutor {
   public void execute(CodegenConfigProvider request, Set<Artifact> artifacts, File projectBaseDir) {
     // get the schema paths that might have changed or all of them.
     if (request.isOnlyGenerateChanged()) {
-      schemaFileService.loadExpandedSchemaPaths(toSet(request.getSchemaPaths()));
+      schemaFileService.loadExpandedSchemaPaths(request.getSchemaPaths());
       Logger.info("expanded schema paths: {}", schemaFileService.getSchemaPaths());
     } else {
-      schemaFileService.setSchemaPaths(toSet(request.getSchemaPaths()));
+      schemaFileService.setSchemaPaths(request.getSchemaPaths());
     }
 
     // load the schema jar files from dependencies
     schemaFileService.loadSchemaJarFilesFromDependencies(
-        artifacts, toSet(request.getSchemaJarFilesFromDependencies()));
+        artifacts, request.getSchemaJarFilesFromDependencies());
 
     schemaFileService.loadSchemaUrls(request.getSchemaUrls());
     schemaFileService.loadIntrospectedSchemas(request.getIntrospectionRequests());
@@ -99,9 +99,9 @@ public class CodegenExecutor {
             .setGenerateKotlinNullableClasses(request.isGenerateKotlinNullableClasses())
             .setGenerateKotlinClosureProjections(request.isGenerateKotlinClosureProjections())
             .setTypeMapping(typeMapping)
-            .setIncludeQueries(toSet(request.getIncludeQueries()))
-            .setIncludeMutations(toSet(request.getIncludeMutations()))
-            .setIncludeSubscriptions(toSet(request.getIncludeSubscriptions()))
+            .setIncludeQueries(request.getIncludeQueries())
+            .setIncludeMutations(request.getIncludeMutations())
+            .setIncludeSubscriptions(request.getIncludeSubscriptions())
             .setSkipEntityQueries(request.isSkipEntityQueries())
             .setShortProjectionNames(request.isShortProjectionNames())
             .setGenerateDataTypes(request.isGenerateDataTypes())

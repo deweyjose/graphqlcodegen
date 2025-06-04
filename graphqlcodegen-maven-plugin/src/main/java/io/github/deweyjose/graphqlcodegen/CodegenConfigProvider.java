@@ -5,18 +5,19 @@ import io.github.deweyjose.graphqlcodegen.parameters.ParameterMap;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** Interface for providing configuration to the GraphQL codegen plugin. */
 public interface CodegenConfigProvider {
   /**
    * @return schema file paths
    */
-  File[] getSchemaPaths();
+  Set<File> getSchemaPaths();
 
   /**
    * @return schema jar files from dependencies
    */
-  String[] getSchemaJarFilesFromDependencies();
+  Set<String> getSchemaJarFilesFromDependencies();
 
   /**
    * @return output directory for schema manifest
@@ -31,7 +32,7 @@ public interface CodegenConfigProvider {
   /**
    * @return type mapping properties files
    */
-  String[] getTypeMappingPropertiesFiles();
+  List<String> getTypeMappingPropertiesFiles();
 
   /**
    * @return whether to skip code generation
@@ -126,17 +127,17 @@ public interface CodegenConfigProvider {
   /**
    * @return included queries
    */
-  String[] getIncludeQueries();
+  Set<String> getIncludeQueries();
 
   /**
    * @return included mutations
    */
-  String[] getIncludeMutations();
+  Set<String> getIncludeMutations();
 
   /**
    * @return included subscriptions
    */
-  String[] getIncludeSubscriptions();
+  Set<String> getIncludeSubscriptions();
 
   /**
    * @return whether to skip entity queries
@@ -246,7 +247,7 @@ public interface CodegenConfigProvider {
   /**
    * @return remote schema URLs
    */
-  String[] getSchemaUrls();
+  List<String> getSchemaUrls();
 
   /**
    * @return whether to auto add source

@@ -5,15 +5,17 @@ import io.github.deweyjose.graphqlcodegen.parameters.ParameterMap;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class TestCodegenProvider implements CodegenConfigProvider {
-  private File[] schemaPaths = new File[0];
-  private String[] schemaJarFilesFromDependencies = new String[0];
+  private Set<File> schemaPaths = new HashSet<>();
+  private Set<String> schemaJarFilesFromDependencies = new HashSet<>();
   private File schemaManifestOutputDir = new File("target/test-schema-manifest");
   private boolean onlyGenerateChanged = false;
-  private String[] typeMappingPropertiesFiles = new String[0];
+  private List<String> typeMappingPropertiesFiles = Collections.emptyList();
   private boolean skip = false;
   private File outputDir = new File("target/generated-test-codegen");
   private File examplesOutputDir = outputDir;
@@ -32,9 +34,9 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   private boolean generateInterfaces = false;
   private boolean generateKotlinNullableClasses = false;
   private boolean generateKotlinClosureProjections = false;
-  private String[] includeQueries = new String[0];
-  private String[] includeMutations = new String[0];
-  private String[] includeSubscriptions = new String[0];
+  private Set<String> includeQueries = new HashSet<>();
+  private Set<String> includeMutations = new HashSet<>();
+  private Set<String> includeSubscriptions = new HashSet<>();
   private boolean skipEntityQueries = false;
   private boolean shortProjectionNames = false;
   private boolean generateDataTypes = true;
@@ -56,12 +58,12 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   private Map<String, ParameterMap> includeEnumImports = new HashMap<>();
   private Map<String, ParameterMap> includeClassImports = new HashMap<>();
   private boolean disableDatesInGeneratedAnnotation = false;
-  private String[] schemaUrls = new String[0];
+  private List<String> schemaUrls = Collections.emptyList();
   private boolean autoAddSource = true;
   private List<IntrospectionRequest> introspectionRequests = Collections.emptyList();
 
   // Setters for test customization
-  public void setSchemaPaths(File[] schemaPaths) {
+  public void setSchemaPaths(Set<File> schemaPaths) {
     this.schemaPaths = schemaPaths;
   }
 
@@ -74,7 +76,7 @@ public class TestCodegenProvider implements CodegenConfigProvider {
     this.schemaManifestOutputDir = dir;
   }
 
-  public void setSchemaUrls(String[] urls) {
+  public void setSchemaUrls(List<String> urls) {
     this.schemaUrls = urls;
   }
 
@@ -89,12 +91,12 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   // Add more setters as needed
 
   @Override
-  public File[] getSchemaPaths() {
+  public Set<File> getSchemaPaths() {
     return schemaPaths;
   }
 
   @Override
-  public String[] getSchemaJarFilesFromDependencies() {
+  public Set<String> getSchemaJarFilesFromDependencies() {
     return schemaJarFilesFromDependencies;
   }
 
@@ -109,7 +111,7 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   }
 
   @Override
-  public String[] getTypeMappingPropertiesFiles() {
+  public List<String> getTypeMappingPropertiesFiles() {
     return typeMappingPropertiesFiles;
   }
 
@@ -204,17 +206,17 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   }
 
   @Override
-  public String[] getIncludeQueries() {
+  public Set<String> getIncludeQueries() {
     return includeQueries;
   }
 
   @Override
-  public String[] getIncludeMutations() {
+  public Set<String> getIncludeMutations() {
     return includeMutations;
   }
 
   @Override
-  public String[] getIncludeSubscriptions() {
+  public Set<String> getIncludeSubscriptions() {
     return includeSubscriptions;
   }
 
@@ -324,7 +326,7 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   }
 
   @Override
-  public String[] getSchemaUrls() {
+  public List<String> getSchemaUrls() {
     return schemaUrls;
   }
 

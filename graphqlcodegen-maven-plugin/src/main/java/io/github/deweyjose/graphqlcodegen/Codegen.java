@@ -32,13 +32,13 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   @Parameter(
       property = "schemaPaths",
       defaultValue = "${project.basedir}/src/main/resources/schema")
-  private File[] schemaPaths;
+  private Set<File> schemaPaths;
 
   @Parameter(property = "schemaUrls")
-  private String[] schemaUrls;
+  private List<String> schemaUrls;
 
   @Parameter(alias = "schemaJarFilesFromDependencies", property = "schemaJarFilesFromDependencies")
-  private String[] schemaJarFilesFromDependencies;
+  private Set<String> schemaJarFilesFromDependencies;
 
   @Parameter(
       property = "schemaManifestOutputDir",
@@ -49,7 +49,7 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   private boolean onlyGenerateChanged;
 
   @Parameter(property = "typeMappingPropertiesFiles")
-  private String[] typeMappingPropertiesFiles;
+  private List<String> typeMappingPropertiesFiles;
 
   @Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
   private boolean skip;
@@ -108,13 +108,13 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   private boolean generateKotlinClosureProjections;
 
   @Parameter(property = "includeQueries")
-  private String[] includeQueries;
+  private Set<String> includeQueries;
 
   @Parameter(property = "includeMutations")
-  private String[] includeMutations;
+  private Set<String> includeMutations;
 
   @Parameter(property = "includeSubscriptions")
-  private String[] includeSubscriptions;
+  private Set<String> includeSubscriptions;
 
   @Parameter(property = "skipEntityQueries", defaultValue = "false")
   private boolean skipEntityQueries;
@@ -208,5 +208,35 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
     if (autoAddSource) {
       project.addCompileSourceRoot(outputDir.getAbsolutePath());
     }
+  }
+
+  @Override
+  public List<String> getSchemaUrls() {
+    return schemaUrls;
+  }
+
+  @Override
+  public Set<String> getSchemaJarFilesFromDependencies() {
+    return schemaJarFilesFromDependencies;
+  }
+
+  @Override
+  public List<String> getTypeMappingPropertiesFiles() {
+    return typeMappingPropertiesFiles;
+  }
+
+  @Override
+  public Set<String> getIncludeQueries() {
+    return includeQueries;
+  }
+
+  @Override
+  public Set<String> getIncludeMutations() {
+    return includeMutations;
+  }
+
+  @Override
+  public Set<String> getIncludeSubscriptions() {
+    return includeSubscriptions;
   }
 }

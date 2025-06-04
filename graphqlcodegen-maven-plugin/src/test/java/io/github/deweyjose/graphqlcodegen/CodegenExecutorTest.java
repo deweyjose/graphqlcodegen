@@ -22,7 +22,7 @@ class CodegenExecutorExecuteTest {
   void integrationTest_generateCodeFromSchema() throws java.io.IOException {
     // Arrange
     File schemaDir = new File(getClass().getClassLoader().getResource("schema").getFile());
-    File[] schemaPaths = {schemaDir};
+    Set<File> schemaPaths = Set.of(schemaDir);
     File outputDir = new File("target/generated-test-codegen");
     TestCodegenProvider config = new TestCodegenProvider();
     config.setSchemaPaths(schemaPaths);
@@ -79,7 +79,7 @@ class CodegenExecutorExecuteTest {
     TestCodegenProvider config = new TestCodegenProvider();
     config.setOutputDir(outputDir);
     config.setSchemaManifestOutputDir(outputDir);
-    config.setSchemaUrls(new String[] {TestUtils.TEST_SCHEMA_URL});
+    config.setSchemaUrls(java.util.List.of(TestUtils.TEST_SCHEMA_URL));
     config.setOnlyGenerateChanged(true);
     SchemaFileService schemaFileService =
         new SchemaFileService(outputDir, new SchemaManifestService(outputDir, outputDir));

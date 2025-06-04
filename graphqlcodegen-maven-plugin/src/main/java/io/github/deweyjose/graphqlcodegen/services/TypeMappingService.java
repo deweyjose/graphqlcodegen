@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -17,11 +18,11 @@ public class TypeMappingService {
    * Loads type mapping properties from the specified files inside a JAR file.
    *
    * @param artifactFile the JAR file to load properties from
-   * @param typeMappingPropertiesFiles the array of property file paths inside the JAR
+   * @param typeMappingPropertiesFiles the list of property file paths inside the JAR
    * @return a map containing the type mappings loaded from the properties files
    */
   public Map<String, String> loadPropertiesFile(
-      File artifactFile, String[] typeMappingPropertiesFiles) {
+      File artifactFile, List<String> typeMappingPropertiesFiles) {
     Map<String, String> typeMapping = new HashMap<>();
     try (JarFile jarFile = new JarFile(artifactFile)) {
       for (String file : typeMappingPropertiesFiles) {
@@ -46,17 +47,17 @@ public class TypeMappingService {
    * artifacts.
    *
    * @param userTypeMapping the user-provided type mapping (may be null)
-   * @param typeMappingPropertiesFiles the array of property file paths to search for in
+   * @param typeMappingPropertiesFiles the list of property file paths to search for in
    *     dependencies
    * @param artifacts the set of Maven dependency artifacts to search for property files
    * @return a map containing the merged type mappings, with user mappings taking precedence
    */
   public Map<String, String> mergeTypeMapping(
       Map<String, String> userTypeMapping,
-      String[] typeMappingPropertiesFiles,
+      List<String> typeMappingPropertiesFiles,
       Set<Artifact> artifacts) {
     Map<String, String> jarTypeMapping = new HashMap<>();
-    if (typeMappingPropertiesFiles != null && typeMappingPropertiesFiles.length > 0) {
+    if (typeMappingPropertiesFiles != null && !typeMappingPropertiesFiles.isEmpty()) {
       for (Artifact dependency : artifacts) {
         File artifactFile = dependency.getFile();
         if (artifactFile != null && artifactFile.isFile()) {
