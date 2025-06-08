@@ -230,27 +230,23 @@ Example
 </typeMapping>
 ```
 
-## typeMappingPropertiesFiles
+## `typeMappingPropertiesFiles`
 
-Provide typeMapping as properties file(s) that is accessible as a compile-time-classpath resource
-Key-Value pairs in the properties file will be added to `typeMapping` Map when it is not already
-present in it
+Specifies one or more `typeMapping` properties files that are available as **compile-time classpath resources** from **external dependencies** (e.g., shared JARs).
 
-When a same GraphQL type is present in both `typeMapping` and also in `typeMappingPropertiesFiles`,
-value in `typeMapping` will be used (and the value from `typeMappingPropertiesFiles` *will* be
-ignored)
+Each properties file must contain key-value pairs that will be added to the `typeMapping` map **only if a mapping for a given GraphQL type is not already present**.
 
-- Type: Array
-- Required: false
+If the same GraphQL type appears in both the `typeMapping` configuration and one of the `typeMappingPropertiesFiles`, the value from `typeMapping` will take precedence, and the entry from the properties file will be ignored.
 
-Example
+- **Type**: Array  
+- **Required**: No
+
+### Example (XML)
 
 ```xml
-
 <typeMappingPropertiesFiles>
   <typeMappingPropertiesFile>commontypes-typeMapping.properties</typeMappingPropertiesFile>
-  <typeMappingPropertiesFile>someother-commontypes-typeMapping.properties
-  </typeMappingPropertiesFile>
+  <typeMappingPropertiesFile>someother-commontypes-typeMapping.properties</typeMappingPropertiesFile>
 </typeMappingPropertiesFiles>
 ```
 
