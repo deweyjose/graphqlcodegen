@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SchemaManifestService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">GraphQL Code Generator Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">io.github.deweyjose.graphqlcodegen.services</a> &gt; <span class="el_source">SchemaManifestService.java</span></div><h1>SchemaManifestService.java</h1><pre class="source lang-java linenums">package io.github.deweyjose.graphqlcodegen.services;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.util.HashSet;
+import java.util.Set;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import nu.studer.java.util.OrderedProperties;
+import nu.studer.java.util.OrderedProperties.OrderedPropertiesBuilder;
+
+/** Manages a manifest of GraphQL schema files and their checksums for change detection. */
+<span class="fc" id="L18">@Slf4j</span>
+public class SchemaManifestService {
+  private Set&lt;File&gt; files;
+  private final File manifestPath;
+  private final File projectPath;
+
+  /**
+   * Constructs a SchemaFileManifest with a set of files, manifest path, and project path.
+   *
+   * @param files the set of schema files to track
+   * @param manifestPath the manifest file path
+   * @param projectPath the project base directory
+   */
+<span class="fc" id="L31">  public SchemaManifestService(Set&lt;File&gt; files, File manifestPath, File projectPath) {</span>
+<span class="fc" id="L32">    this.files = files;</span>
+<span class="fc" id="L33">    this.manifestPath = manifestPath;</span>
+<span class="fc" id="L34">    this.projectPath = projectPath;</span>
+<span class="fc" id="L35">  }</span>
+
+  /**
+   * Constructs a SchemaFileManifest with a manifest path and project path.
+   *
+   * @param manifestDir the directory where the manifest file will be created
+   * @param projectPath the project base directory
+   */
+<span class="fc" id="L43">  public SchemaManifestService(File manifestDir, File projectPath) {</span>
+<span class="fc" id="L44">    this.manifestPath = new File(manifestDir, &quot;schema-manifest.props&quot;);</span>
+<span class="fc" id="L45">    this.projectPath = projectPath;</span>
+<span class="fc" id="L46">  }</span>
+
+  /**
+   * Generates an MD5 checksum for the given file.
+   *
+   * @param path the file to checksum
+   * @return the checksum as a hex string
+   */
+<span class="nc" id="L54">  @SneakyThrows</span>
+  public static String generateChecksum(File path) {
+<span class="fc" id="L56">    byte[] data = Files.readAllBytes(Paths.get(path.toURI()));</span>
+<span class="fc" id="L57">    byte[] hash = MessageDigest.getInstance(&quot;MD5&quot;).digest(data);</span>
+<span class="fc" id="L58">    String checksum = new BigInteger(1, hash).toString(16);</span>
+<span class="fc" id="L59">    return checksum;</span>
+  }
+
+  /**
+   * Sets the files to be tracked by the manifest.
+   *
+   * @param files the set of files to track
+   */
+  public void setFiles(Set&lt;File&gt; files) {
+<span class="fc" id="L68">    this.files = files;</span>
+<span class="fc" id="L69">  }</span>
+
+  /**
+   * Computes the set of files that have changed or are new and need to trigger code generation.
+   *
+   * @return a set of changed or new files
+   */
+  public Set&lt;File&gt; getChangedFiles() {
+<span class="fc" id="L77">    Set&lt;File&gt; changed = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L78">    OrderedProperties manifest = loadManifest();</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">    for (File file : files) {</span>
+<span class="fc" id="L80">      String oldChecksum = manifest.getProperty(relativizeToProject(file));</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">      if (oldChecksum == null) {</span>
+<span class="fc" id="L82">        log.info(&quot;{} is new, will generate code&quot;, file.getName());</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">      } else if (!oldChecksum.equals(generateChecksum(file))) {</span>
+<span class="fc" id="L84">        log.info(&quot;{} has changed, will generate code&quot;, file.getName());</span>
+      } else {
+<span class="fc" id="L86">        log.info(&quot;{} has not changed, will not generate code&quot;, file.getName());</span>
+<span class="fc" id="L87">        continue;</span>
+      }
+<span class="fc" id="L89">      changed.add(file);</span>
+<span class="fc" id="L90">    }</span>
+<span class="fc" id="L91">    return changed;</span>
+  }
+
+  /** Syncs the manifest with the files. */
+<span class="pc" id="L95">  @SneakyThrows</span>
+  public void syncManifest() {
+<span class="fc" id="L97">    OrderedProperties manifest =</span>
+<span class="fc" id="L98">        new OrderedPropertiesBuilder().withSuppressDateInComment(true).build();</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">    for (File file : files) {</span>
+<span class="fc" id="L100">      manifest.setProperty(relativizeToProject(file), generateChecksum(file));</span>
+<span class="fc" id="L101">    }</span>
+
+<span class="fc bfc" id="L103" title="All 2 branches covered.">    if (!manifestPath.exists()) {</span>
+<span class="fc" id="L104">      manifestPath.getParentFile().mkdirs();</span>
+    }
+
+<span class="fc" id="L107">    try (FileOutputStream fos = new FileOutputStream(manifestPath)) {</span>
+<span class="fc" id="L108">      manifest.store(fos, &quot;Schema Manifest&quot;);</span>
+<span class="fc" id="L109">      fos.flush();</span>
+    }
+<span class="fc" id="L111">  }</span>
+
+  /**
+   * Loads the manifest from the manifest path, or returns an empty manifest if it does not exist.
+   *
+   * @return the loaded manifest properties
+   * @throws java.io.IOException if an I/O error occurs reading the manifest
+   */
+<span class="nc" id="L119">  @SneakyThrows</span>
+  private OrderedProperties loadManifest() {
+<span class="fc" id="L121">    OrderedProperties properties =</span>
+<span class="fc" id="L122">        new OrderedPropertiesBuilder().withSuppressDateInComment(true).build();</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">    if (manifestPath.exists()) {</span>
+<span class="fc" id="L124">      try (FileInputStream fis = new FileInputStream(manifestPath)) {</span>
+<span class="fc" id="L125">        properties.load(fis);</span>
+      }
+    }
+<span class="fc" id="L128">    return properties;</span>
+  }
+
+  /**
+   * Relativizes a file path to the project path.
+   *
+   * @param file the file to relativize
+   * @return the relativized file path as a string
+   */
+  private String relativizeToProject(File file) {
+<span class="fc" id="L138">    return projectPath.toPath().relativize(file.toPath()).toString();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

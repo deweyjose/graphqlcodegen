@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Codegen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">GraphQL Code Generator Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">io.github.deweyjose.graphqlcodegen</a> &gt; <span class="el_source">Codegen.java</span></div><h1>Codegen.java</h1><pre class="source lang-java linenums">package io.github.deweyjose.graphqlcodegen;
+
+import io.github.deweyjose.graphqlcodegen.parameters.IntrospectionRequest;
+import io.github.deweyjose.graphqlcodegen.parameters.ParameterMap;
+import io.github.deweyjose.graphqlcodegen.services.SchemaFileService;
+import io.github.deweyjose.graphqlcodegen.services.SchemaManifestService;
+import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import lombok.Getter;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.MavenProject;
+
+/** Maven Mojo for GraphQL code generation. */
+@Getter
+@Mojo(
+    name = &quot;generate&quot;,
+    defaultPhase = LifecyclePhase.GENERATE_SOURCES,
+    requiresDependencyResolution = ResolutionScope.COMPILE)
+<span class="nc" id="L27">public class Codegen extends AbstractMojo implements CodegenConfigProvider {</span>
+
+  @Parameter(defaultValue = &quot;${project}&quot;)
+  private MavenProject project;
+
+  @Parameter(
+      property = &quot;schemaPaths&quot;,
+      defaultValue = &quot;${project.basedir}/src/main/resources/schema&quot;)
+  private Set&lt;File&gt; schemaPaths;
+
+  @Parameter(property = &quot;schemaUrls&quot;)
+  private List&lt;String&gt; schemaUrls;
+
+  @Parameter(alias = &quot;schemaJarFilesFromDependencies&quot;, property = &quot;schemaJarFilesFromDependencies&quot;)
+  private Set&lt;String&gt; schemaJarFilesFromDependencies;
+
+  @Parameter(
+      property = &quot;schemaManifestOutputDir&quot;,
+      defaultValue = &quot;${project.build.directory}/graphqlcodegen&quot;)
+  private File schemaManifestOutputDir;
+
+  @Parameter(property = &quot;onlyGenerateChanged&quot;, defaultValue = &quot;true&quot;)
+  private boolean onlyGenerateChanged;
+
+  @Parameter(property = &quot;typeMappingPropertiesFiles&quot;)
+  private List&lt;String&gt; typeMappingPropertiesFiles;
+
+  @Parameter(property = &quot;dgs.codegen.skip&quot;, defaultValue = &quot;false&quot;, required = false)
+  private boolean skip;
+
+  @Parameter(property = &quot;outputDir&quot;, defaultValue = &quot;${project.build.directory}/generated-sources&quot;)
+  private File outputDir;
+
+  @Parameter(
+      property = &quot;examplesOutputDir&quot;,
+      defaultValue = &quot;${project.build.directory}/generated-examples&quot;)
+  private File examplesOutputDir;
+
+  @Parameter(property = &quot;writeToFiles&quot;, defaultValue = &quot;true&quot;)
+  private boolean writeToFiles;
+
+  @Parameter(property = &quot;packageName&quot;, defaultValue = &quot;&quot;)
+  private String packageName;
+
+  @Parameter(property = &quot;subPackageNameClient&quot;, defaultValue = &quot;client&quot;)
+  private String subPackageNameClient;
+
+  @Parameter(property = &quot;subPackageNameDatafetchers&quot;, defaultValue = &quot;datafetchers&quot;)
+  private String subPackageNameDatafetchers;
+
+  @Parameter(property = &quot;subPackageNameTypes&quot;, defaultValue = &quot;types&quot;)
+  private String subPackageNameTypes;
+
+  @Parameter(property = &quot;subPackageNameDocs&quot;, defaultValue = &quot;docs&quot;)
+  private String subPackageNameDocs;
+
+  @Parameter(property = &quot;language&quot;, defaultValue = &quot;java&quot;)
+  private String language;
+
+  @Parameter(property = &quot;typeMapping&quot;)
+  private Map&lt;String, String&gt; typeMapping;
+
+  @Parameter(property = &quot;generateBoxedTypes&quot;, defaultValue = &quot;false&quot;)
+  private boolean generateBoxedTypes;
+
+  @Parameter(property = &quot;generateIsGetterForPrimitiveBooleanFields&quot;, defaultValue = &quot;false&quot;)
+  private boolean generateIsGetterForPrimitiveBooleanFields;
+
+  @Parameter(property = &quot;generateClientApi&quot;, defaultValue = &quot;false&quot;)
+  private boolean generateClientApi;
+
+  @Parameter(property = &quot;generateClientApiv2&quot;, defaultValue = &quot;false&quot;)
+  private boolean generateClientApiv2;
+
+  @Parameter(property = &quot;generateInterfaces&quot;, defaultValue = &quot;false&quot;)
+  private boolean generateInterfaces;
+
+  @Parameter(property = &quot;generateKotlinNullableClasses&quot;, defaultValue = &quot;false&quot;)
+  private boolean generateKotlinNullableClasses;
+
+  @Parameter(property = &quot;generateKotlinClosureProjections&quot;, defaultValue = &quot;false&quot;)
+  private boolean generateKotlinClosureProjections;
+
+  @Parameter(property = &quot;includeQueries&quot;)
+  private Set&lt;String&gt; includeQueries;
+
+  @Parameter(property = &quot;includeMutations&quot;)
+  private Set&lt;String&gt; includeMutations;
+
+  @Parameter(property = &quot;includeSubscriptions&quot;)
+  private Set&lt;String&gt; includeSubscriptions;
+
+  @Parameter(property = &quot;skipEntityQueries&quot;, defaultValue = &quot;false&quot;)
+  private boolean skipEntityQueries;
+
+  @Parameter(property = &quot;shortProjectionNames&quot;, defaultValue = &quot;false&quot;)
+  private boolean shortProjectionNames;
+
+  @Parameter(property = &quot;generateDataTypes&quot;, defaultValue = &quot;true&quot;)
+  private boolean generateDataTypes;
+
+  @Parameter(property = &quot;omitNullInputFields&quot;, defaultValue = &quot;false&quot;)
+  private boolean omitNullInputFields;
+
+  @Parameter(property = &quot;maxProjectionDepth&quot;, defaultValue = &quot;10&quot;)
+  private int maxProjectionDepth;
+
+  @Parameter(property = &quot;kotlinAllFieldsOptional&quot;, defaultValue = &quot;false&quot;)
+  private boolean kotlinAllFieldsOptional;
+
+  @Parameter(property = &quot;snakeCaseConstantNames&quot;, defaultValue = &quot;false&quot;)
+  private boolean snakeCaseConstantNames;
+
+  @Parameter(property = &quot;generateInterfaceSetters&quot;, defaultValue = &quot;false&quot;)
+  private boolean generateInterfaceSetters;
+
+  @Parameter(property = &quot;generateInterfaceMethodsForInterfaceFields&quot;, defaultValue = &quot;false&quot;)
+  private boolean generateInterfaceMethodsForInterfaceFields;
+
+  @Parameter(property = &quot;generateDocs&quot;, defaultValue = &quot;false&quot;)
+  private Boolean generateDocs;
+
+  @Parameter(property = &quot;generatedDocsFolder&quot;, defaultValue = &quot;./generated-docs&quot;)
+  private String generatedDocsFolder;
+
+  @Parameter(property = &quot;javaGenerateAllConstructor&quot;, defaultValue = &quot;false&quot;)
+  private boolean javaGenerateAllConstructor;
+
+  @Parameter(property = &quot;implementSerializable&quot;, defaultValue = &quot;false&quot;)
+  private boolean implementSerializable;
+
+  @Parameter(property = &quot;addGeneratedAnnotation&quot;, defaultValue = &quot;false&quot;)
+  private boolean addGeneratedAnnotation;
+
+  @Parameter(property = &quot;addDeprecatedAnnotation&quot;, defaultValue = &quot;false&quot;)
+  private boolean addDeprecatedAnnotation;
+
+  @Parameter(property = &quot;trackInputFieldSet&quot;, defaultValue = &quot;false&quot;)
+  private boolean trackInputFieldSet;
+
+  @Parameter(property = &quot;generateCustomAnnotations&quot;, defaultValue = &quot;false&quot;)
+  private boolean generateCustomAnnotations;
+
+  @Parameter(property = &quot;includeImports&quot;)
+  private Map&lt;String, String&gt; includeImports;
+
+  @Parameter(property = &quot;includeEnumImports&quot;)
+  private Map&lt;String, ParameterMap&gt; includeEnumImports;
+
+  @Parameter(property = &quot;includeClassImports&quot;)
+  private Map&lt;String, ParameterMap&gt; includeClassImports;
+
+  @Parameter(property = &quot;disableDatesInGeneratedAnnotation&quot;, defaultValue = &quot;false&quot;)
+  private boolean disableDatesInGeneratedAnnotation;
+
+  @Parameter(property = &quot;autoAddSource&quot;, defaultValue = &quot;true&quot;)
+  private boolean autoAddSource;
+
+  @Parameter(property = &quot;introspectionRequests&quot;)
+  private List&lt;IntrospectionRequest&gt; introspectionRequests;
+
+  @Override
+  public void execute() {
+<span class="nc" id="L190">    Logger.registerMavenLog(getLog());</span>
+
+<span class="nc bnc" id="L192" title="All 2 branches missed.">    if (skip) {</span>
+<span class="nc" id="L193">      Logger.info(&quot;Skipping code generation as requested (skip=true)&quot;);</span>
+<span class="nc" id="L194">      return;</span>
+    }
+
+<span class="nc" id="L197">    SchemaManifestService manifest =</span>
+<span class="nc" id="L198">        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());</span>
+<span class="nc" id="L199">    TypeMappingService typeMappingService = new TypeMappingService();</span>
+<span class="nc" id="L200">    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest);</span>
+
+<span class="nc" id="L202">    Set&lt;Artifact&gt; artifacts = project.getArtifacts();</span>
+
+<span class="nc" id="L204">    var executor = new CodegenExecutor(schemaFileService, typeMappingService);</span>
+<span class="nc" id="L205">    executor.execute(this, artifacts, project.getBasedir());</span>
+
+<span class="nc bnc" id="L207" title="All 2 branches missed.">    if (autoAddSource) {</span>
+<span class="nc" id="L208">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
+    }
+<span class="nc" id="L210">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

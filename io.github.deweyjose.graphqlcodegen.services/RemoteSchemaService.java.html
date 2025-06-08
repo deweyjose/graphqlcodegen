@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RemoteSchemaService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">GraphQL Code Generator Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">io.github.deweyjose.graphqlcodegen.services</a> &gt; <span class="el_source">RemoteSchemaService.java</span></div><h1>RemoteSchemaService.java</h1><pre class="source lang-java linenums">package io.github.deweyjose.graphqlcodegen.services;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import graphql.ExecutionResult;
+import graphql.introspection.IntrospectionResultToSchema;
+import graphql.language.Document;
+import graphql.schema.idl.SchemaPrinter;
+import io.github.deweyjose.graphqlcodegen.Logger;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.Map;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.SneakyThrows;
+
+/**
+ * Service for fetching and converting remote GraphQL schemas, including introspection queries.
+ *
+ * &lt;p&gt;This service provides methods to:
+ *
+ * &lt;ul&gt;
+ *   &lt;li&gt;Fetch a remote GraphQL schema file via HTTP GET
+ *   &lt;li&gt;Fetch and convert a remote GraphQL schema via introspection (HTTP POST)
+ *   &lt;li&gt;Convert introspection JSON results to GraphQL SDL
+ * &lt;/ul&gt;
+ */
+public class RemoteSchemaService {
+  private final HttpClient httpClient;
+<span class="fc" id="L33">  private final ObjectMapper objectMapper = new ObjectMapper();</span>
+
+  /**
+   * Represents a GraphQL introspection operation, including the query and optional operation name.
+   */
+  @Builder
+  @Getter
+  public static class IntrospectionOperation {
+    /** The GraphQL introspection query string. */
+    private String query;
+
+    /** The operation name for the introspection query (optional). */
+    private String operationName;
+  }
+
+  /** Constructs a new RemoteSchemaService using Java's built-in HttpClient. */
+<span class="fc" id="L49">  public RemoteSchemaService() {</span>
+<span class="fc" id="L50">    this.httpClient = HttpClient.newHttpClient();</span>
+<span class="fc" id="L51">  }</span>
+
+  /**
+   * Fetches a remote GraphQL schema file via HTTP GET.
+   *
+   * @param url the URL of the remote schema file
+   * @return the contents of the schema file as a String
+   * @throws IOException if the request fails or returns a non-200 status
+   * @throws InterruptedException if the thread is interrupted
+   */
+  public String getRemoteSchemaFile(String url) throws IOException, InterruptedException {
+<span class="fc" id="L62">    HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();</span>
+<span class="fc" id="L63">    HttpResponse&lt;String&gt; response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());</span>
+<span class="fc" id="L64">    Logger.debug(&quot;Remote schema file: {}&quot;, response.body());</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">    if (response.statusCode() != 200) {</span>
+<span class="fc" id="L66">      throw new IOException(&quot;Failed to get remote schema file: &quot; + response.statusCode());</span>
+    }
+<span class="fc" id="L68">    return response.body();</span>
+  }
+
+  /**
+   * Fetches a remote GraphQL schema via introspection (HTTP POST) and converts it to SDL.
+   *
+   * @param url the URL of the GraphQL endpoint
+   * @param operation the introspection operation (query and operation name)
+   * @param headers additional HTTP headers to include in the request
+   * @return the GraphQL schema SDL as a String
+   */
+<span class="nc" id="L79">  @SneakyThrows</span>
+  public String getIntrospectedSchemaFile(
+      String url, IntrospectionOperation operation, Map&lt;String, String&gt; headers) {
+    HttpRequest.Builder builder =
+<span class="fc" id="L83">        HttpRequest.newBuilder()</span>
+<span class="fc" id="L84">            .uri(URI.create(url))</span>
+<span class="fc" id="L85">            .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(operation)))</span>
+<span class="fc" id="L86">            .header(&quot;Content-Type&quot;, &quot;application/json&quot;);</span>
+
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">    if (!headers.isEmpty()) {</span>
+<span class="fc" id="L89">      headers.forEach(builder::header);</span>
+    }
+
+<span class="fc" id="L92">    HttpRequest request = builder.build();</span>
+<span class="fc" id="L93">    HttpResponse&lt;String&gt; response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());</span>
+<span class="fc" id="L94">    Logger.debug(&quot;Introspection results: {}&quot;, response.body());</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">    if (response.statusCode() != 200) {</span>
+<span class="nc" id="L96">      throw new IOException(&quot;Failed to get introspection results: &quot; + response.statusCode());</span>
+    }
+<span class="fc" id="L98">    Map&lt;String, Object&gt; introspection =</span>
+<span class="fc" id="L99">        objectMapper.readValue(response.body(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {});</span>
+<span class="fc" id="L100">    return convertIntrospectionToSchema(introspection);</span>
+  }
+
+  /**
+   * Converts a parsed introspection result (as a Map) to GraphQL SDL.
+   *
+   * @param introspection the introspection result as a Map (should contain a &quot;data&quot; key)
+   * @return the GraphQL schema SDL as a String
+   */
+  public String convertIntrospectionToSchema(Map&lt;String, Object&gt; introspection) {
+<span class="fc" id="L110">    IntrospectionResultToSchema introspectionResultToSchema = new IntrospectionResultToSchema();</span>
+    ExecutionResult executionResult =
+<span class="fc" id="L112">        ExecutionResult.newExecutionResult().data(introspection.get(&quot;data&quot;)).build();</span>
+<span class="fc" id="L113">    Document schema = introspectionResultToSchema.createSchemaDefinition(executionResult);</span>
+<span class="fc" id="L114">    SchemaPrinter schemaPrinter = new SchemaPrinter();</span>
+<span class="fc" id="L115">    String sdl = schemaPrinter.print(schema);</span>
+<span class="fc" id="L116">    return sdl;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
