@@ -58,10 +58,8 @@ public class TypeMappingService {
       Set<Artifact> artifacts) {
     Map<String, String> jarTypeMapping = new HashMap<>();
     if (typeMappingPropertiesFiles != null && !typeMappingPropertiesFiles.isEmpty()) {
-      Logger.info("Loading type mapping from dependencies: {}", artifacts);
       for (Artifact dependency : artifacts) {
         File artifactFile = dependency.getFile();
-        Logger.info("Loading type mapping from dependency: {}", artifactFile);
         if (artifactFile != null && artifactFile.isFile()) {
           jarTypeMapping.putAll(loadPropertiesFile(artifactFile, typeMappingPropertiesFiles));
         }
@@ -69,7 +67,6 @@ public class TypeMappingService {
     }
     Map<String, String> finalTypeMapping = new HashMap<>(jarTypeMapping);
     if (userTypeMapping != null) {
-      Logger.info("Merging user type mapping: {}", userTypeMapping);
       finalTypeMapping.putAll(userTypeMapping);
     }
     return finalTypeMapping;
