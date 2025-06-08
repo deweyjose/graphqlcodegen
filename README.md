@@ -495,19 +495,6 @@ Example
 <generateDataTypes>false</generateDataTypes>
 ```
 
-## maxProjectionDepth
-
-- Type: int
-- Required: false
-- Default: 10
-
-Example
-
-```xml
-
-<maxProjectionDepth>10</maxProjectionDepth>
-```
-
 ## language
 
 - Type: String
