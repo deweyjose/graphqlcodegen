@@ -1,6 +1,5 @@
 package io.github.deweyjose.graphqlcodegen.services;
 
-import io.github.deweyjose.graphqlcodegen.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
