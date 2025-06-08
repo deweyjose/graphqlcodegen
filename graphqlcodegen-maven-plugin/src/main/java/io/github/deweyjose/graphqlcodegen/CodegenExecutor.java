@@ -107,7 +107,6 @@ public class CodegenExecutor {
             .setShortProjectionNames(request.isShortProjectionNames())
             .setGenerateDataTypes(request.isGenerateDataTypes())
             .setOmitNullInputFields(request.isOmitNullInputFields())
-            .setMaxProjectionDepth(request.getMaxProjectionDepth())
             .setKotlinAllFieldsOptional(request.isKotlinAllFieldsOptional())
             .setSnakeCaseConstantNames(request.isSnakeCaseConstantNames())
             .setGenerateInterfaceSetters(request.isGenerateInterfaceSetters())
