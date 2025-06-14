@@ -16,6 +16,7 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   private File schemaManifestOutputDir = new File("target/test-schema-manifest");
   private boolean onlyGenerateChanged = false;
   private List<String> typeMappingPropertiesFiles = Collections.emptyList();
+  private List<String> localTypeMappingPropertiesFiles = Collections.emptyList();
   private boolean skip = false;
   private File outputDir = new File("target/generated-test-codegen");
   private File examplesOutputDir = outputDir;
@@ -113,6 +114,11 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   @Override
   public List<String> getTypeMappingPropertiesFiles() {
     return typeMappingPropertiesFiles;
+  }
+
+  @Override
+  public List<String> getLocalTypeMappingPropertiesFiles() {
+    return localTypeMappingPropertiesFiles;
   }
 
   @Override

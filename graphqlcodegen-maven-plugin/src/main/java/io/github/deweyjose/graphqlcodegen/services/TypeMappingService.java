@@ -1,6 +1,7 @@
 package io.github.deweyjose.graphqlcodegen.services;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -43,18 +44,50 @@ public class TypeMappingService {
   }
 
   /**
+   * Loads type mapping properties from local files.
+   *
+   * @param projectBaseDir the project base directory
+   * @param localTypeMappingPropertiesFiles the list of local property file paths
+   * @return a map containing the type mappings loaded from the local properties files
+   */
+  public Map<String, String> loadLocalPropertiesFiles(
+      File projectBaseDir, List<String> localTypeMappingPropertiesFiles) {
+    Map<String, String> typeMapping = new HashMap<>();
+    if (localTypeMappingPropertiesFiles != null && !localTypeMappingPropertiesFiles.isEmpty()) {
+      for (String file : localTypeMappingPropertiesFiles) {
+        File propertiesFile = new File(projectBaseDir, file);
+        if (propertiesFile.exists() && propertiesFile.isFile()) {
+          try (FileInputStream inputStream = new FileInputStream(propertiesFile)) {
+            Properties typeMappingProperties = new Properties();
+            typeMappingProperties.load(inputStream);
+            typeMappingProperties.forEach(
+                (k, v) -> typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v)));
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    }
+    return typeMapping;
+  }
+
+  /**
    * Merges user-provided type mappings with those loaded from properties files in dependency
-   * artifacts.
+   * artifacts and local files.
    *
    * @param userTypeMapping the user-provided type mapping (may be null)
    * @param typeMappingPropertiesFiles the list of property file paths to search for in dependencies
+   * @param localTypeMappingPropertiesFiles the list of local property file paths
    * @param artifacts the set of Maven dependency artifacts to search for property files
+   * @param projectBaseDir the project base directory
    * @return a map containing the merged type mappings, with user mappings taking precedence
    */
   public Map<String, String> mergeTypeMapping(
       Map<String, String> userTypeMapping,
       List<String> typeMappingPropertiesFiles,
-      Set<Artifact> artifacts) {
+      List<String> localTypeMappingPropertiesFiles,
+      Set<Artifact> artifacts,
+      File projectBaseDir) {
     Map<String, String> jarTypeMapping = new HashMap<>();
     if (typeMappingPropertiesFiles != null && !typeMappingPropertiesFiles.isEmpty()) {
       for (Artifact dependency : artifacts) {
@@ -64,7 +97,14 @@ public class TypeMappingService {
         }
       }
     }
+
+    // Load local type mappings
+    Map<String, String> localTypeMapping =
+        loadLocalPropertiesFiles(projectBaseDir, localTypeMappingPropertiesFiles);
+
+    // Merge all mappings with user mappings taking precedence
     Map<String, String> finalTypeMapping = new HashMap<>(jarTypeMapping);
+    finalTypeMapping.putAll(localTypeMapping);
     if (userTypeMapping != null) {
       finalTypeMapping.putAll(userTypeMapping);
     }

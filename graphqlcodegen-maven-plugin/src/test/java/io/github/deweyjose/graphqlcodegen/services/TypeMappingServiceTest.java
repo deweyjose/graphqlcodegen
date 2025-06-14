@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,6 +66,64 @@ class TypeMappingServiceTest {
   }
 
   @Test
+  void mergeTypeMapping_returnsEmptyIfNoInput() {
+    TypeMappingService service = new TypeMappingService();
+    Map<String, String> result =
+        service.mergeTypeMapping(null, null, null, Collections.emptySet(), new File("."));
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void loadLocalPropertiesFiles_readsPropertiesFromLocalFile() throws IOException {
+    TypeMappingService service = new TypeMappingService();
+    File tempDir = Files.createTempDirectory("test").toFile();
+    File propertiesFile = new File(tempDir, "local-type-mapping.properties");
+    try (FileOutputStream fos = new FileOutputStream(propertiesFile)) {
+      fos.write("foo=bar\nhello=world\n".getBytes());
+    }
+
+    Map<String, String> result =
+        service.loadLocalPropertiesFiles(tempDir, List.of("local-type-mapping.properties"));
+    assertEquals(2, result.size());
+    assertEquals("bar", result.get("foo"));
+    assertEquals("world", result.get("hello"));
+
+    // Cleanup
+    propertiesFile.delete();
+    tempDir.delete();
+  }
+
+  @Test
+  void mergeTypeMapping_includesLocalTypeMappings() throws IOException {
+    TypeMappingService service = new TypeMappingService();
+    File tempDir = Files.createTempDirectory("test").toFile();
+    File propertiesFile = new File(tempDir, "local-type-mapping.properties");
+    try (FileOutputStream fos = new FileOutputStream(propertiesFile)) {
+      fos.write("foo=bar\nhello=world\n".getBytes());
+    }
+
+    Map<String, String> userMap = new HashMap<>();
+    userMap.put("user", "value");
+
+    Map<String, String> result =
+        service.mergeTypeMapping(
+            userMap,
+            Collections.emptyList(),
+            List.of("local-type-mapping.properties"),
+            Collections.emptySet(),
+            tempDir);
+
+    assertEquals(3, result.size());
+    assertEquals("bar", result.get("foo"));
+    assertEquals("world", result.get("hello"));
+    assertEquals("value", result.get("user"));
+
+    // Cleanup
+    propertiesFile.delete();
+    tempDir.delete();
+  }
+
+  @Test
   void mergeTypeMapping_mergesJarAndUserTypeMapping() {
     TypeMappingService service = new TypeMappingService();
     Artifact artifact = mock(Artifact.class);
@@ -75,7 +134,12 @@ class TypeMappingServiceTest {
     userMap.put("foo", "override");
     userMap.put("user", "value");
     Map<String, String> result =
-        service.mergeTypeMapping(userMap, List.of("type-mapping.properties"), artifacts);
+        service.mergeTypeMapping(
+            userMap,
+            List.of("type-mapping.properties"),
+            Collections.emptyList(),
+            artifacts,
+            new File("."));
     assertEquals(3, result.size());
     assertEquals("override", result.get("foo")); // user map overrides jar
     assertEquals("world", result.get("hello"));
@@ -89,15 +153,12 @@ class TypeMappingServiceTest {
     userMap.put("foo", "bar");
     Map<String, String> result =
         service.mergeTypeMapping(
-            userMap, List.of("type-mapping.properties"), Collections.emptySet());
+            userMap,
+            List.of("type-mapping.properties"),
+            Collections.emptyList(),
+            Collections.emptySet(),
+            new File("."));
     assertEquals(1, result.size());
     assertEquals("bar", result.get("foo"));
-  }
-
-  @Test
-  void mergeTypeMapping_returnsEmptyIfNoInput() {
-    TypeMappingService service = new TypeMappingService();
-    Map<String, String> result = service.mergeTypeMapping(null, null, Collections.emptySet());
-    assertTrue(result.isEmpty());
   }
 }

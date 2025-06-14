@@ -51,6 +51,9 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   @Parameter(property = "typeMappingPropertiesFiles")
   private List<String> typeMappingPropertiesFiles;
 
+  @Parameter(property = "localTypeMappingPropertiesFiles")
+  private List<String> localTypeMappingPropertiesFiles;
+
   @Parameter(property = "dgs.codegen.skip", defaultValue = "false", required = false)
   private boolean skip;
 
