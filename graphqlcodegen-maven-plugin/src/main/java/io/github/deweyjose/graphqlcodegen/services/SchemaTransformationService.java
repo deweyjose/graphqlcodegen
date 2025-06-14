@@ -3,7 +3,7 @@ package io.github.deweyjose.graphqlcodegen.services;
 import graphql.language.*;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.*;
-import java.io.IOException;
+import io.github.deweyjose.graphqlcodegen.Logger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -55,18 +55,25 @@ public class SchemaTransformationService {
    *
    * @param schemaFile the schema file path
    * @return the transformed schema content
-   * @throws IOException if reading or writing fails
    */
-  public String transformSchemaFile(Path schemaFile) throws IOException {
+  @SneakyThrows
+  public String transformSchemaFile(Path schemaFile) {
     String content = Files.readString(schemaFile);
     String transformed = transformSchema(content);
+    Logger.debug("Original schema: {}", content);
+    Logger.debug("Transformed schema: {}", transformed);
     if (!content.equals(transformed)) {
-      log.info("Transformed schema file: {}", schemaFile);
       Files.writeString(schemaFile, transformed);
     }
     return transformed;
   }
 
+  /**
+   * Extracts root type mappings from a schema definition.  
+   *
+   * @param schemaDef the schema definition
+   * @return a map of old type names to new type names
+   */
   private Map<String, String> extractRootTypeMappings(SchemaDefinition schemaDef) {
     Map<String, String> mappings = new HashMap<>();
     for (OperationTypeDefinition op : schemaDef.getOperationTypeDefinitions()) {
@@ -80,6 +87,13 @@ public class SchemaTransformationService {
     return mappings;
   }
 
+  /**
+   * Renames a type and its extensions in the registry.
+   *
+   * @param registry the type definition registry
+   * @param oldName the old type name
+   * @param newName the new type name
+   */
   private void renameTypeAndExtensions(
       TypeDefinitionRegistry registry, String oldName, String newName) {
     registry
@@ -100,6 +114,13 @@ public class SchemaTransformationService {
     }
   }
 
+  /**
+   * Rebuilds the schema definition with the new operation type names.
+   *
+   * @param original the original schema definition
+   * @param typeMappings the type mappings
+   * @return the rebuilt schema definition
+   */
   private SchemaDefinition rebuildSchemaDefinition(
       SchemaDefinition original, Map<String, String> typeMappings) {
     List<OperationTypeDefinition> newOps = new ArrayList<>();
