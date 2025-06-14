@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TypeMappingService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">GraphQL Code Generator Maven Plugin</a> &gt; <a href="index.source.html" class="el_package">io.github.deweyjose.graphqlcodegen.services</a> &gt; <span class="el_source">TypeMappingService.java</span></div><h1>TypeMappingService.java</h1><pre class="source lang-java linenums">package io.github.deweyjose.graphqlcodegen.services;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -13,7 +14,7 @@ import java.util.zip.ZipEntry;
 import org.apache.maven.artifact.Artifact;
 
 /** This class provides services related to type mapping. */
-<span class="fc" id="L16">public class TypeMappingService {</span>
+<span class="fc" id="L17">public class TypeMappingService {</span>
   /**
    * Loads type mapping properties from the specified files inside a JAR file.
    *
@@ -23,52 +24,91 @@ import org.apache.maven.artifact.Artifact;
    */
   public Map&lt;String, String&gt; loadPropertiesFile(
       File artifactFile, List&lt;String&gt; typeMappingPropertiesFiles) {
-<span class="fc" id="L26">    Map&lt;String, String&gt; typeMapping = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L27">    try (JarFile jarFile = new JarFile(artifactFile)) {</span>
-<span class="fc bfc" id="L28" title="All 2 branches covered.">      for (String file : typeMappingPropertiesFiles) {</span>
-<span class="fc" id="L29">        ZipEntry entry = jarFile.getEntry(file);</span>
-<span class="fc bfc" id="L30" title="All 2 branches covered.">        if (entry != null) {</span>
-<span class="fc" id="L31">          try (InputStream inputStream = jarFile.getInputStream(entry)) {</span>
-<span class="fc" id="L32">            Properties typeMappingProperties = new Properties();</span>
-<span class="fc" id="L33">            typeMappingProperties.load(inputStream);</span>
-<span class="fc" id="L34">            typeMappingProperties.forEach(</span>
-<span class="fc" id="L35">                (k, v) -&gt; typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v)));</span>
+<span class="fc" id="L27">    Map&lt;String, String&gt; typeMapping = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L28">    try (JarFile jarFile = new JarFile(artifactFile)) {</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">      for (String file : typeMappingPropertiesFiles) {</span>
+<span class="fc" id="L30">        ZipEntry entry = jarFile.getEntry(file);</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if (entry != null) {</span>
+<span class="fc" id="L32">          try (InputStream inputStream = jarFile.getInputStream(entry)) {</span>
+<span class="fc" id="L33">            Properties typeMappingProperties = new Properties();</span>
+<span class="fc" id="L34">            typeMappingProperties.load(inputStream);</span>
+<span class="fc" id="L35">            typeMappingProperties.forEach(</span>
+<span class="fc" id="L36">                (k, v) -&gt; typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v)));</span>
           }
         }
-<span class="fc" id="L38">      }</span>
-<span class="nc" id="L39">    } catch (IOException e) {</span>
-<span class="nc" id="L40">      e.printStackTrace();</span>
-<span class="fc" id="L41">    }</span>
-<span class="fc" id="L42">    return typeMapping;</span>
+<span class="fc" id="L39">      }</span>
+<span class="nc" id="L40">    } catch (IOException e) {</span>
+<span class="nc" id="L41">      e.printStackTrace();</span>
+<span class="fc" id="L42">    }</span>
+<span class="fc" id="L43">    return typeMapping;</span>
+  }
+
+  /**
+   * Loads type mapping properties from local files.
+   *
+   * @param projectBaseDir the project base directory
+   * @param localTypeMappingPropertiesFiles the list of local property file paths
+   * @return a map containing the type mappings loaded from the local properties files
+   */
+  public Map&lt;String, String&gt; loadLocalPropertiesFiles(
+      File projectBaseDir, List&lt;String&gt; localTypeMappingPropertiesFiles) {
+<span class="fc" id="L55">    Map&lt;String, String&gt; typeMapping = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L56" title="All 4 branches covered.">    if (localTypeMappingPropertiesFiles != null &amp;&amp; !localTypeMappingPropertiesFiles.isEmpty()) {</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">      for (String file : localTypeMappingPropertiesFiles) {</span>
+<span class="fc" id="L58">        File propertiesFile = new File(projectBaseDir, file);</span>
+<span class="pc bpc" id="L59" title="2 of 4 branches missed.">        if (propertiesFile.exists() &amp;&amp; propertiesFile.isFile()) {</span>
+<span class="fc" id="L60">          try (FileInputStream inputStream = new FileInputStream(propertiesFile)) {</span>
+<span class="fc" id="L61">            Properties typeMappingProperties = new Properties();</span>
+<span class="fc" id="L62">            typeMappingProperties.load(inputStream);</span>
+<span class="fc" id="L63">            typeMappingProperties.forEach(</span>
+<span class="fc" id="L64">                (k, v) -&gt; typeMapping.putIfAbsent(String.valueOf(k), String.valueOf(v)));</span>
+<span class="nc" id="L65">          } catch (IOException e) {</span>
+<span class="nc" id="L66">            e.printStackTrace();</span>
+<span class="fc" id="L67">          }</span>
+        }
+<span class="fc" id="L69">      }</span>
+    }
+<span class="fc" id="L71">    return typeMapping;</span>
   }
 
   /**
    * Merges user-provided type mappings with those loaded from properties files in dependency
-   * artifacts.
+   * artifacts and local files.
    *
    * @param userTypeMapping the user-provided type mapping (may be null)
    * @param typeMappingPropertiesFiles the list of property file paths to search for in dependencies
+   * @param localTypeMappingPropertiesFiles the list of local property file paths
    * @param artifacts the set of Maven dependency artifacts to search for property files
+   * @param projectBaseDir the project base directory
    * @return a map containing the merged type mappings, with user mappings taking precedence
    */
   public Map&lt;String, String&gt; mergeTypeMapping(
       Map&lt;String, String&gt; userTypeMapping,
       List&lt;String&gt; typeMappingPropertiesFiles,
-      Set&lt;Artifact&gt; artifacts) {
-<span class="fc" id="L58">    Map&lt;String, String&gt; jarTypeMapping = new HashMap&lt;&gt;();</span>
-<span class="fc bfc" id="L59" title="All 4 branches covered.">    if (typeMappingPropertiesFiles != null &amp;&amp; !typeMappingPropertiesFiles.isEmpty()) {</span>
-<span class="fc bfc" id="L60" title="All 2 branches covered.">      for (Artifact dependency : artifacts) {</span>
-<span class="fc" id="L61">        File artifactFile = dependency.getFile();</span>
-<span class="pc bpc" id="L62" title="2 of 4 branches missed.">        if (artifactFile != null &amp;&amp; artifactFile.isFile()) {</span>
-<span class="fc" id="L63">          jarTypeMapping.putAll(loadPropertiesFile(artifactFile, typeMappingPropertiesFiles));</span>
+      List&lt;String&gt; localTypeMappingPropertiesFiles,
+      Set&lt;Artifact&gt; artifacts,
+      File projectBaseDir) {
+<span class="fc" id="L91">    Map&lt;String, String&gt; jarTypeMapping = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L92" title="All 4 branches covered.">    if (typeMappingPropertiesFiles != null &amp;&amp; !typeMappingPropertiesFiles.isEmpty()) {</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">      for (Artifact dependency : artifacts) {</span>
+<span class="fc" id="L94">        File artifactFile = dependency.getFile();</span>
+<span class="pc bpc" id="L95" title="2 of 4 branches missed.">        if (artifactFile != null &amp;&amp; artifactFile.isFile()) {</span>
+<span class="fc" id="L96">          jarTypeMapping.putAll(loadPropertiesFile(artifactFile, typeMappingPropertiesFiles));</span>
         }
-<span class="fc" id="L65">      }</span>
+<span class="fc" id="L98">      }</span>
     }
-<span class="fc" id="L67">    Map&lt;String, String&gt; finalTypeMapping = new HashMap&lt;&gt;(jarTypeMapping);</span>
-<span class="fc bfc" id="L68" title="All 2 branches covered.">    if (userTypeMapping != null) {</span>
-<span class="fc" id="L69">      finalTypeMapping.putAll(userTypeMapping);</span>
+
+    // Load local type mappings
+<span class="fc" id="L102">    Map&lt;String, String&gt; localTypeMapping =</span>
+<span class="fc" id="L103">        loadLocalPropertiesFiles(projectBaseDir, localTypeMappingPropertiesFiles);</span>
+
+    // Merge all mappings with user mappings taking precedence
+<span class="fc" id="L106">    Map&lt;String, String&gt; finalTypeMapping = new HashMap&lt;&gt;(jarTypeMapping);</span>
+<span class="fc" id="L107">    finalTypeMapping.putAll(localTypeMapping);</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">    if (userTypeMapping != null) {</span>
+<span class="fc" id="L109">      finalTypeMapping.putAll(userTypeMapping);</span>
     }
-<span class="fc" id="L71">    return finalTypeMapping;</span>
+<span class="fc" id="L111">    return finalTypeMapping;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
