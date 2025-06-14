@@ -35,6 +35,11 @@ public interface CodegenConfigProvider {
   List<String> getTypeMappingPropertiesFiles();
 
   /**
+   * @return local type mapping properties files
+   */
+  List<String> getLocalTypeMappingPropertiesFiles();
+
+  /**
    * @return whether to skip code generation
    */
   boolean isSkip();

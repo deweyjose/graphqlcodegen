@@ -74,7 +74,11 @@ public class CodegenExecutor {
 
     Map<String, String> typeMapping =
         typeMappingService.mergeTypeMapping(
-            request.getTypeMapping(), request.getTypeMappingPropertiesFiles(), artifacts);
+            request.getTypeMapping(),
+            request.getTypeMappingPropertiesFiles(),
+            request.getLocalTypeMappingPropertiesFiles(),
+            artifacts,
+            projectBaseDir);
 
     final CodeGenConfig config =
         new GeneratedCodeGenConfigBuilder()
