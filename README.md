@@ -266,7 +266,6 @@ If the same GraphQL type appears in both the `typeMapping` configuration and one
 ```xml
 <localTypeMappingPropertiesFiles>
   <localTypeMappingPropertiesFile>src/main/resources/type-mapping.properties</localTypeMappingPropertiesFile>
-  <localTypeMappingPropertiesFile>config/custom-type-mapping.properties</localTypeMappingPropertiesFile>
 </localTypeMappingPropertiesFiles>
 ```
 
