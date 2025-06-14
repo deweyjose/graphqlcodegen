@@ -250,6 +250,26 @@ If the same GraphQL type appears in both the `typeMapping` configuration and one
 </typeMappingPropertiesFiles>
 ```
 
+## `localTypeMappingPropertiesFiles`
+
+Specifies one or more `typeMapping` properties files that are available in the local project directory. These files should be specified relative to the project root.
+
+Each properties file must contain key-value pairs that will be added to the `typeMapping` map **only if a mapping for a given GraphQL type is not already present**.
+
+If the same GraphQL type appears in both the `typeMapping` configuration and one of the `localTypeMappingPropertiesFiles`, the value from `typeMapping` will take precedence, and the entry from the properties file will be ignored.
+
+- **Type**: Array  
+- **Required**: No
+
+### Example (XML)
+
+```xml
+<localTypeMappingPropertiesFiles>
+  <localTypeMappingPropertiesFile>src/main/resources/type-mapping.properties</localTypeMappingPropertiesFile>
+  <localTypeMappingPropertiesFile>config/custom-type-mapping.properties</localTypeMappingPropertiesFile>
+</localTypeMappingPropertiesFiles>
+```
+
 ## subPackageNameClient
 
 - Type: string
