@@ -25,9 +25,11 @@ import org.jetbrains.kotlin.psi.KtFile;
 import org.jetbrains.kotlin.psi.KtParameter;
 import org.jetbrains.kotlin.psi.KtPrimaryConstructor;
 
-// This class is a Maven Mojo that fetches CodeGenConfig.kt from GitHub, parses its constructor, and
-// will generate Java code for parameter mapping. See tests in
-// src/test/java/io/github/deweyjose/bootstrapcodegen/ParamCodegenTest.java.
+/**
+ * This class is a Maven Mojo that fetches CodeGenConfig.kt from GitHub, parses its constructor, and
+ * will generate Java code for parameter mapping. See tests in
+ * src/test/java/io/github/deweyjose/bootstrapcodegen/ParamCodegenTest.java.
+ */
 @Mojo(name = "generate")
 public class BuilderCodegen extends AbstractMojo {
 
@@ -60,7 +62,6 @@ public class BuilderCodegen extends AbstractMojo {
    * @return The CodeGenConfig.kt file as a string.
    * @throws IOException If there is an error downloading the file.
    * @throws InterruptedException If the download is interrupted.
-   * @return The CodeGenConfig.kt file as a string.
    */
   public static String downloadCodeGenConfig(String url) throws IOException, InterruptedException {
     HttpClient client = HttpClient.newHttpClient();
@@ -111,6 +112,8 @@ public class BuilderCodegen extends AbstractMojo {
    * Generate the builder class for CodeGenConfig.
    *
    * @param params The parameters to generate the builder class for.
+   * @param outputDir The directory to write the builder class to.
+   * @throws IOException If there is an error writing the builder class.
    */
   public static void generateBuilderClass(KtParameter[] params, String outputDir)
       throws IOException {
@@ -168,6 +171,10 @@ public class BuilderCodegen extends AbstractMojo {
   /**
    * Map a Kotlin type string to a JavaPoet TypeName, using ClassName.get and
    * ParameterizedTypeName.get for known types.
+   *
+   * @param kotlinType The Kotlin type string to map.
+   * @return The JavaPoet TypeName for the Kotlin type.
+   * @throws IllegalArgumentException If the Kotlin type is not supported.
    */
   public static TypeName mapKotlinTypeToJavaPoetType(String kotlinType) {
     // Handle generics
