@@ -8,10 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 
 /** Service for transforming GraphQL schemas. */
-@Slf4j
 public class SchemaTransformationService {
   private static final String QUERY = "Query";
   private static final String MUTATION = "Mutation";
@@ -29,7 +27,7 @@ public class SchemaTransformationService {
     Optional<SchemaDefinition> schemaDefOpt = registry.schemaDefinition();
 
     if (schemaDefOpt.isEmpty()) {
-      log.debug("No schema definition found, skipping transformation");
+      Logger.debug("No schema definition found, skipping transformation");
       return schemaContent;
     }
 
@@ -37,7 +35,7 @@ public class SchemaTransformationService {
     Map<String, String> typeMappings = extractRootTypeMappings(schemaDef);
 
     if (typeMappings.isEmpty()) {
-      log.debug("No custom root types found, skipping transformation");
+      Logger.debug("No custom root types found, skipping transformation");
       return schemaContent;
     }
 
@@ -69,7 +67,7 @@ public class SchemaTransformationService {
   }
 
   /**
-   * Extracts root type mappings from a schema definition.  
+   * Extracts root type mappings from a schema definition.
    *
    * @param schemaDef the schema definition
    * @return a map of old type names to new type names
