@@ -26,6 +26,7 @@ public class SchemaFileService {
   private final File outputDir;
   private final SchemaManifestService manifest;
   private final RemoteSchemaService remoteSchemaService;
+  private final SchemaTransformationService schemaTransformationService;
 
   private Set<File> schemaPaths;
   private List<File> schemaJarFilesFromDependencies;
@@ -37,7 +38,7 @@ public class SchemaFileService {
    * @param manifest the manifest service to use
    */
   public SchemaFileService(File outputDir, SchemaManifestService manifest) {
-    this(outputDir, manifest, new RemoteSchemaService());
+    this(outputDir, manifest, new RemoteSchemaService(), new SchemaTransformationService());
   }
 
   /**
@@ -47,13 +48,18 @@ public class SchemaFileService {
    * @param outputDir the output directory to save the schema files
    * @param manifest the manifest service to use
    * @param remoteSchemaService the remote schema service to use
+   * @param schemaTransformationService the schema transformation service to use
    */
   public SchemaFileService(
-      File outputDir, SchemaManifestService manifest, RemoteSchemaService remoteSchemaService) {
+      File outputDir,
+      SchemaManifestService manifest,
+      RemoteSchemaService remoteSchemaService,
+      SchemaTransformationService schemaTransformationService) {
     this.schemaPaths = new HashSet<>();
     this.outputDir = outputDir;
     this.manifest = manifest;
     this.remoteSchemaService = remoteSchemaService;
+    this.schemaTransformationService = schemaTransformationService;
   }
 
   /**
@@ -119,7 +125,8 @@ public class SchemaFileService {
       String content =
           remoteSchemaService.getIntrospectedSchemaFile(
               request.getUrl(), operation, request.getHeaders());
-      schemaPaths.add(saveUrlToFile(request.getUrl(), content));
+      String transformedContent = schemaTransformationService.transformSchema(content);
+      schemaPaths.add(saveUrlToFile(request.getUrl(), transformedContent));
     }
   }
 

@@ -8,15 +8,26 @@ import io.github.deweyjose.graphqlcodegen.parameters.ParameterMap;
 import io.github.deweyjose.graphqlcodegen.services.RemoteSchemaService;
 import io.github.deweyjose.graphqlcodegen.services.SchemaFileService;
 import io.github.deweyjose.graphqlcodegen.services.SchemaManifestService;
+import io.github.deweyjose.graphqlcodegen.services.SchemaTransformationService;
 import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
 import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class CodegenExecutorExecuteTest {
+class CodegenExecutorTest {
+
+  private SchemaTransformationService schemaTransformationService;
+  private RemoteSchemaService remoteSchemaService;
+
+  @BeforeEach
+  void setUp() {
+    remoteSchemaService = mock(RemoteSchemaService.class);
+    schemaTransformationService = mock(SchemaTransformationService.class);
+  }
 
   @Test
   void integrationTest_generateCodeFromSchema() throws java.io.IOException {
@@ -29,7 +40,11 @@ class CodegenExecutorExecuteTest {
     config.setOutputDir(outputDir);
     config.setSchemaManifestOutputDir(outputDir);
     SchemaFileService schemaFileService =
-        new SchemaFileService(outputDir, new SchemaManifestService(outputDir, outputDir));
+        new SchemaFileService(
+            outputDir,
+            new SchemaManifestService(outputDir, outputDir),
+            remoteSchemaService,
+            schemaTransformationService);
     TypeMappingService typeMappingService = new TypeMappingService();
     CodegenExecutor executor = new CodegenExecutor(schemaFileService, typeMappingService);
     executor.execute(config, new HashSet<>(), new File("."));
@@ -73,7 +88,8 @@ class CodegenExecutorExecuteTest {
   }
 
   @Test
-  void integrationTest_generateCodeFromSchemaWithRemoteSchema() throws java.io.IOException {
+  void integrationTest_generateCodeFromSchemaWithRemoteSchema()
+      throws java.io.IOException, InterruptedException {
     // Arrange
     File outputDir = new File("target/generated-test-codegen-remote");
     TestCodegenProvider config = new TestCodegenProvider();
@@ -81,8 +97,31 @@ class CodegenExecutorExecuteTest {
     config.setSchemaManifestOutputDir(outputDir);
     config.setSchemaUrls(java.util.List.of(TestUtils.TEST_SCHEMA_URL));
     config.setOnlyGenerateChanged(true);
+
+    // Mock RemoteSchemaService to return a test schema
+    String testSchema =
+        """
+        type Query {
+            hello: String
+            user: User
+        }
+
+        type User {
+            id: ID!
+            name: String!
+        }
+        """;
+    when(remoteSchemaService.getRemoteSchemaFile(TestUtils.TEST_SCHEMA_URL)).thenReturn(testSchema);
+
+    // Mock SchemaTransformationService to pass through the schema
+    when(schemaTransformationService.transformSchema(testSchema)).thenReturn(testSchema);
+
     SchemaFileService schemaFileService =
-        new SchemaFileService(outputDir, new SchemaManifestService(outputDir, outputDir));
+        new SchemaFileService(
+            outputDir,
+            new SchemaManifestService(outputDir, outputDir),
+            remoteSchemaService,
+            schemaTransformationService);
     TypeMappingService typeMappingService = new TypeMappingService();
     CodegenExecutor executor = new CodegenExecutor(schemaFileService, typeMappingService);
     executor.execute(config, new HashSet<>(), new File("."));
@@ -97,7 +136,7 @@ class CodegenExecutorExecuteTest {
     // Check for specific generated type files and their content
     File typesDir = new File(outputDir, "com/example/types");
     assertTrue(typesDir.exists() && typesDir.isDirectory(), "Types directory should exist");
-    String[] expectedTypeFiles = {"Foo.java"};
+    String[] expectedTypeFiles = {"User.java"};
     for (String fileName : expectedTypeFiles) {
       File f = new File(typesDir, fileName);
       assertTrue(f.exists(), fileName + " should be generated");
@@ -113,7 +152,7 @@ class CodegenExecutorExecuteTest {
     assertTrue(
         datafetchersDir.exists() && datafetchersDir.isDirectory(),
         "Datafetchers directory should exist");
-    String[] expectedDatafetcherFiles = {"BarsDatafetcher.java", "ShowsDatafetcher.java"};
+    String[] expectedDatafetcherFiles = {"HelloDatafetcher.java", "UserDatafetcher.java"};
     for (String fileName : expectedDatafetcherFiles) {
       File f = new File(datafetchersDir, fileName);
       assertTrue(f.exists(), fileName + " should be generated");
@@ -157,7 +196,6 @@ class CodegenExecutorExecuteTest {
     config.setOnlyGenerateChanged(true);
 
     // Mock RemoteSchemaService
-    RemoteSchemaService remoteSchemaService = mock(RemoteSchemaService.class);
     when(remoteSchemaService.getIntrospectedSchemaFile(
             eq("http://mock/graphql"),
             argThat(
@@ -167,15 +205,37 @@ class CodegenExecutorExecuteTest {
             eq(Map.of())))
         .thenReturn("type Query { hello: String }");
 
+    when(schemaTransformationService.transformSchema(anyString()))
+        .thenReturn(
+            """
+{
+  "data": {
+    "__schema": {
+      "queryType": {
+        "name": "Query"
+      },
+      "mutationType": {
+        "name": "Mutation"
+      },
+      "subscriptionType": {
+        "name": "Subscription"
+      }
+    }
+  }
+}
+""");
+
     // Use a real manifest, but a mock remote schema service
     SchemaFileService schemaFileService =
         new SchemaFileService(
-            outputDir, new SchemaManifestService(outputDir, outputDir), remoteSchemaService);
+            outputDir,
+            new SchemaManifestService(outputDir, outputDir),
+            remoteSchemaService,
+            schemaTransformationService);
 
     // Spy on schemaFileService to mock loadIntrospectedSchemas
     SchemaFileService spyService = spy(schemaFileService);
     doNothing().when(spyService).loadIntrospectedSchemas(any());
-    // Optionally, you can mock getSchemaPaths to return a fake file if you want to check output
     File fakeSchemaFile = new File(outputDir, "remote-schemas/mock.graphqls");
     doReturn(Set.of(fakeSchemaFile)).when(spyService).getSchemaPaths();
 
