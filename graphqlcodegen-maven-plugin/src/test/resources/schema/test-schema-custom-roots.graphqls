@@ -1,0 +1,23 @@
+schema {
+    query: CustomQuery
+    mutation: CustomMutation
+    subscription: CustomSubscription
+}
+
+type CustomQuery {
+    hello: String
+    actors: [Actor!]
+}
+
+type CustomMutation {
+    updateHello(message: String): String
+}
+
+type CustomSubscription {
+    helloEvents: String
+} 
+
+type Actor {
+    id: ID!
+    name: String!
+}
