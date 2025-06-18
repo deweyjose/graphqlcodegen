@@ -109,7 +109,7 @@ class SchemaFileServiceTest {
   void testFindGraphqlFiles() {
     File directory = TestUtils.getFile("schema");
     Set<File> files = SchemaFileService.findGraphQLSFiles(directory);
-    assertEquals(3, files.size());
+    assertEquals(6, files.size());
   }
 
   @Test

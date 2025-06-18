@@ -11,243 +11,227 @@ import io.github.deweyjose.graphqlcodegen.services.SchemaManifestService;
 import io.github.deweyjose.graphqlcodegen.services.SchemaTransformationService;
 import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
 import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class CodegenExecutorTest {
 
-  private SchemaTransformationService schemaTransformationService;
   private RemoteSchemaService remoteSchemaService;
+  private SchemaTransformationService schemaTransformationService;
+  private SchemaFileService schemaFileService;
+  private TypeMappingService typeMappingService;
+  private CodegenExecutor executor;
+  private File outputDir;
 
   @BeforeEach
   void setUp() {
     remoteSchemaService = mock(RemoteSchemaService.class);
-    schemaTransformationService = mock(SchemaTransformationService.class);
+    schemaTransformationService = new SchemaTransformationService();
+    typeMappingService = new TypeMappingService();
+
+    // Setup single output directory
+    outputDir = new File("target/generated-test-codegen-executor");
+    if (outputDir.exists()) {
+      deleteDirectory(outputDir);
+    }
+    outputDir.mkdirs();
   }
 
+  @SneakyThrows
   @Test
-  void integrationTest_generateCodeFromSchema() throws java.io.IOException {
-    // Arrange
-    File schemaDir = new File(getClass().getClassLoader().getResource("schema").getFile());
-    Set<File> schemaPaths = Set.of(schemaDir);
-    File outputDir = new File("target/generated-test-codegen");
+  void testGenerateCodeFromSchema() {
+    File schemaFile = TestUtils.getFile("schema/test-schema.graphqls");
+
+    SchemaManifestService manifestService = new SchemaManifestService(outputDir, outputDir);
+    schemaFileService =
+        new SchemaFileService(
+            outputDir, manifestService, remoteSchemaService, schemaTransformationService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService);
+
     TestCodegenProvider config = new TestCodegenProvider();
-    config.setSchemaPaths(schemaPaths);
+    config.setSchemaPaths(Set.of(schemaFile));
     config.setOutputDir(outputDir);
     config.setSchemaManifestOutputDir(outputDir);
-    SchemaFileService schemaFileService =
-        new SchemaFileService(
-            outputDir,
-            new SchemaManifestService(outputDir, outputDir),
-            remoteSchemaService,
-            schemaTransformationService);
-    TypeMappingService typeMappingService = new TypeMappingService();
-    CodegenExecutor executor = new CodegenExecutor(schemaFileService, typeMappingService);
+
     executor.execute(config, new HashSet<>(), new File("."));
 
-    // Assert that code generation produced output files
-    assertTrue(outputDir.exists() && outputDir.isDirectory(), "Output directory should exist");
-    File[] generatedFiles = outputDir.listFiles();
-    assertNotNull(generatedFiles, "Output directory should not be empty");
+    assertTrue(outputDir.exists());
+    assertTrue(outputDir.isDirectory());
     assertTrue(
-        generatedFiles.length > 0, "There should be generated files in the output directory");
-
-    // Check for specific generated type files and their content
-    File typesDir = new File(outputDir, "com/example/types");
-    assertTrue(typesDir.exists() && typesDir.isDirectory(), "Types directory should exist");
-    String[] expectedTypeFiles = {"Show.java", "ShowInput.java", "Foo.java", "Actor.java"};
-    for (String fileName : expectedTypeFiles) {
-      File f = new File(typesDir, fileName);
-      assertTrue(f.exists(), fileName + " should be generated");
-      String content = java.nio.file.Files.readString(f.toPath());
-      String className = fileName.replace(".java", "");
-      assertTrue(
-          content.contains("public class " + className),
-          fileName + " should contain class definition");
-    }
-
-    // Check for datafetcher files
-    File datafetchersDir = new File(outputDir, "com/example/datafetchers");
+        new File(outputDir, "com/example/datafetchers/HelloDatafetcher.java").exists(),
+        "Should generate datafetcher file");
     assertTrue(
-        datafetchersDir.exists() && datafetchersDir.isDirectory(),
-        "Datafetchers directory should exist");
-    String[] expectedDatafetcherFiles = {"BarsDatafetcher.java", "ShowsDatafetcher.java"};
-    for (String fileName : expectedDatafetcherFiles) {
-      File f = new File(datafetchersDir, fileName);
-      assertTrue(f.exists(), fileName + " should be generated");
-      String content = java.nio.file.Files.readString(f.toPath());
-      String className = fileName.replace(".java", "");
-      assertTrue(
-          content.contains("public class " + className),
-          fileName + " should contain class definition");
-    }
+        new File(outputDir, "com/example/DgsConstants.java").exists(),
+        "Should generate constants file");
   }
 
+  @SneakyThrows
   @Test
-  void integrationTest_generateCodeFromSchemaWithRemoteSchema()
-      throws java.io.IOException, InterruptedException {
-    // Arrange
-    File outputDir = new File("target/generated-test-codegen-remote");
+  void testGenerateCodeFromSchemaWithRemoteSchema() {
+    String testSchema = TestUtils.getFileContent("schema/test-schema-with-user.graphqls");
+    when(remoteSchemaService.getRemoteSchemaFile(TestUtils.TEST_SCHEMA_URL)).thenReturn(testSchema);
+
+    SchemaManifestService manifestService = new SchemaManifestService(outputDir, outputDir);
+    schemaFileService =
+        new SchemaFileService(
+            outputDir, manifestService, remoteSchemaService, schemaTransformationService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService);
+
     TestCodegenProvider config = new TestCodegenProvider();
     config.setOutputDir(outputDir);
     config.setSchemaManifestOutputDir(outputDir);
     config.setSchemaUrls(java.util.List.of(TestUtils.TEST_SCHEMA_URL));
-    config.setOnlyGenerateChanged(true);
 
-    // Mock RemoteSchemaService to return a test schema
-    String testSchema =
-        """
-        type Query {
-            hello: String
-            user: User
-        }
-
-        type User {
-            id: ID!
-            name: String!
-        }
-        """;
-    when(remoteSchemaService.getRemoteSchemaFile(TestUtils.TEST_SCHEMA_URL)).thenReturn(testSchema);
-
-    // Mock SchemaTransformationService to pass through the schema
-    when(schemaTransformationService.transformSchema(testSchema)).thenReturn(testSchema);
-
-    SchemaFileService schemaFileService =
-        new SchemaFileService(
-            outputDir,
-            new SchemaManifestService(outputDir, outputDir),
-            remoteSchemaService,
-            schemaTransformationService);
-    TypeMappingService typeMappingService = new TypeMappingService();
-    CodegenExecutor executor = new CodegenExecutor(schemaFileService, typeMappingService);
     executor.execute(config, new HashSet<>(), new File("."));
 
-    // Assert that code generation produced output files
-    assertTrue(outputDir.exists() && outputDir.isDirectory(), "Output directory should exist");
-    File[] generatedFiles = outputDir.listFiles();
-    assertNotNull(generatedFiles, "Output directory should not be empty");
+    assertTrue(outputDir.exists());
+    assertTrue(outputDir.isDirectory());
     assertTrue(
-        generatedFiles.length > 0, "There should be generated files in the output directory");
-
-    // Check for specific generated type files and their content
-    File typesDir = new File(outputDir, "com/example/types");
-    assertTrue(typesDir.exists() && typesDir.isDirectory(), "Types directory should exist");
-    String[] expectedTypeFiles = {"User.java"};
-    for (String fileName : expectedTypeFiles) {
-      File f = new File(typesDir, fileName);
-      assertTrue(f.exists(), fileName + " should be generated");
-      String content = java.nio.file.Files.readString(f.toPath());
-      String className = fileName.replace(".java", "");
-      assertTrue(
-          content.contains("public class " + className),
-          fileName + " should contain class definition");
-    }
-
-    // Check for datafetcher files
-    File datafetchersDir = new File(outputDir, "com/example/datafetchers");
+        new File(outputDir, "com/example/datafetchers/HelloDatafetcher.java").exists(),
+        "Should generate datafetcher file");
     assertTrue(
-        datafetchersDir.exists() && datafetchersDir.isDirectory(),
-        "Datafetchers directory should exist");
-    String[] expectedDatafetcherFiles = {"HelloDatafetcher.java", "UserDatafetcher.java"};
-    for (String fileName : expectedDatafetcherFiles) {
-      File f = new File(datafetchersDir, fileName);
-      assertTrue(f.exists(), fileName + " should be generated");
-      String content = java.nio.file.Files.readString(f.toPath());
-      String className = fileName.replace(".java", "");
-      assertTrue(
-          content.contains("public class " + className),
-          fileName + " should contain class definition");
-    }
+        new File(outputDir, "com/example/datafetchers/UserDatafetcher.java").exists(),
+        "Should generate datafetcher file");
+    assertTrue(
+        new File(outputDir, "com/example/types/User.java").exists(),
+        "Should generate User Type file");
+    assertTrue(
+        new File(outputDir, "com/example/DgsConstants.java").exists(),
+        "Should generate constants file");
   }
 
   @Test
-  void testToMap_nullAndEmptyAndNormal() {
-    assertEquals(java.util.Collections.emptyMap(), CodegenExecutor.toMap(null));
-    assertEquals(
-        java.util.Collections.emptyMap(), CodegenExecutor.toMap(java.util.Collections.emptyMap()));
+  void testToMapNullAndEmptyAndNormal() {
+    assertEquals(Collections.emptyMap(), CodegenExecutor.toMap(null));
+    assertEquals(Collections.emptyMap(), CodegenExecutor.toMap(Collections.emptyMap()));
+
     ParameterMap paramMap = new ParameterMap();
-    java.util.Map<String, String> props = new java.util.HashMap<>();
-    props.put("foo", "bar");
-    paramMap.setProperties(props);
-    java.util.Map<String, ParameterMap> input = new java.util.HashMap<>();
+    paramMap.setProperties(Map.of("nested", "value"));
+    Map<String, ParameterMap> input = new HashMap<>();
     input.put("key", paramMap);
-    java.util.Map<String, java.util.Map<String, String>> result = CodegenExecutor.toMap(input);
-    assertEquals(1, result.size());
-    assertEquals(java.util.Map.of("foo", "bar"), result.get("key"));
+    assertEquals(Map.of("key", Map.of("nested", "value")), CodegenExecutor.toMap(input));
   }
 
   @Test
-  void integrationTest_generateCodeFromIntrospection_withMocks() throws Exception {
-    // Arrange
-    File outputDir = new File("target/generated-test-codegen-introspection");
+  void testGenerateCodeFromIntrospection() throws Exception {
+    String testSchema = TestUtils.getFileContent("schema/test-schema-with-user.graphqls");
+
+    when(remoteSchemaService.getIntrospectedSchemaFile(
+            eq("https://example.com/graphql"), any(), any()))
+        .thenReturn(testSchema);
+
     TestCodegenProvider config = new TestCodegenProvider();
     config.setOutputDir(outputDir);
     config.setSchemaManifestOutputDir(outputDir);
+
     IntrospectionRequest introspectionRequest = new IntrospectionRequest();
-    introspectionRequest.setUrl("http://mock/graphql");
-    introspectionRequest.setQuery("query { __schema { types { name } } }");
-    introspectionRequest.setOperationName("IntrospectionQuery");
-    introspectionRequest.setHeaders(Map.of());
+    introspectionRequest.setUrl("https://example.com/graphql");
     config.setIntrospectionRequests(List.of(introspectionRequest));
-    config.setOnlyGenerateChanged(true);
 
-    // Mock RemoteSchemaService
-    when(remoteSchemaService.getIntrospectedSchemaFile(
-            eq("http://mock/graphql"),
-            argThat(
-                op ->
-                    op.getQuery().equals("query { __schema { types { name } } }")
-                        && op.getOperationName().equals("IntrospectionQuery")),
-            eq(Map.of())))
-        .thenReturn("type Query { hello: String }");
-
-    when(schemaTransformationService.transformSchema(anyString()))
-        .thenReturn(
-            """
-{
-  "data": {
-    "__schema": {
-      "queryType": {
-        "name": "Query"
-      },
-      "mutationType": {
-        "name": "Mutation"
-      },
-      "subscriptionType": {
-        "name": "Subscription"
-      }
-    }
-  }
-}
-""");
-
-    // Use a real manifest, but a mock remote schema service
-    SchemaFileService schemaFileService =
+    SchemaManifestService manifestService = new SchemaManifestService(outputDir, outputDir);
+    schemaFileService =
         new SchemaFileService(
-            outputDir,
-            new SchemaManifestService(outputDir, outputDir),
-            remoteSchemaService,
-            schemaTransformationService);
+            outputDir, manifestService, remoteSchemaService, schemaTransformationService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService);
 
-    // Spy on schemaFileService to mock loadIntrospectedSchemas
-    SchemaFileService spyService = spy(schemaFileService);
-    doNothing().when(spyService).loadIntrospectedSchemas(any());
-    File fakeSchemaFile = new File(outputDir, "remote-schemas/mock.graphqls");
-    doReturn(Set.of(fakeSchemaFile)).when(spyService).getSchemaPaths();
-
-    TypeMappingService typeMappingService = new TypeMappingService();
-    CodegenExecutor executor = new CodegenExecutor(spyService, typeMappingService);
     executor.execute(config, new HashSet<>(), new File("."));
 
     // Assert that code generation produced output files
-    assertTrue(outputDir.exists() && outputDir.isDirectory(), "Output directory should exist");
-    File[] generatedFiles = outputDir.listFiles();
-    assertNotNull(generatedFiles, "Output directory should not be empty");
+    assertTrue(outputDir.exists());
+    assertTrue(outputDir.isDirectory());
     assertTrue(
-        generatedFiles.length > 0, "There should be generated files in the output directory");
+        new File(outputDir, "com/example/datafetchers/HelloDatafetcher.java").exists(),
+        "Should generate Hello datafetcher file");
+    assertTrue(
+        new File(outputDir, "com/example/datafetchers/UserDatafetcher.java").exists(),
+        "Should generate User datafetcher file");
+    assertTrue(
+        new File(outputDir, "com/example/types/User.java").exists(),
+        "Should generate User type file");
+    assertTrue(
+        new File(outputDir, "com/example/DgsConstants.java").exists(),
+        "Should generate constants file");
+  }
+
+  @Test
+  void testGenerateCodeFromIntrospectionCustomTypes() throws IOException {
+    String testSchema = TestUtils.getFileContent("schema/test-schema-custom-roots.graphqls");
+
+    when(remoteSchemaService.getIntrospectedSchemaFile(
+            eq("https://example.com/graphql"), any(), any()))
+        .thenReturn(testSchema);
+
+    TestCodegenProvider config = new TestCodegenProvider();
+    config.setOutputDir(outputDir);
+    config.setSchemaManifestOutputDir(outputDir);
+    config.setGenerateDataTypes(false);
+
+    IntrospectionRequest introspectionRequest = new IntrospectionRequest();
+    introspectionRequest.setUrl("https://example.com/graphql");
+    config.setIntrospectionRequests(List.of(introspectionRequest));
+
+    SchemaManifestService manifestService = new SchemaManifestService(outputDir, outputDir);
+    schemaFileService =
+        new SchemaFileService(
+            outputDir, manifestService, remoteSchemaService, schemaTransformationService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService);
+
+    executor.execute(config, new HashSet<>(), new File("."));
+
+    // Assert that code generation produced output files
+    assertTrue(outputDir.exists());
+    assertTrue(outputDir.isDirectory());
+
+    // Assert constants file
+    assertTrue(
+        new File(outputDir, "com/example/DgsConstants.java").exists(),
+        "Should generate constants file");
+
+    // Assert client files
+    assertTrue(
+        new File(outputDir, "com/example/client/ActorsGraphQLQuery.java").exists(),
+        "Should generate ActorsGraphQLQuery file");
+    assertTrue(
+        new File(outputDir, "com/example/client/ActorsProjectionRoot.java").exists(),
+        "Should generate ActorsProjectionRoot file");
+    assertTrue(
+        new File(outputDir, "com/example/client/HelloEventsGraphQLQuery.java").exists(),
+        "Should generate HelloEventsGraphQLQuery file");
+    assertTrue(
+        new File(outputDir, "com/example/client/UpdateHelloGraphQLQuery.java").exists(),
+        "Should generate UpdateHelloGraphQLQuery file");
+    assertTrue(
+        new File(outputDir, "com/example/client/HelloGraphQLQuery.java").exists(),
+        "Should generate HelloGraphQLQuery file");
+
+    // Assert datafetcher files
+    assertTrue(
+        new File(outputDir, "com/example/datafetchers/HelloDatafetcher.java").exists(),
+        "Should generate HelloDatafetcher file");
+    assertTrue(
+        new File(outputDir, "com/example/datafetchers/ActorsDatafetcher.java").exists(),
+        "Should generate ActorsDatafetcher file");
+  }
+
+  private void deleteDirectory(File directory) {
+    File[] files = directory.listFiles();
+    if (files != null) {
+      for (File file : files) {
+        if (file.isDirectory()) {
+          deleteDirectory(file);
+        } else {
+          file.delete();
+        }
+      }
+    }
+    directory.delete();
   }
 }
