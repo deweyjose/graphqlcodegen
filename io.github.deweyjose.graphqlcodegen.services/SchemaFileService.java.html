@@ -156,11 +156,11 @@ public class SchemaFileService {
   /** Syncs the manifest by writing the current state to disk. Prints stack trace on error. */
   public void syncManifest() {
     try {
-<span class="fc" id="L159">      manifest.syncManifest();</span>
+<span class="nc" id="L159">      manifest.syncManifest();</span>
 <span class="nc" id="L160">    } catch (Exception e) {</span>
 <span class="nc" id="L161">      e.printStackTrace();</span>
-<span class="fc" id="L162">    }</span>
-<span class="fc" id="L163">  }</span>
+<span class="nc" id="L162">    }</span>
+<span class="nc" id="L163">  }</span>
 
   /** Filters schemaPaths to only include files that have changed according to the manifest. */
   public void filterChangedSchemaFiles() {

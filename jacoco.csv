@@ -4,11 +4,11 @@ GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.parameter
 GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,Constants,3,0,0,0,1,0,1,0,1,0
 GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,SchemaTransformationService,12,273,4,14,4,56,4,19,0,13
 GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,RemoteSchemaService.new TypeReference() {...},0,6,0,0,0,1,0,1,0,1
-GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,SchemaFileService,26,358,7,29,4,89,7,31,1,19
-GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,SchemaManifestService,9,189,0,12,2,48,0,15,0,9
+GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,SchemaFileService,31,353,7,29,7,86,8,30,2,18
+GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,SchemaManifestService,13,185,0,12,4,46,1,14,1,8
 GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,TypeMappingService,6,168,4,22,4,41,4,15,0,6
 GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen.services,RemoteSchemaService,10,135,2,4,2,29,2,5,0,4
 GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen,Codegen,61,0,4,0,15,0,4,0,2,0
-GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen,CodegenExecutor,10,277,2,10,2,83,2,8,0,4
+GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen,CodegenExecutor,42,245,5,7,7,78,5,5,0,4
 GraphQL Code Generator Maven Plugin,io.github.deweyjose.graphqlcodegen,Logger,33,6,6,2,10,4,7,2,3,2
 GraphQL Code Generator Maven Plugin,io.github.deweyjose.codegen.generated,GeneratedCodeGenConfigBuilder,0,308,0,0,0,88,0,45,0,45
