@@ -30,8 +30,8 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   private Map<String, String> typeMapping = new HashMap<>();
   private boolean generateBoxedTypes = false;
   private boolean generateIsGetterForPrimitiveBooleanFields = false;
-  private boolean generateClientApi = false;
-  private boolean generateClientApiv2 = false;
+  private boolean generateClientApi = true;
+  private boolean generateClientApiv2 = true;
   private boolean generateInterfaces = false;
   private boolean generateKotlinNullableClasses = false;
   private boolean generateKotlinClosureProjections = false;
@@ -87,6 +87,10 @@ public class TestCodegenProvider implements CodegenConfigProvider {
 
   public void setIntrospectionRequests(List<IntrospectionRequest> introspectionRequests) {
     this.introspectionRequests = introspectionRequests;
+  }
+
+  public void setGenerateDataTypes(boolean generateDataTypes) {
+    this.generateDataTypes = generateDataTypes;
   }
 
   // Add more setters as needed

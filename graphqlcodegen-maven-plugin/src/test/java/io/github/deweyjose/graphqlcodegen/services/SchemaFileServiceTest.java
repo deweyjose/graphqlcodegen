@@ -31,14 +31,17 @@ class SchemaFileServiceTest {
   private SchemaManifestService schemaManifestService;
   private SchemaFileService schemaFileService;
   private RemoteSchemaService remoteSchemaService;
+  private SchemaTransformationService schemaTransformationService;
 
   @BeforeEach
   void setUp() {
     File manifestDir = new File("target/test-classes/schema");
     schemaManifestService = mock(SchemaManifestService.class);
     remoteSchemaService = mock(RemoteSchemaService.class);
+    schemaTransformationService = mock(SchemaTransformationService.class);
     schemaFileService =
-        new SchemaFileService(manifestDir, schemaManifestService, remoteSchemaService);
+        new SchemaFileService(
+            manifestDir, schemaManifestService, remoteSchemaService, schemaTransformationService);
   }
 
   @SneakyThrows
@@ -106,7 +109,7 @@ class SchemaFileServiceTest {
   void testFindGraphqlFiles() {
     File directory = TestUtils.getFile("schema");
     Set<File> files = SchemaFileService.findGraphQLSFiles(directory);
-    assertEquals(3, files.size());
+    assertEquals(6, files.size());
   }
 
   @Test
@@ -236,6 +239,8 @@ class SchemaFileServiceTest {
             eq(headers)))
         .thenReturn(expectedSDL);
 
+    when(schemaTransformationService.transformSchema(expectedSDL)).thenReturn(expectedSDL);
+
     IntrospectionRequest request = new IntrospectionRequest();
     request.setUrl(url);
     request.setQuery(query);
@@ -243,7 +248,11 @@ class SchemaFileServiceTest {
     request.setHeaders(headers);
 
     SchemaFileService service =
-        new SchemaFileService(tempDir.toFile(), schemaManifestService, remoteSchemaService);
+        new SchemaFileService(
+            tempDir.toFile(),
+            schemaManifestService,
+            remoteSchemaService,
+            schemaTransformationService);
     service.loadIntrospectedSchemas(List.of(request));
     Set<File> schemaPaths = service.getSchemaPaths();
     assertEquals(1, schemaPaths.size());
