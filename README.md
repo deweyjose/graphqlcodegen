@@ -334,7 +334,7 @@ Example
 <generateClientApi>false</generateClientApi>
 ```
 
-## generateClientApiV2
+## generateClientApiv2
 
 - Type: boolean
 - Required: false
@@ -344,7 +344,7 @@ Example
 
 ```xml
 
-<generateClientApiV2>false</generateClientApiV2>
+<generateClientApiv2>false</generateClientApiv2>
 ```
 
 ## generateInterfaces
