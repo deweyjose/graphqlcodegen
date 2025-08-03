@@ -57,7 +57,7 @@
     <junit.version>5.13.1</junit.version>
     <lombok.version>1.18.38</lombok.version>
     <kotlinpoet-jvm.version>1.18.1</kotlinpoet-jvm.version>
-    <spotless.version>2.44.4</spotless.version>
+    <spotless.version>2.46.0</spotless.version>
     <maven-core.version>3.9.10</maven-core.version>
   </properties>
 
