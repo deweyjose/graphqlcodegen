@@ -33,8 +33,10 @@ import org.jetbrains.kotlin.psi.KtPrimaryConstructor;
 @Mojo(name = "generate")
 public class BuilderCodegen extends AbstractMojo {
 
-  public static final String CODEGENCONFIG_URL =
-      "https://raw.githubusercontent.com/Netflix/dgs-codegen/master/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt";
+  @Parameter(
+      property = "graphql-dgs-codegen-core.version",
+      defaultValue = "${graphql-dgs-codegen-core.version}")
+  private String dgsCodegenVersion;
 
   @Parameter(
       property = "buildercodegen.outputDirectory",
@@ -45,14 +47,29 @@ public class BuilderCodegen extends AbstractMojo {
   public void execute() throws MojoExecutionException, MojoFailureException {
     getLog().info("Builder Code Generator Plugin");
     getLog().info("Output Directory: " + outputDirectory);
+    getLog().info("Using dgs-codegen version: " + dgsCodegenVersion);
 
     try {
-      String codeGenConfig = downloadCodeGenConfig(CODEGENCONFIG_URL);
+      String url = buildCodeGenConfigUrl(dgsCodegenVersion);
+      String codeGenConfig = downloadCodeGenConfig(url);
       KtParameter[] params = parseCodeGenConfigParameters(codeGenConfig);
       generateBuilderClass(params, outputDirectory);
     } catch (Exception e) {
       throw new MojoExecutionException("Failed to generate builder from CodeGenConfig.kt", e);
     }
+  }
+
+  /**
+   * Build the GitHub URL for CodeGen.kt based on the version.
+   *
+   * @param version The version of graphql-dgs-codegen-core (e.g., "8.1.1").
+   * @return The GitHub raw URL pointing to the versioned CodeGen.kt file.
+   */
+  private String buildCodeGenConfigUrl(String version) {
+    String tag = "v" + version;
+    return "https://raw.githubusercontent.com/Netflix/dgs-codegen/"
+        + tag
+        + "/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt";
   }
 
   /**
