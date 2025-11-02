@@ -11,7 +11,9 @@ class BuilderCodegenTest {
 
   @Test
   void testDownloadCodeGenConfig() throws Exception {
-    String url = BuilderCodegen.CODEGENCONFIG_URL;
+    // Use a versioned URL (v8.1.1) instead of master branch
+    String url =
+        "https://raw.githubusercontent.com/Netflix/dgs-codegen/v8.1.1/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt";
     String codeGenConfig = BuilderCodegen.downloadCodeGenConfig(url);
     assertNotNull(codeGenConfig, "CodeGenConfig should not be null");
     assertTrue(
