@@ -7,7 +7,7 @@ public class Constants {
 
   /** The default query for the introspection query. */
   public static final String DEFAULT_QUERY =
-      """
+"""
 query IntrospectionQuery {
   __schema {
     queryType { name }
