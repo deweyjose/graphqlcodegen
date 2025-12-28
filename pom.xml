@@ -55,7 +55,7 @@
     <maven-scm-provider-gitexe.version>1.11.2</maven-scm-provider-gitexe.version>
     <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
     <junit.version>5.13.1</junit.version>
-    <lombok.version>1.18.38</lombok.version>
+    <lombok.version>1.18.42</lombok.version>
     <kotlinpoet-jvm.version>1.18.1</kotlinpoet-jvm.version>
     <spotless.version>3.0.0</spotless.version>
     <maven-core.version>3.9.10</maven-core.version>
