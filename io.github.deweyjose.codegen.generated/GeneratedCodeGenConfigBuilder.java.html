@@ -65,8 +65,6 @@ import java.util.Set;
 
   private boolean generateDataTypes;
 
-  private boolean omitNullInputFields;
-
   private boolean kotlinAllFieldsOptional;
 
   private boolean snakeCaseConstantNames;
@@ -98,6 +96,8 @@ import java.util.Set;
   private boolean addDeprecatedAnnotation;
 
   private boolean trackInputFieldSet;
+
+  private boolean generateJSpecifyAnnotations;
 
   public GeneratedCodeGenConfigBuilder setSchemas(Set&lt;String&gt; schemas) {
 <span class="fc" id="L103">    this.schemas = schemas;</span>
@@ -234,100 +234,101 @@ import java.util.Set;
 <span class="fc" id="L234">    return this;</span>
   }
 
-  public GeneratedCodeGenConfigBuilder setOmitNullInputFields(boolean omitNullInputFields) {
-<span class="fc" id="L238">    this.omitNullInputFields = omitNullInputFields;</span>
+  public GeneratedCodeGenConfigBuilder setKotlinAllFieldsOptional(boolean kotlinAllFieldsOptional) {
+<span class="fc" id="L238">    this.kotlinAllFieldsOptional = kotlinAllFieldsOptional;</span>
 <span class="fc" id="L239">    return this;</span>
   }
 
-  public GeneratedCodeGenConfigBuilder setKotlinAllFieldsOptional(boolean kotlinAllFieldsOptional) {
-<span class="fc" id="L243">    this.kotlinAllFieldsOptional = kotlinAllFieldsOptional;</span>
-<span class="fc" id="L244">    return this;</span>
-  }
-
   public GeneratedCodeGenConfigBuilder setSnakeCaseConstantNames(boolean snakeCaseConstantNames) {
-<span class="fc" id="L248">    this.snakeCaseConstantNames = snakeCaseConstantNames;</span>
-<span class="fc" id="L249">    return this;</span>
+<span class="fc" id="L243">    this.snakeCaseConstantNames = snakeCaseConstantNames;</span>
+<span class="fc" id="L244">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setGenerateInterfaceSetters(
       boolean generateInterfaceSetters) {
-<span class="fc" id="L254">    this.generateInterfaceSetters = generateInterfaceSetters;</span>
-<span class="fc" id="L255">    return this;</span>
+<span class="fc" id="L249">    this.generateInterfaceSetters = generateInterfaceSetters;</span>
+<span class="fc" id="L250">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setGenerateInterfaceMethodsForInterfaceFields(
       boolean generateInterfaceMethodsForInterfaceFields) {
-<span class="fc" id="L260">    this.generateInterfaceMethodsForInterfaceFields = generateInterfaceMethodsForInterfaceFields;</span>
-<span class="fc" id="L261">    return this;</span>
+<span class="fc" id="L255">    this.generateInterfaceMethodsForInterfaceFields = generateInterfaceMethodsForInterfaceFields;</span>
+<span class="fc" id="L256">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setGenerateDocs(boolean generateDocs) {
-<span class="fc" id="L265">    this.generateDocs = generateDocs;</span>
-<span class="fc" id="L266">    return this;</span>
+<span class="fc" id="L260">    this.generateDocs = generateDocs;</span>
+<span class="fc" id="L261">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setGeneratedDocsFolder(Path generatedDocsFolder) {
-<span class="fc" id="L270">    this.generatedDocsFolder = generatedDocsFolder;</span>
-<span class="fc" id="L271">    return this;</span>
+<span class="fc" id="L265">    this.generatedDocsFolder = generatedDocsFolder;</span>
+<span class="fc" id="L266">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setIncludeImports(Map&lt;String, String&gt; includeImports) {
-<span class="fc" id="L275">    this.includeImports = includeImports;</span>
-<span class="fc" id="L276">    return this;</span>
+<span class="fc" id="L270">    this.includeImports = includeImports;</span>
+<span class="fc" id="L271">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setIncludeEnumImports(
       Map&lt;String, Map&lt;String, String&gt;&gt; includeEnumImports) {
-<span class="fc" id="L281">    this.includeEnumImports = includeEnumImports;</span>
-<span class="fc" id="L282">    return this;</span>
+<span class="fc" id="L276">    this.includeEnumImports = includeEnumImports;</span>
+<span class="fc" id="L277">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setIncludeClassImports(
       Map&lt;String, Map&lt;String, String&gt;&gt; includeClassImports) {
-<span class="fc" id="L287">    this.includeClassImports = includeClassImports;</span>
-<span class="fc" id="L288">    return this;</span>
+<span class="fc" id="L282">    this.includeClassImports = includeClassImports;</span>
+<span class="fc" id="L283">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setGenerateCustomAnnotations(
       boolean generateCustomAnnotations) {
-<span class="fc" id="L293">    this.generateCustomAnnotations = generateCustomAnnotations;</span>
-<span class="fc" id="L294">    return this;</span>
+<span class="fc" id="L288">    this.generateCustomAnnotations = generateCustomAnnotations;</span>
+<span class="fc" id="L289">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setJavaGenerateAllConstructor(
       boolean javaGenerateAllConstructor) {
-<span class="fc" id="L299">    this.javaGenerateAllConstructor = javaGenerateAllConstructor;</span>
-<span class="fc" id="L300">    return this;</span>
+<span class="fc" id="L294">    this.javaGenerateAllConstructor = javaGenerateAllConstructor;</span>
+<span class="fc" id="L295">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setImplementSerializable(boolean implementSerializable) {
-<span class="fc" id="L304">    this.implementSerializable = implementSerializable;</span>
-<span class="fc" id="L305">    return this;</span>
+<span class="fc" id="L299">    this.implementSerializable = implementSerializable;</span>
+<span class="fc" id="L300">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setAddGeneratedAnnotation(boolean addGeneratedAnnotation) {
-<span class="fc" id="L309">    this.addGeneratedAnnotation = addGeneratedAnnotation;</span>
-<span class="fc" id="L310">    return this;</span>
+<span class="fc" id="L304">    this.addGeneratedAnnotation = addGeneratedAnnotation;</span>
+<span class="fc" id="L305">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setDisableDatesInGeneratedAnnotation(
       boolean disableDatesInGeneratedAnnotation) {
-<span class="fc" id="L315">    this.disableDatesInGeneratedAnnotation = disableDatesInGeneratedAnnotation;</span>
-<span class="fc" id="L316">    return this;</span>
+<span class="fc" id="L310">    this.disableDatesInGeneratedAnnotation = disableDatesInGeneratedAnnotation;</span>
+<span class="fc" id="L311">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setAddDeprecatedAnnotation(boolean addDeprecatedAnnotation) {
-<span class="fc" id="L320">    this.addDeprecatedAnnotation = addDeprecatedAnnotation;</span>
-<span class="fc" id="L321">    return this;</span>
+<span class="fc" id="L315">    this.addDeprecatedAnnotation = addDeprecatedAnnotation;</span>
+<span class="fc" id="L316">    return this;</span>
   }
 
   public GeneratedCodeGenConfigBuilder setTrackInputFieldSet(boolean trackInputFieldSet) {
-<span class="fc" id="L325">    this.trackInputFieldSet = trackInputFieldSet;</span>
-<span class="fc" id="L326">    return this;</span>
+<span class="fc" id="L320">    this.trackInputFieldSet = trackInputFieldSet;</span>
+<span class="fc" id="L321">    return this;</span>
+  }
+
+  public GeneratedCodeGenConfigBuilder setGenerateJSpecifyAnnotations(
+      boolean generateJSpecifyAnnotations) {
+<span class="nc" id="L326">    this.generateJSpecifyAnnotations = generateJSpecifyAnnotations;</span>
+<span class="nc" id="L327">    return this;</span>
   }
 
   public CodeGenConfig build() {
-<span class="fc" id="L330">    return new CodeGenConfig(schemas, schemaFiles, schemaJarFilesFromDependencies, outputDir, examplesOutputDir, writeToFiles, packageName, subPackageNameClient, subPackageNameDatafetchers, subPackageNameTypes, subPackageNameDocs, language, generateBoxedTypes, generateIsGetterForPrimitiveBooleanFields, generateClientApi, generateClientApiv2, generateInterfaces, generateKotlinNullableClasses, generateKotlinClosureProjections, typeMapping, includeQueries, includeMutations, includeSubscriptions, skipEntityQueries, shortProjectionNames, generateDataTypes, omitNullInputFields, kotlinAllFieldsOptional, snakeCaseConstantNames, generateInterfaceSetters, generateInterfaceMethodsForInterfaceFields, generateDocs, generatedDocsFolder, includeImports, includeEnumImports, includeClassImports, generateCustomAnnotations, javaGenerateAllConstructor, implementSerializable, addGeneratedAnnotation, disableDatesInGeneratedAnnotation, addDeprecatedAnnotation, trackInputFieldSet);</span>
+<span class="fc" id="L331">    return new CodeGenConfig(schemas, schemaFiles, schemaJarFilesFromDependencies, outputDir, examplesOutputDir, writeToFiles, packageName, subPackageNameClient, subPackageNameDatafetchers, subPackageNameTypes, subPackageNameDocs, language, generateBoxedTypes, generateIsGetterForPrimitiveBooleanFields, generateClientApi, generateClientApiv2, generateInterfaces, generateKotlinNullableClasses, generateKotlinClosureProjections, typeMapping, includeQueries, includeMutations, includeSubscriptions, skipEntityQueries, shortProjectionNames, generateDataTypes, kotlinAllFieldsOptional, snakeCaseConstantNames, generateInterfaceSetters, generateInterfaceMethodsForInterfaceFields, generateDocs, generatedDocsFolder, includeImports, includeEnumImports, includeClassImports, generateCustomAnnotations, javaGenerateAllConstructor, implementSerializable, addGeneratedAnnotation, disableDatesInGeneratedAnnotation, addDeprecatedAnnotation, trackInputFieldSet, generateJSpecifyAnnotations);</span>
   }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
