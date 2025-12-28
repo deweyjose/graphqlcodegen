@@ -66,7 +66,7 @@
       <dependency>
         <groupId>com.graphql-java</groupId>
         <artifactId>graphql-java</artifactId>
-        <version>24.1</version>
+        <version>25.0</version>
       </dependency>
       <dependency>
         <groupId>com.squareup</groupId>
