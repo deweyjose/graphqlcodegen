@@ -14,8 +14,8 @@
   <url>https://github.com/deweyjose/graphqlcodegen</url>
 
   <modules>
-    <module>graphqlcodegen-maven-plugin</module>
     <module>graphqlcodegen-bootstrap-plugin</module>
+    <module>graphqlcodegen-maven-plugin</module>
   </modules>
 
   <licenses>
@@ -42,7 +42,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
-    <graphql-dgs-codegen-core.version>8.1.0</graphql-dgs-codegen-core.version>
+    <graphql-dgs-codegen-core.version>8.2.1</graphql-dgs-codegen-core.version>
     <java.version>17</java.version>
     <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
     <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
