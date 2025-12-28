@@ -62,7 +62,7 @@ public class BuilderCodegen extends AbstractMojo {
   /**
    * Build the GitHub URL for CodeGen.kt based on the version.
    *
-   * @param version The version of graphql-dgs-codegen-core (e.g., "8.2.1").
+   * @param version The version of graphql-dgs-codegen-core (e.g., "8.2.3").
    * @return The GitHub raw URL pointing to the versioned CodeGen.kt file.
    */
   private String buildCodeGenConfigUrl(String version) {
