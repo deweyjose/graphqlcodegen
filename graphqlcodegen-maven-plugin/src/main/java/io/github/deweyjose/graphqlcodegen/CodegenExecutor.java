@@ -110,7 +110,6 @@ public class CodegenExecutor {
             .setSkipEntityQueries(request.isSkipEntityQueries())
             .setShortProjectionNames(request.isShortProjectionNames())
             .setGenerateDataTypes(request.isGenerateDataTypes())
-            .setOmitNullInputFields(request.isOmitNullInputFields())
             .setKotlinAllFieldsOptional(request.isKotlinAllFieldsOptional())
             .setSnakeCaseConstantNames(request.isSnakeCaseConstantNames())
             .setGenerateInterfaceSetters(request.isGenerateInterfaceSetters())
@@ -130,6 +129,11 @@ public class CodegenExecutor {
             .setAddDeprecatedAnnotation(request.isAddDeprecatedAnnotation())
             .setTrackInputFieldSet(request.isTrackInputFieldSet())
             .build();
+
+    if (request.isOmitNullInputFields()) {
+      Logger.warn(
+          "omitNullInputFields is no longer supported by graphql-dgs-codegen-core >= 8.2.1; ignoring.");
+    }
 
     Logger.info("Codegen config: \n{}", config);
     final CodeGen codeGen = new CodeGen(config);

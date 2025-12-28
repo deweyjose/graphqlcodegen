@@ -532,6 +532,7 @@ Example
 - Type: boolean
 - Required: false
 - Default: false
+- Note: ignored with `graphql-dgs-codegen-core` >= 8.2.1 (option removed upstream)
 
 Example
 
