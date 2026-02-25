@@ -11,7 +11,7 @@
   </parent>
 
   <artifactId>graphqlcodegen-maven-plugin</artifactId>
-  <version>3.7.0</version>
+  <version>3.7.1</version>
   <packaging>maven-plugin</packaging>
 
   <name>GraphQL Code Generator Maven Plugin</name>

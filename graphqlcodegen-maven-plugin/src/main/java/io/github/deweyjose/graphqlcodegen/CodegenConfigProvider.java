@@ -225,6 +225,11 @@ public interface CodegenConfigProvider {
   boolean isTrackInputFieldSet();
 
   /**
+   * @return whether to generate JSpecify nullness annotations
+   */
+  boolean isGenerateJSpecifyAnnotations();
+
+  /**
    * @return whether to generate custom annotations
    */
   boolean isGenerateCustomAnnotations();
