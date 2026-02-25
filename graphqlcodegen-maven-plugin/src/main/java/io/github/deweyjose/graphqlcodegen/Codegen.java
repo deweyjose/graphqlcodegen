@@ -167,6 +167,9 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   @Parameter(property = "trackInputFieldSet", defaultValue = "false")
   private boolean trackInputFieldSet;
 
+  @Parameter(property = "generateJSpecifyAnnotations", defaultValue = "false")
+  private boolean generateJSpecifyAnnotations;
+
   @Parameter(property = "generateCustomAnnotations", defaultValue = "false")
   private boolean generateCustomAnnotations;
 

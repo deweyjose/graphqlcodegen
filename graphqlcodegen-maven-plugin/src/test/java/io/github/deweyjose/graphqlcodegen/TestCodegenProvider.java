@@ -54,6 +54,7 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   private boolean addGeneratedAnnotation = false;
   private boolean addDeprecatedAnnotation = false;
   private boolean trackInputFieldSet = false;
+  private boolean generateJSpecifyAnnotations = false;
   private boolean generateCustomAnnotations = false;
   private Map<String, String> includeImports = new HashMap<>();
   private Map<String, ParameterMap> includeEnumImports = new HashMap<>();
@@ -91,6 +92,10 @@ public class TestCodegenProvider implements CodegenConfigProvider {
 
   public void setGenerateDataTypes(boolean generateDataTypes) {
     this.generateDataTypes = generateDataTypes;
+  }
+
+  public void setGenerateJSpecifyAnnotations(boolean generateJSpecifyAnnotations) {
+    this.generateJSpecifyAnnotations = generateJSpecifyAnnotations;
   }
 
   // Add more setters as needed
@@ -308,6 +313,11 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   @Override
   public boolean isTrackInputFieldSet() {
     return trackInputFieldSet;
+  }
+
+  @Override
+  public boolean isGenerateJSpecifyAnnotations() {
+    return generateJSpecifyAnnotations;
   }
 
   @Override

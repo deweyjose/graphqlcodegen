@@ -12,6 +12,7 @@ import io.github.deweyjose.graphqlcodegen.services.SchemaTransformationService;
 import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -106,6 +107,43 @@ class CodegenExecutorTest {
     assertTrue(
         new File(outputDir, "com/example/DgsConstants.java").exists(),
         "Should generate constants file");
+  }
+
+  @SneakyThrows
+  @Test
+  void testGenerateCodeWithJSpecifyAnnotations() {
+    File schemaFile = TestUtils.getFile("schema/test-schema-with-nullable-user-fields.graphqls");
+
+    SchemaManifestService manifestService = new SchemaManifestService(outputDir, outputDir);
+    schemaFileService =
+        new SchemaFileService(
+            outputDir, manifestService, remoteSchemaService, schemaTransformationService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService);
+
+    TestCodegenProvider config = new TestCodegenProvider();
+    config.setSchemaPaths(Set.of(schemaFile));
+    config.setOutputDir(outputDir);
+    config.setSchemaManifestOutputDir(outputDir);
+    config.setGenerateJSpecifyAnnotations(true);
+
+    executor.execute(config, new HashSet<>(), new File("."));
+
+    File generatedUserType = new File(outputDir, "com/example/types/User.java");
+    assertTrue(generatedUserType.exists(), "Should generate User type file");
+
+    String generatedUserTypeContent = Files.readString(generatedUserType.toPath());
+    assertTrue(
+        generatedUserTypeContent.contains("org.jspecify.annotations.NullMarked"),
+        "Should include NullMarked annotation import");
+    assertTrue(
+        generatedUserTypeContent.contains("org.jspecify.annotations.Nullable"),
+        "Should include Nullable annotation import");
+    assertTrue(
+        generatedUserTypeContent.contains("@NullMarked"),
+        "Should annotate generated class with @NullMarked");
+    assertTrue(
+        generatedUserTypeContent.contains("@Nullable"),
+        "Should annotate nullable members with @Nullable");
   }
 
   @Test

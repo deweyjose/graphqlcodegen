@@ -128,6 +128,7 @@ public class CodegenExecutor {
             .setDisableDatesInGeneratedAnnotation(request.isDisableDatesInGeneratedAnnotation())
             .setAddDeprecatedAnnotation(request.isAddDeprecatedAnnotation())
             .setTrackInputFieldSet(request.isTrackInputFieldSet())
+            .setGenerateJSpecifyAnnotations(request.isGenerateJSpecifyAnnotations())
             .build();
 
     if (request.isOmitNullInputFields()) {

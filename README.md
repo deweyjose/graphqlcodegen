@@ -686,6 +686,22 @@ Example
 <trackInputFieldSet>true</trackInputFieldSet>
 ```
 
+## generateJSpecifyAnnotations
+
+Generate [JSpecify](https://jspecify.dev/) null-safety annotations in generated Java code.
+When enabled, generated classes are annotated with `@NullMarked` and nullable members are
+annotated with `@Nullable`.
+
+- Type: boolean
+- Required: false
+- Default: false
+
+Example
+
+```xml
+<generateJSpecifyAnnotations>true</generateJSpecifyAnnotations>
+```
+
 ## includeImports
 
 - Type: map<string, string>
