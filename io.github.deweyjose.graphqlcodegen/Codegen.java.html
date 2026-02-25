@@ -167,6 +167,9 @@ import org.apache.maven.project.MavenProject;
   @Parameter(property = &quot;trackInputFieldSet&quot;, defaultValue = &quot;false&quot;)
   private boolean trackInputFieldSet;
 
+  @Parameter(property = &quot;generateJSpecifyAnnotations&quot;, defaultValue = &quot;false&quot;)
+  private boolean generateJSpecifyAnnotations;
+
   @Parameter(property = &quot;generateCustomAnnotations&quot;, defaultValue = &quot;false&quot;)
   private boolean generateCustomAnnotations;
 
@@ -190,26 +193,26 @@ import org.apache.maven.project.MavenProject;
 
   @Override
   public void execute() {
-<span class="nc" id="L193">    Logger.registerMavenLog(getLog());</span>
+<span class="nc" id="L196">    Logger.registerMavenLog(getLog());</span>
 
-<span class="nc bnc" id="L195" title="All 2 branches missed.">    if (skip) {</span>
-<span class="nc" id="L196">      Logger.info(&quot;Skipping code generation as requested (skip=true)&quot;);</span>
-<span class="nc" id="L197">      return;</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">    if (skip) {</span>
+<span class="nc" id="L199">      Logger.info(&quot;Skipping code generation as requested (skip=true)&quot;);</span>
+<span class="nc" id="L200">      return;</span>
     }
 
-<span class="nc" id="L200">    SchemaManifestService manifest =</span>
-<span class="nc" id="L201">        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());</span>
-<span class="nc" id="L202">    TypeMappingService typeMappingService = new TypeMappingService();</span>
-<span class="nc" id="L203">    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest);</span>
+<span class="nc" id="L203">    SchemaManifestService manifest =</span>
+<span class="nc" id="L204">        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());</span>
+<span class="nc" id="L205">    TypeMappingService typeMappingService = new TypeMappingService();</span>
+<span class="nc" id="L206">    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest);</span>
 
-<span class="nc" id="L205">    Set&lt;Artifact&gt; artifacts = project.getArtifacts();</span>
+<span class="nc" id="L208">    Set&lt;Artifact&gt; artifacts = project.getArtifacts();</span>
 
-<span class="nc" id="L207">    var executor = new CodegenExecutor(schemaFileService, typeMappingService);</span>
-<span class="nc" id="L208">    executor.execute(this, artifacts, project.getBasedir());</span>
+<span class="nc" id="L210">    var executor = new CodegenExecutor(schemaFileService, typeMappingService);</span>
+<span class="nc" id="L211">    executor.execute(this, artifacts, project.getBasedir());</span>
 
-<span class="nc bnc" id="L210" title="All 2 branches missed.">    if (autoAddSource) {</span>
-<span class="nc" id="L211">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">    if (autoAddSource) {</span>
+<span class="nc" id="L214">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
     }
-<span class="nc" id="L213">  }</span>
+<span class="nc" id="L216">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

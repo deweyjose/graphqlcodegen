@@ -128,21 +128,22 @@ public class CodegenExecutor {
 <span class="fc" id="L128">            .setDisableDatesInGeneratedAnnotation(request.isDisableDatesInGeneratedAnnotation())</span>
 <span class="fc" id="L129">            .setAddDeprecatedAnnotation(request.isAddDeprecatedAnnotation())</span>
 <span class="fc" id="L130">            .setTrackInputFieldSet(request.isTrackInputFieldSet())</span>
-<span class="fc" id="L131">            .build();</span>
+<span class="fc" id="L131">            .setGenerateJSpecifyAnnotations(request.isGenerateJSpecifyAnnotations())</span>
+<span class="fc" id="L132">            .build();</span>
 
-<span class="pc bpc" id="L133" title="1 of 2 branches missed.">    if (request.isOmitNullInputFields()) {</span>
-<span class="nc" id="L134">      Logger.warn(</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">    if (request.isOmitNullInputFields()) {</span>
+<span class="nc" id="L135">      Logger.warn(</span>
           &quot;omitNullInputFields is no longer supported by graphql-dgs-codegen-core &gt;= 8.2.1; ignoring.&quot;);
     }
 
-<span class="fc" id="L138">    Logger.info(&quot;Codegen config: \n{}&quot;, config);</span>
-<span class="fc" id="L139">    final CodeGen codeGen = new CodeGen(config);</span>
-<span class="fc" id="L140">    codeGen.generate();</span>
+<span class="fc" id="L139">    Logger.info(&quot;Codegen config: \n{}&quot;, config);</span>
+<span class="fc" id="L140">    final CodeGen codeGen = new CodeGen(config);</span>
+<span class="fc" id="L141">    codeGen.generate();</span>
 
-<span class="pc bpc" id="L142" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="nc" id="L143">      schemaFileService.syncManifest();</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="nc" id="L144">      schemaFileService.syncManifest();</span>
     }
-<span class="fc" id="L145">  }</span>
+<span class="fc" id="L146">  }</span>
 
   /**
    * Converts a map of ParameterMap to a map of string-to-string maps.
@@ -151,12 +152,12 @@ public class CodegenExecutor {
    * @return a map of string to string maps
    */
   public static Map&lt;String, Map&lt;String, String&gt;&gt; toMap(Map&lt;String, ParameterMap&gt; m) {
-<span class="fc bfc" id="L154" title="All 2 branches covered.">    if (m == null) return Collections.emptyMap();</span>
-<span class="fc" id="L155">    return m.entrySet().stream()</span>
-<span class="fc" id="L156">        .collect(</span>
-<span class="fc" id="L157">            Collectors.toMap(</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">    if (m == null) return Collections.emptyMap();</span>
+<span class="fc" id="L156">    return m.entrySet().stream()</span>
+<span class="fc" id="L157">        .collect(</span>
+<span class="fc" id="L158">            Collectors.toMap(</span>
                 Map.Entry::getKey,
-<span class="pc bpc" id="L159" title="1 of 2 branches missed.">                e -&gt; e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));</span>
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">                e -&gt; e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
