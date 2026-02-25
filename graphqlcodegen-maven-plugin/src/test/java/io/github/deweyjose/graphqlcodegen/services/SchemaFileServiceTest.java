@@ -111,10 +111,12 @@ class SchemaFileServiceTest {
     Set<File> files = SchemaFileService.findGraphQLSFiles(directory);
     assertTrue(files.size() >= 6);
     assertTrue(files.stream().anyMatch(file -> file.getName().equals("test-schema.graphqls")));
-    assertTrue(files.stream().anyMatch(file -> file.getName().equals("test-schema-with-user.graphqls")));
+    assertTrue(
+        files.stream().anyMatch(file -> file.getName().equals("test-schema-with-user.graphqls")));
     assertTrue(
         files.stream()
-            .anyMatch(file -> file.getName().equals("test-schema-with-nullable-user-fields.graphqls")));
+            .anyMatch(
+                file -> file.getName().equals("test-schema-with-nullable-user-fields.graphqls")));
   }
 
   @Test
