@@ -21,6 +21,19 @@ Quick guide for cloud/cursor agents working in this repository.
 4. Add/update tests in `CodegenExecutorTest` and fixtures under `src/test/resources/schema`.
 5. Document option in `README.md`.
 
+## Lessons learned (issue #302 session)
+
+- A DGS config option can already exist in upstream `CodeGenConfig` and in our generated
+  `GeneratedCodeGenConfigBuilder`, but still be **unusable** in Maven if it is not exposed in
+  `Codegen.java` and wired through `CodegenExecutor`.
+- Missing setter calls on the generated builder usually do **not** fail compilation because primitive
+  fields default to `false`. This can hide feature gaps.
+- Always verify upstream release notes before bumping versions. In this case, `graphql-dgs-codegen-core`
+  was already on latest (`8.3.0`), so the right fix was wiring, not dependency upgrades.
+- Avoid brittle test assertions on fixture counts. If adding a schema fixture, prefer checking for
+  required fixture names rather than hardcoded totals.
+- For this repo, run `spotless:apply` after edits; formatting changes are common in tests.
+
 ## Build/test commands
 
 Prefer Maven wrapper:
