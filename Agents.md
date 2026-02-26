@@ -6,9 +6,9 @@ Quick guide for cloud/cursor agents working in this repository.
 
 ## Repository layout
 
-- `graphqlcodegen-bootstrap-plugin`: helper plugin that generates `GeneratedCodeGenConfigBuilder` from upstream DGS `CodeGen.kt`.
 - `graphqlcodegen-maven-plugin`: actual Maven plugin users consume.
-- root `pom.xml`: parent/dependency management for both modules.
+- `graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/codegen/generated/GeneratedCodeGenConfigBuilder.java`: checked-in builder that mirrors upstream DGS `CodeGenConfig`.
+- root `pom.xml`: parent/dependency management.
 
 ## Common workflow for DGS option updates
 
@@ -40,24 +40,14 @@ Prefer Maven wrapper:
 
 ```bash
 ./mvnw spotless:apply
-./mvnw -N install
-./mvnw -pl graphqlcodegen-bootstrap-plugin -DskipTests install
 ./mvnw -pl graphqlcodegen-maven-plugin test
 ```
 
 ## Important gotcha
 
-If building/testing only `graphqlcodegen-maven-plugin`, Maven must resolve:
-
-- parent POM (`graphqlcodegen-parent`) in local repo
-- locally built `graphqlcodegen-bootstrap-plugin` (used during `generate-sources`)
-
-If missing, run:
-
-```bash
-./mvnw -N install
-./mvnw -pl graphqlcodegen-bootstrap-plugin -DskipTests install
-```
+This repo keeps `GeneratedCodeGenConfigBuilder` checked in. When bumping
+`graphql-dgs-codegen-core.version`, make sure builder constructor args and setter surface still match
+upstream `CodeGenConfig`, then wire any new options through `Codegen.java`/`CodegenConfigProvider.java`/`CodegenExecutor.java`.
 
 ## Release version bump
 
