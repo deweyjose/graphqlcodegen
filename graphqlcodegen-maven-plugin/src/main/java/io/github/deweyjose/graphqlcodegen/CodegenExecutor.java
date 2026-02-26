@@ -3,7 +3,6 @@ package io.github.deweyjose.graphqlcodegen;
 import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
 import com.netflix.graphql.dgs.codegen.Language;
-import io.github.deweyjose.codegen.generated.GeneratedCodeGenConfigBuilder;
 import io.github.deweyjose.graphqlcodegen.parameters.ParameterMap;
 import io.github.deweyjose.graphqlcodegen.services.SchemaFileService;
 import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
@@ -81,7 +80,7 @@ public class CodegenExecutor {
             projectBaseDir);
 
     final CodeGenConfig config =
-        new GeneratedCodeGenConfigBuilder()
+        new CodeGenConfigBuilder()
             .setSchemas(Collections.emptySet())
             .setSchemaFiles(schemaFileService.getSchemaPaths())
             .setSchemaJarFilesFromDependencies(

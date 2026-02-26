@@ -17,7 +17,7 @@ This is the Maven plugin that users apply to their projects. It provides goals f
 - Resolving schema files from the local project and dependencies.
 - Invoking the DGS codegen library with the correct configuration.
 - Managing incremental code generation and manifest tracking.
-- Holding a checked-in `GeneratedCodeGenConfigBuilder` (`graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/codegen/generated`) that mirrors the upstream `CodeGenConfig` constructor shape.
+- Holding a checked-in `CodeGenConfigBuilder` (`graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen`) that mirrors the upstream `CodeGenConfig` constructor shape.
 
 # Contributing
 
@@ -32,7 +32,7 @@ PRs are welcome as well. The level of difficulty across DGS Codegen updates vari
 
 When constructor parameters change upstream:
 
-- Update `GeneratedCodeGenConfigBuilder` to match the latest constructor shape and ordering.
+- Update `CodeGenConfigBuilder` to match the latest constructor shape and ordering.
 - Wire new options through:
   - `graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java`
   - `graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/CodegenConfigProvider.java`

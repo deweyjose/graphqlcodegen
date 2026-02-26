@@ -7,7 +7,7 @@ Quick guide for cloud/cursor agents working in this repository.
 ## Repository layout
 
 - `graphqlcodegen-maven-plugin`: actual Maven plugin users consume.
-- `graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/codegen/generated/GeneratedCodeGenConfigBuilder.java`: checked-in builder that mirrors upstream DGS `CodeGenConfig`.
+- `graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/CodeGenConfigBuilder.java`: checked-in builder that mirrors upstream DGS `CodeGenConfig`.
 - root `pom.xml`: parent/dependency management.
 
 ## Common workflow for DGS option updates
@@ -17,14 +17,14 @@ Quick guide for cloud/cursor agents working in this repository.
 3. Expose new option in:
    - `graphqlcodegen-maven-plugin/src/main/java/.../Codegen.java` (`@Parameter`)
    - `CodegenConfigProvider.java` (getter method)
-   - `CodegenExecutor.java` (forward to `GeneratedCodeGenConfigBuilder`)
+   - `CodegenExecutor.java` (forward to `CodeGenConfigBuilder`)
 4. Add/update tests in `CodegenExecutorTest` and fixtures under `src/test/resources/schema`.
 5. Document option in `README.md`.
 
 ## Lessons learned (issue #302 session)
 
-- A DGS config option can already exist in upstream `CodeGenConfig` and in our generated
-  `GeneratedCodeGenConfigBuilder`, but still be **unusable** in Maven if it is not exposed in
+- A DGS config option can already exist in upstream `CodeGenConfig` and in our checked-in
+  `CodeGenConfigBuilder`, but still be **unusable** in Maven if it is not exposed in
   `Codegen.java` and wired through `CodegenExecutor`.
 - Missing setter calls on the generated builder usually do **not** fail compilation because primitive
   fields default to `false`. This can hide feature gaps.
@@ -45,7 +45,7 @@ Prefer Maven wrapper:
 
 ## Important gotcha
 
-This repo keeps `GeneratedCodeGenConfigBuilder` checked in. When bumping
+This repo keeps `CodeGenConfigBuilder` checked in. When bumping
 `graphql-dgs-codegen-core.version`, make sure builder constructor args and setter surface still match
 upstream `CodeGenConfig`, then wire any new options through `Codegen.java`/`CodegenConfigProvider.java`/`CodegenExecutor.java`.
 
