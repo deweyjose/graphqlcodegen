@@ -3,7 +3,6 @@
 import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
 import com.netflix.graphql.dgs.codegen.Language;
-import io.github.deweyjose.codegen.generated.GeneratedCodeGenConfigBuilder;
 import io.github.deweyjose.graphqlcodegen.parameters.ParameterMap;
 import io.github.deweyjose.graphqlcodegen.services.SchemaFileService;
 import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
@@ -32,10 +31,10 @@ public class CodegenExecutor {
    * @param typeMappingService the type mapping service
    */
   public CodegenExecutor(
-<span class="fc" id="L35">      SchemaFileService schemaFileService, TypeMappingService typeMappingService) {</span>
-<span class="fc" id="L36">    this.schemaFileService = schemaFileService;</span>
-<span class="fc" id="L37">    this.typeMappingService = typeMappingService;</span>
-<span class="fc" id="L38">  }</span>
+<span class="fc" id="L34">      SchemaFileService schemaFileService, TypeMappingService typeMappingService) {</span>
+<span class="fc" id="L35">    this.schemaFileService = schemaFileService;</span>
+<span class="fc" id="L36">    this.typeMappingService = typeMappingService;</span>
+<span class="fc" id="L37">  }</span>
 
   /**
    * Executes the code generation.
@@ -44,106 +43,106 @@ public class CodegenExecutor {
    * @param artifacts the artifacts
    * @param projectBaseDir the project base directory
    */
-<span class="pc" id="L47">  @SneakyThrows</span>
+<span class="pc" id="L46">  @SneakyThrows</span>
   public void execute(CodegenConfigProvider request, Set&lt;Artifact&gt; artifacts, File projectBaseDir) {
     // get the schema paths that might have changed or all of them.
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="nc" id="L51">      schemaFileService.loadExpandedSchemaPaths(request.getSchemaPaths());</span>
-<span class="nc" id="L52">      Logger.info(&quot;expanded schema paths: {}&quot;, schemaFileService.getSchemaPaths());</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="nc" id="L50">      schemaFileService.loadExpandedSchemaPaths(request.getSchemaPaths());</span>
+<span class="nc" id="L51">      Logger.info(&quot;expanded schema paths: {}&quot;, schemaFileService.getSchemaPaths());</span>
     } else {
-<span class="fc" id="L54">      schemaFileService.setSchemaPaths(request.getSchemaPaths());</span>
+<span class="fc" id="L53">      schemaFileService.setSchemaPaths(request.getSchemaPaths());</span>
     }
 
     // load the schema jar files from dependencies
-<span class="fc" id="L58">    schemaFileService.loadSchemaJarFilesFromDependencies(</span>
-<span class="fc" id="L59">        artifacts, request.getSchemaJarFilesFromDependencies());</span>
+<span class="fc" id="L57">    schemaFileService.loadSchemaJarFilesFromDependencies(</span>
+<span class="fc" id="L58">        artifacts, request.getSchemaJarFilesFromDependencies());</span>
 
-<span class="fc" id="L61">    schemaFileService.loadSchemaUrls(request.getSchemaUrls());</span>
-<span class="fc" id="L62">    schemaFileService.loadIntrospectedSchemas(request.getIntrospectionRequests());</span>
-<span class="fc" id="L63">    schemaFileService.checkHasSchemaFiles();</span>
+<span class="fc" id="L60">    schemaFileService.loadSchemaUrls(request.getSchemaUrls());</span>
+<span class="fc" id="L61">    schemaFileService.loadIntrospectedSchemas(request.getIntrospectionRequests());</span>
+<span class="fc" id="L62">    schemaFileService.checkHasSchemaFiles();</span>
 
-<span class="pc bpc" id="L65" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="nc" id="L66">      schemaFileService.filterChangedSchemaFiles();</span>
-<span class="nc" id="L67">      Logger.info(&quot;changed schema files: {}&quot;, schemaFileService.getSchemaPaths());</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="nc" id="L65">      schemaFileService.filterChangedSchemaFiles();</span>
+<span class="nc" id="L66">      Logger.info(&quot;changed schema files: {}&quot;, schemaFileService.getSchemaPaths());</span>
     }
 
-<span class="pc bpc" id="L70" title="1 of 2 branches missed.">    if (schemaFileService.noWorkToDo()) {</span>
-<span class="nc" id="L71">      Logger.info(&quot;no files to generate&quot;);</span>
-<span class="nc" id="L72">      return;</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">    if (schemaFileService.noWorkToDo()) {</span>
+<span class="nc" id="L70">      Logger.info(&quot;no files to generate&quot;);</span>
+<span class="nc" id="L71">      return;</span>
     }
 
-<span class="fc" id="L75">    Map&lt;String, String&gt; typeMapping =</span>
-<span class="fc" id="L76">        typeMappingService.mergeTypeMapping(</span>
-<span class="fc" id="L77">            request.getTypeMapping(),</span>
-<span class="fc" id="L78">            request.getTypeMappingPropertiesFiles(),</span>
-<span class="fc" id="L79">            request.getLocalTypeMappingPropertiesFiles(),</span>
+<span class="fc" id="L74">    Map&lt;String, String&gt; typeMapping =</span>
+<span class="fc" id="L75">        typeMappingService.mergeTypeMapping(</span>
+<span class="fc" id="L76">            request.getTypeMapping(),</span>
+<span class="fc" id="L77">            request.getTypeMappingPropertiesFiles(),</span>
+<span class="fc" id="L78">            request.getLocalTypeMappingPropertiesFiles(),</span>
             artifacts,
             projectBaseDir);
 
-<span class="fc" id="L83">    final CodeGenConfig config =</span>
-        new GeneratedCodeGenConfigBuilder()
-<span class="fc" id="L85">            .setSchemas(Collections.emptySet())</span>
-<span class="fc" id="L86">            .setSchemaFiles(schemaFileService.getSchemaPaths())</span>
-<span class="fc" id="L87">            .setSchemaJarFilesFromDependencies(</span>
-<span class="fc" id="L88">                schemaFileService.getSchemaJarFilesFromDependencies())</span>
-<span class="fc" id="L89">            .setOutputDir(request.getOutputDir().toPath())</span>
-<span class="fc" id="L90">            .setExamplesOutputDir(request.getExamplesOutputDir().toPath())</span>
-<span class="fc" id="L91">            .setWriteToFiles(request.isWriteToFiles())</span>
-<span class="fc" id="L92">            .setPackageName(request.getPackageName())</span>
-<span class="fc" id="L93">            .setSubPackageNameClient(request.getSubPackageNameClient())</span>
-<span class="fc" id="L94">            .setSubPackageNameDatafetchers(request.getSubPackageNameDatafetchers())</span>
-<span class="fc" id="L95">            .setSubPackageNameTypes(request.getSubPackageNameTypes())</span>
-<span class="fc" id="L96">            .setSubPackageNameDocs(request.getSubPackageNameDocs())</span>
-<span class="fc" id="L97">            .setLanguage(Language.valueOf(request.getLanguage().toUpperCase()))</span>
-<span class="fc" id="L98">            .setGenerateBoxedTypes(request.isGenerateBoxedTypes())</span>
-<span class="fc" id="L99">            .setGenerateIsGetterForPrimitiveBooleanFields(</span>
-<span class="fc" id="L100">                request.isGenerateIsGetterForPrimitiveBooleanFields())</span>
-<span class="fc" id="L101">            .setGenerateClientApi(request.isGenerateClientApi())</span>
-<span class="fc" id="L102">            .setGenerateClientApiv2(request.isGenerateClientApiv2())</span>
-<span class="fc" id="L103">            .setGenerateInterfaces(request.isGenerateInterfaces())</span>
-<span class="fc" id="L104">            .setGenerateKotlinNullableClasses(request.isGenerateKotlinNullableClasses())</span>
-<span class="fc" id="L105">            .setGenerateKotlinClosureProjections(request.isGenerateKotlinClosureProjections())</span>
-<span class="fc" id="L106">            .setTypeMapping(typeMapping)</span>
-<span class="fc" id="L107">            .setIncludeQueries(request.getIncludeQueries())</span>
-<span class="fc" id="L108">            .setIncludeMutations(request.getIncludeMutations())</span>
-<span class="fc" id="L109">            .setIncludeSubscriptions(request.getIncludeSubscriptions())</span>
-<span class="fc" id="L110">            .setSkipEntityQueries(request.isSkipEntityQueries())</span>
-<span class="fc" id="L111">            .setShortProjectionNames(request.isShortProjectionNames())</span>
-<span class="fc" id="L112">            .setGenerateDataTypes(request.isGenerateDataTypes())</span>
-<span class="fc" id="L113">            .setKotlinAllFieldsOptional(request.isKotlinAllFieldsOptional())</span>
-<span class="fc" id="L114">            .setSnakeCaseConstantNames(request.isSnakeCaseConstantNames())</span>
-<span class="fc" id="L115">            .setGenerateInterfaceSetters(request.isGenerateInterfaceSetters())</span>
-<span class="fc" id="L116">            .setGenerateInterfaceMethodsForInterfaceFields(</span>
-<span class="fc" id="L117">                request.isGenerateInterfaceMethodsForInterfaceFields())</span>
-<span class="fc" id="L118">            .setGenerateDocs(request.getGenerateDocs())</span>
-<span class="fc" id="L119">            .setGeneratedDocsFolder(Paths.get(request.getGeneratedDocsFolder()))</span>
-<span class="fc" id="L120">            .setIncludeImports(</span>
-<span class="fc" id="L121">                Optional.ofNullable(request.getIncludeImports()).orElse(Collections.emptyMap()))</span>
-<span class="fc" id="L122">            .setIncludeEnumImports(toMap(request.getIncludeEnumImports()))</span>
-<span class="fc" id="L123">            .setIncludeClassImports(toMap(request.getIncludeClassImports()))</span>
-<span class="fc" id="L124">            .setGenerateCustomAnnotations(request.isGenerateCustomAnnotations())</span>
-<span class="fc" id="L125">            .setJavaGenerateAllConstructor(request.isJavaGenerateAllConstructor())</span>
-<span class="fc" id="L126">            .setImplementSerializable(request.isImplementSerializable())</span>
-<span class="fc" id="L127">            .setAddGeneratedAnnotation(request.isAddGeneratedAnnotation())</span>
-<span class="fc" id="L128">            .setDisableDatesInGeneratedAnnotation(request.isDisableDatesInGeneratedAnnotation())</span>
-<span class="fc" id="L129">            .setAddDeprecatedAnnotation(request.isAddDeprecatedAnnotation())</span>
-<span class="fc" id="L130">            .setTrackInputFieldSet(request.isTrackInputFieldSet())</span>
-<span class="fc" id="L131">            .setGenerateJSpecifyAnnotations(request.isGenerateJSpecifyAnnotations())</span>
-<span class="fc" id="L132">            .build();</span>
+<span class="fc" id="L82">    final CodeGenConfig config =</span>
+        new CodeGenConfigBuilder()
+<span class="fc" id="L84">            .setSchemas(Collections.emptySet())</span>
+<span class="fc" id="L85">            .setSchemaFiles(schemaFileService.getSchemaPaths())</span>
+<span class="fc" id="L86">            .setSchemaJarFilesFromDependencies(</span>
+<span class="fc" id="L87">                schemaFileService.getSchemaJarFilesFromDependencies())</span>
+<span class="fc" id="L88">            .setOutputDir(request.getOutputDir().toPath())</span>
+<span class="fc" id="L89">            .setExamplesOutputDir(request.getExamplesOutputDir().toPath())</span>
+<span class="fc" id="L90">            .setWriteToFiles(request.isWriteToFiles())</span>
+<span class="fc" id="L91">            .setPackageName(request.getPackageName())</span>
+<span class="fc" id="L92">            .setSubPackageNameClient(request.getSubPackageNameClient())</span>
+<span class="fc" id="L93">            .setSubPackageNameDatafetchers(request.getSubPackageNameDatafetchers())</span>
+<span class="fc" id="L94">            .setSubPackageNameTypes(request.getSubPackageNameTypes())</span>
+<span class="fc" id="L95">            .setSubPackageNameDocs(request.getSubPackageNameDocs())</span>
+<span class="fc" id="L96">            .setLanguage(Language.valueOf(request.getLanguage().toUpperCase()))</span>
+<span class="fc" id="L97">            .setGenerateBoxedTypes(request.isGenerateBoxedTypes())</span>
+<span class="fc" id="L98">            .setGenerateIsGetterForPrimitiveBooleanFields(</span>
+<span class="fc" id="L99">                request.isGenerateIsGetterForPrimitiveBooleanFields())</span>
+<span class="fc" id="L100">            .setGenerateClientApi(request.isGenerateClientApi())</span>
+<span class="fc" id="L101">            .setGenerateClientApiv2(request.isGenerateClientApiv2())</span>
+<span class="fc" id="L102">            .setGenerateInterfaces(request.isGenerateInterfaces())</span>
+<span class="fc" id="L103">            .setGenerateKotlinNullableClasses(request.isGenerateKotlinNullableClasses())</span>
+<span class="fc" id="L104">            .setGenerateKotlinClosureProjections(request.isGenerateKotlinClosureProjections())</span>
+<span class="fc" id="L105">            .setTypeMapping(typeMapping)</span>
+<span class="fc" id="L106">            .setIncludeQueries(request.getIncludeQueries())</span>
+<span class="fc" id="L107">            .setIncludeMutations(request.getIncludeMutations())</span>
+<span class="fc" id="L108">            .setIncludeSubscriptions(request.getIncludeSubscriptions())</span>
+<span class="fc" id="L109">            .setSkipEntityQueries(request.isSkipEntityQueries())</span>
+<span class="fc" id="L110">            .setShortProjectionNames(request.isShortProjectionNames())</span>
+<span class="fc" id="L111">            .setGenerateDataTypes(request.isGenerateDataTypes())</span>
+<span class="fc" id="L112">            .setKotlinAllFieldsOptional(request.isKotlinAllFieldsOptional())</span>
+<span class="fc" id="L113">            .setSnakeCaseConstantNames(request.isSnakeCaseConstantNames())</span>
+<span class="fc" id="L114">            .setGenerateInterfaceSetters(request.isGenerateInterfaceSetters())</span>
+<span class="fc" id="L115">            .setGenerateInterfaceMethodsForInterfaceFields(</span>
+<span class="fc" id="L116">                request.isGenerateInterfaceMethodsForInterfaceFields())</span>
+<span class="fc" id="L117">            .setGenerateDocs(request.getGenerateDocs())</span>
+<span class="fc" id="L118">            .setGeneratedDocsFolder(Paths.get(request.getGeneratedDocsFolder()))</span>
+<span class="fc" id="L119">            .setIncludeImports(</span>
+<span class="fc" id="L120">                Optional.ofNullable(request.getIncludeImports()).orElse(Collections.emptyMap()))</span>
+<span class="fc" id="L121">            .setIncludeEnumImports(toMap(request.getIncludeEnumImports()))</span>
+<span class="fc" id="L122">            .setIncludeClassImports(toMap(request.getIncludeClassImports()))</span>
+<span class="fc" id="L123">            .setGenerateCustomAnnotations(request.isGenerateCustomAnnotations())</span>
+<span class="fc" id="L124">            .setJavaGenerateAllConstructor(request.isJavaGenerateAllConstructor())</span>
+<span class="fc" id="L125">            .setImplementSerializable(request.isImplementSerializable())</span>
+<span class="fc" id="L126">            .setAddGeneratedAnnotation(request.isAddGeneratedAnnotation())</span>
+<span class="fc" id="L127">            .setDisableDatesInGeneratedAnnotation(request.isDisableDatesInGeneratedAnnotation())</span>
+<span class="fc" id="L128">            .setAddDeprecatedAnnotation(request.isAddDeprecatedAnnotation())</span>
+<span class="fc" id="L129">            .setTrackInputFieldSet(request.isTrackInputFieldSet())</span>
+<span class="fc" id="L130">            .setGenerateJSpecifyAnnotations(request.isGenerateJSpecifyAnnotations())</span>
+<span class="fc" id="L131">            .build();</span>
 
-<span class="pc bpc" id="L134" title="1 of 2 branches missed.">    if (request.isOmitNullInputFields()) {</span>
-<span class="nc" id="L135">      Logger.warn(</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">    if (request.isOmitNullInputFields()) {</span>
+<span class="nc" id="L134">      Logger.warn(</span>
           &quot;omitNullInputFields is no longer supported by graphql-dgs-codegen-core &gt;= 8.2.1; ignoring.&quot;);
     }
 
-<span class="fc" id="L139">    Logger.info(&quot;Codegen config: \n{}&quot;, config);</span>
-<span class="fc" id="L140">    final CodeGen codeGen = new CodeGen(config);</span>
-<span class="fc" id="L141">    codeGen.generate();</span>
+<span class="fc" id="L138">    Logger.info(&quot;Codegen config: \n{}&quot;, config);</span>
+<span class="fc" id="L139">    final CodeGen codeGen = new CodeGen(config);</span>
+<span class="fc" id="L140">    codeGen.generate();</span>
 
-<span class="pc bpc" id="L143" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="nc" id="L144">      schemaFileService.syncManifest();</span>
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="nc" id="L143">      schemaFileService.syncManifest();</span>
     }
-<span class="fc" id="L146">  }</span>
+<span class="fc" id="L145">  }</span>
 
   /**
    * Converts a map of ParameterMap to a map of string-to-string maps.
@@ -152,12 +151,12 @@ public class CodegenExecutor {
    * @return a map of string to string maps
    */
   public static Map&lt;String, Map&lt;String, String&gt;&gt; toMap(Map&lt;String, ParameterMap&gt; m) {
-<span class="fc bfc" id="L155" title="All 2 branches covered.">    if (m == null) return Collections.emptyMap();</span>
-<span class="fc" id="L156">    return m.entrySet().stream()</span>
-<span class="fc" id="L157">        .collect(</span>
-<span class="fc" id="L158">            Collectors.toMap(</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">    if (m == null) return Collections.emptyMap();</span>
+<span class="fc" id="L155">    return m.entrySet().stream()</span>
+<span class="fc" id="L156">        .collect(</span>
+<span class="fc" id="L157">            Collectors.toMap(</span>
                 Map.Entry::getKey,
-<span class="pc bpc" id="L160" title="1 of 2 branches missed.">                e -&gt; e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">                e -&gt; e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
