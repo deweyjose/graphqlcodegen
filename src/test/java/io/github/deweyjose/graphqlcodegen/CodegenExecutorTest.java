@@ -146,6 +146,39 @@ class CodegenExecutorTest {
         "Should annotate nullable members with @Nullable");
   }
 
+  @SneakyThrows
+  @Test
+  void testGenerateProjectionWithArgumentsRetainsGenericParameters() {
+    File schemaFile = TestUtils.getFile("schema/test-schema-issue-274.graphqls");
+
+    SchemaManifestService manifestService = new SchemaManifestService(outputDir, outputDir);
+    schemaFileService =
+        new SchemaFileService(
+            outputDir, manifestService, remoteSchemaService, schemaTransformationService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService);
+
+    TestCodegenProvider config = new TestCodegenProvider();
+    config.setSchemaPaths(Set.of(schemaFile));
+    config.setOutputDir(outputDir);
+    config.setSchemaManifestOutputDir(outputDir);
+
+    executor.execute(config, new HashSet<>(), new File("."));
+
+    File generatedProjection = new File(outputDir, "com/example/client/AccountProjection.java");
+    assertTrue(generatedProjection.exists(), "Should generate AccountProjection client file");
+
+    String normalizedProjection =
+        Files.readString(generatedProjection.toPath()).replaceAll("\\s+", " ");
+    assertTrue(
+        normalizedProjection.contains(
+            "public AccountProjection<AccountProjection<PARENT, ROOT>, ROOT> permissions(List<String> filter) {"),
+        "Projection methods with arguments should preserve generic type parameters");
+    assertFalse(
+        normalizedProjection.contains(
+            "public AccountProjection permissions(List<String> filter) {"),
+        "Projection methods with arguments should not use raw types");
+  }
+
   @Test
   void testToMapNullAndEmptyAndNormal() {
     assertEquals(Collections.emptyMap(), CodegenExecutor.toMap(null));

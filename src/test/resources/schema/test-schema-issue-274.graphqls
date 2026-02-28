@@ -1,0 +1,8 @@
+type Query {
+    account: Account
+}
+
+type Account {
+    name: String
+    permissions(filter: [String!]!): Account
+}
