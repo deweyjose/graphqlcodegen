@@ -6,7 +6,7 @@ import lombok.SneakyThrows;
 
 public class TestUtils {
   public static final String TEST_SCHEMA_URL =
-      "https://raw.githubusercontent.com/deweyjose/graphqlcodegen/main/graphqlcodegen-maven-plugin/src/test/resources/schema/foo.graphqls";
+      "https://raw.githubusercontent.com/deweyjose/graphqlcodegen/main/src/test/resources/schema/foo.graphqls";
 
   /**
    * wrapper for resource File objects

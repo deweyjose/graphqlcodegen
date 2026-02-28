@@ -27,12 +27,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
-          path: graphqlcodegen-maven-plugin/target/site/jacoco
+          path: target/site/jacoco
       
       - name: JaCoCo Report
         uses: madrapps/jacoco-report@v1.7.2
         with:
-          paths: graphqlcodegen-maven-plugin/target/site/jacoco/jacoco.xml
+          paths: target/site/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 80
           min-coverage-changed-files: 90
@@ -42,7 +42,7 @@ jobs:
       - name: Generate Coverage Badge        
         uses: cicirello/jacoco-badge-generator@v2
         with:
-          jacoco-csv-file: graphqlcodegen-maven-plugin/target/site/jacoco/jacoco.csv
+          jacoco-csv-file: target/site/jacoco/jacoco.csv
           badges-directory: badges
 
       - name: Commit and push coverage badge
@@ -61,7 +61,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./graphqlcodegen-maven-plugin/target/site/jacoco
+          publish_dir: ./target/site/jacoco
           publish_branch: gh-pages
 
 permissions:

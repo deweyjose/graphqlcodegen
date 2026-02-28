@@ -6,16 +6,16 @@ Quick guide for cloud/cursor agents working in this repository.
 
 ## Repository layout
 
-- `graphqlcodegen-maven-plugin`: actual Maven plugin users consume.
-- `graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/CodeGenConfigBuilder.java`: checked-in builder that mirrors upstream DGS `CodeGenConfig`.
-- root `pom.xml`: parent/dependency management.
+- `src/main/java/io/github/deweyjose/graphqlcodegen`: main plugin source.
+- `src/main/java/io/github/deweyjose/graphqlcodegen/CodeGenConfigBuilder.java`: checked-in builder that mirrors upstream DGS `CodeGenConfig`.
+- root `pom.xml`: single-module plugin build descriptor.
 
 ## Common workflow for DGS option updates
 
 1. Check issue + upstream Netflix DGS release notes.
 2. Confirm `graphql-dgs-codegen-core.version` in root `pom.xml`.
 3. Expose new option in:
-   - `graphqlcodegen-maven-plugin/src/main/java/.../Codegen.java` (`@Parameter`)
+   - `src/main/java/.../Codegen.java` (`@Parameter`)
    - `CodegenConfigProvider.java` (getter method)
    - `CodegenExecutor.java` (forward to `CodeGenConfigBuilder`)
 4. Add/update tests in `CodegenExecutorTest` and fixtures under `src/test/resources/schema`.
@@ -40,7 +40,7 @@ Prefer Maven wrapper:
 
 ```bash
 ./mvnw spotless:apply
-./mvnw -pl graphqlcodegen-maven-plugin test
+./mvnw test
 ```
 
 ## Important gotcha
@@ -53,7 +53,7 @@ upstream `CodeGenConfig`, then wire any new options through `Codegen.java`/`Code
 
 Current plugin artifact version is in:
 
-- `graphqlcodegen-maven-plugin/pom.xml` -> `<version>`
+- `pom.xml` -> `<version>`
 
 After bumping:
 

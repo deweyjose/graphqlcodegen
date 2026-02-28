@@ -9,7 +9,7 @@ Found [here](https://github.com/Netflix/dgs-codegen).
 
 # Architecture
 
-This project is organized as a single Maven module:
+This project is organized as a single Maven module at the repository root:
 
 ## graphqlcodegen-maven-plugin
 This is the Maven plugin that users apply to their projects. It provides goals for generating Java (or Kotlin) code from GraphQL schemas, mirroring the functionality of the Netflix DGS Gradle codegen plugin. It is responsible for:
@@ -17,7 +17,7 @@ This is the Maven plugin that users apply to their projects. It provides goals f
 - Resolving schema files from the local project and dependencies.
 - Invoking the DGS codegen library with the correct configuration.
 - Managing incremental code generation and manifest tracking.
-- Holding a checked-in `CodeGenConfigBuilder` (`graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen`) that mirrors the upstream `CodeGenConfig` constructor shape.
+- Holding a checked-in `CodeGenConfigBuilder` (`src/main/java/io/github/deweyjose/graphqlcodegen`) that mirrors the upstream `CodeGenConfig` constructor shape.
 
 # Contributing
 
@@ -34,16 +34,16 @@ When constructor parameters change upstream:
 
 - Update `CodeGenConfigBuilder` to match the latest constructor shape and ordering.
 - Wire new options through:
-  - `graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java`
-  - `graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/CodegenConfigProvider.java`
-  - `graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/CodegenExecutor.java`
+  - `src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java`
+  - `src/main/java/io/github/deweyjose/graphqlcodegen/CodegenConfigProvider.java`
+  - `src/main/java/io/github/deweyjose/graphqlcodegen/CodegenExecutor.java`
 - Add/update tests and document options in this README.
 
 Process:
 
 1. Bump the version in [pom.xml](pom.xml)
 2. Run `mvn spotless:apply clean install` locally to ensure the project still builds and is formatted
-3. Adjust [Codegen](graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) and related classes to support new options if needed
+3. Adjust [Codegen](src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) and related classes to support new options if needed
 4. **Test with the example project:**
    - Clone [graphqlcodegen-example](https://github.com/deweyjose/graphqlcodegen-example)
    - Bump the plugin version in its `pom.xml` to match your changes
