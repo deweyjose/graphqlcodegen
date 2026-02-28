@@ -9,22 +9,15 @@ Found [here](https://github.com/Netflix/dgs-codegen).
 
 # Architecture
 
-This project is organized into two main Maven modules:
+This project is organized as a single Maven module at the repository root:
 
-## 1. graphqlcodegen-maven-plugin
-This is the main Maven plugin that users apply to their projects. It provides goals for generating Java (or Kotlin) code from GraphQL schemas, mirroring the functionality of the Netflix DGS Gradle codegen plugin. It is responsible for:
+## graphqlcodegen-maven-plugin
+This is the Maven plugin that users apply to their projects. It provides goals for generating Java (or Kotlin) code from GraphQL schemas, mirroring the functionality of the Netflix DGS Gradle codegen plugin. It is responsible for:
 - Accepting configuration via plugin parameters.
 - Resolving schema files from the local project and dependencies.
 - Invoking the DGS codegen library with the correct configuration.
 - Managing incremental code generation and manifest tracking.
-
-## 2. graphqlcodegen-bootstrap-plugin
-This is a helper plugin used only during the build of this project. Its purpose is to:
-- Download the latest `CodeGenConfig.kt` from the Netflix DGS codegen repository.
-- Parse the constructor parameters and their types.
-- Generate a Java builder class that exactly matches the upstream config surface.
-
-This architecture ensures that the Maven plugin's configuration is always in sync with the upstream DGS codegen library, and makes it much easier to adapt to changes in the core library.
+- Holding a checked-in `CodeGenConfigBuilder` (`src/main/java/io/github/deweyjose/graphqlcodegen`) that mirrors the upstream `CodeGenConfig` constructor shape.
 
 # Contributing
 
@@ -37,18 +30,20 @@ newer [releases](https://github.com/Netflix/dgs-codegen/releases) of the core DG
 
 PRs are welcome as well. The level of difficulty across DGS Codegen updates varies. Typically, new plugin options are added when the [CodeGenConfig](https://github.com/Netflix/dgs-codegen/blob/master/graphql-dgs-codegen-core/src/main/kotlin/com/netflix/graphql/dgs/codegen/CodeGen.kt) constructor in the core library changes.
 
-**Good news:** The process for handling constructor changes is now much simpler:
+When constructor parameters change upstream:
 
-- The `graphqlcodegen-bootstrap-plugin` will automatically fetch the latest `CodeGenConfig.kt` and generate a new builder class reflecting any new or changed parameters.
-- If the upstream constructor changes, you will get a compile failure in the main plugin module. The error will clearly indicate which parameters are missing or need to be updated.
-- Simply update the main plugin's configuration and wiring to match the new builder and parameters. The compile error will guide you to what needs to be fixed.
-- Make sure to document any new options in the `Options` section below.
+- Update `CodeGenConfigBuilder` to match the latest constructor shape and ordering.
+- Wire new options through:
+  - `src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java`
+  - `src/main/java/io/github/deweyjose/graphqlcodegen/CodegenConfigProvider.java`
+  - `src/main/java/io/github/deweyjose/graphqlcodegen/CodegenExecutor.java`
+- Add/update tests and document options in this README.
 
 Process:
 
 1. Bump the version in [pom.xml](pom.xml)
 2. Run `mvn spotless:apply clean install` locally to ensure the project still builds and is formatted
-3. Adjust [CodeGen](src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) and related classes to support new options if needed
+3. Adjust [Codegen](src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) and related classes to support new options if needed
 4. **Test with the example project:**
    - Clone [graphqlcodegen-example](https://github.com/deweyjose/graphqlcodegen-example)
    - Bump the plugin version in its `pom.xml` to match your changes
