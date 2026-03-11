@@ -1,7 +1,11 @@
 package io.github.deweyjose.graphqlcodegen.services;
 
 import graphql.language.*;
+import graphql.schema.Coercing;
+import graphql.schema.DataFetcher;
+import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.TypeResolver;
 import graphql.schema.idl.*;
 import io.github.deweyjose.graphqlcodegen.Logger;
 import java.nio.file.Files;
@@ -14,6 +18,27 @@ public class SchemaTransformationService {
   private static final String QUERY = "Query";
   private static final String MUTATION = "Mutation";
   private static final String SUBSCRIPTION = "Subscription";
+  private static final DataFetcher<Object> NO_OP_DATA_FETCHER = environment -> null;
+  private static final TypeResolver NO_OP_TYPE_RESOLVER = environment -> null;
+  private static final Coercing<Object, Object> PASS_THROUGH_COERCING =
+      new Coercing<>() {
+        @Override
+        public Object serialize(Object dataFetcherResult) {
+          return dataFetcherResult;
+        }
+
+        @Override
+        public Object parseValue(Object input) {
+          return input;
+        }
+
+        @Override
+        public Object parseLiteral(Object input) {
+          return input;
+        }
+      };
+  private static final RuntimeWiring SCHEMA_PRINTING_WIRING =
+      RuntimeWiring.newRuntimeWiring().wiringFactory(new SchemaPrintingWiringFactory()).build();
 
   /**
    * Transforms GraphQL schema content by normalizing root operation type names.
@@ -134,8 +159,52 @@ public class SchemaTransformationService {
 
   private String printSchema(TypeDefinitionRegistry registry) {
     GraphQLSchema schema =
-        new SchemaGenerator()
-            .makeExecutableSchema(registry, RuntimeWiring.newRuntimeWiring().build());
+        new SchemaGenerator().makeExecutableSchema(registry, SCHEMA_PRINTING_WIRING);
     return new SchemaPrinter().print(schema);
+  }
+
+  private static final class SchemaPrintingWiringFactory implements WiringFactory {
+    @Override
+    public boolean providesTypeResolver(InterfaceWiringEnvironment environment) {
+      return true;
+    }
+
+    @Override
+    public TypeResolver getTypeResolver(InterfaceWiringEnvironment environment) {
+      return NO_OP_TYPE_RESOLVER;
+    }
+
+    @Override
+    public boolean providesTypeResolver(UnionWiringEnvironment environment) {
+      return true;
+    }
+
+    @Override
+    public TypeResolver getTypeResolver(UnionWiringEnvironment environment) {
+      return NO_OP_TYPE_RESOLVER;
+    }
+
+    @Override
+    public boolean providesDataFetcher(FieldWiringEnvironment environment) {
+      return true;
+    }
+
+    @Override
+    public DataFetcher<?> getDataFetcher(FieldWiringEnvironment environment) {
+      return NO_OP_DATA_FETCHER;
+    }
+
+    @Override
+    public boolean providesScalar(ScalarWiringEnvironment environment) {
+      return !ScalarInfo.isGraphqlSpecifiedScalar(environment.getScalarTypeDefinition().getName());
+    }
+
+    @Override
+    public GraphQLScalarType getScalar(ScalarWiringEnvironment environment) {
+      return GraphQLScalarType.newScalar()
+          .name(environment.getScalarTypeDefinition().getName())
+          .coercing(PASS_THROUGH_COERCING)
+          .build();
+    }
   }
 }
