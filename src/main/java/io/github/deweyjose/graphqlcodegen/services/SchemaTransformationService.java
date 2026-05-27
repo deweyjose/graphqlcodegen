@@ -94,15 +94,11 @@ public class SchemaTransformationService {
    */
   private void renameTypeAndExtensions(
       TypeDefinitionRegistry registry, String oldName, String newName) {
-    registry
-        .getType(oldName)
-        .ifPresent(
-            type -> {
-              if (type instanceof ObjectTypeDefinition objType) {
-                registry.remove(type);
-                registry.add(objType.transform(builder -> builder.name(newName)));
-              }
-            });
+    TypeDefinition<?> type = registry.getTypeOrNull(oldName);
+    if (type instanceof ObjectTypeDefinition objType) {
+      registry.remove(type);
+      registry.add(objType.transform(builder -> builder.name(newName)));
+    }
 
     List<ObjectTypeExtensionDefinition> extensions =
         new ArrayList<>(registry.objectTypeExtensions().getOrDefault(oldName, List.of()));
