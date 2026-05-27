@@ -2,6 +2,7 @@ package io.github.deweyjose.graphqlcodegen.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.github.deweyjose.graphqlcodegen.Slf4jLogger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,7 +11,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 class SchemaTransformationServiceTest {
 
-  private final SchemaTransformationService service = new SchemaTransformationService();
+  private final SchemaTransformationService service =
+      new SchemaTransformationService(new Slf4jLogger());
 
   @Test
   void shouldTransformCustomRootTypes() {

@@ -22,6 +22,7 @@ import org.apache.maven.project.MavenProject;
 @Getter
 @Mojo(
     name = "generate",
+    threadSafe = true,
     defaultPhase = LifecyclePhase.GENERATE_SOURCES,
     requiresDependencyResolution = ResolutionScope.COMPILE)
 public class Codegen extends AbstractMojo implements CodegenConfigProvider {
@@ -193,21 +194,21 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
 
   @Override
   public void execute() {
-    Logger.registerMavenLog(getLog());
+    Logger logger = new MavenLogger(getLog());
 
     if (skip) {
-      Logger.info("Skipping code generation as requested (skip=true)");
+      logger.info("Skipping code generation as requested (skip=true)");
       return;
     }
 
     SchemaManifestService manifest =
         new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());
     TypeMappingService typeMappingService = new TypeMappingService();
-    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest);
+    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest, logger);
 
     Set<Artifact> artifacts = project.getArtifacts();
 
-    var executor = new CodegenExecutor(schemaFileService, typeMappingService);
+    var executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);
     executor.execute(this, artifacts, project.getBasedir());
 
     if (autoAddSource) {
