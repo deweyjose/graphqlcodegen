@@ -158,4 +158,68 @@ class SchemaTransformationServiceTest {
     assertTrue(transformed.contains("hello: String"));
     assertTrue(Files.readString(schemaFile).contains("type Query {"));
   }
+
+  @Test
+  void shouldHandleCustomScalarsInIntrospectionStyleSchema() {
+    String schema =
+        """
+            schema {
+                query: query_root
+                mutation: mutation_root
+                subscription: subscription_root
+            }
+
+            scalar uuid
+            scalar timestamptz
+
+            type query_root {
+                pipeline(where: PipelineBoolExp): [Pipeline!]!
+            }
+
+            type mutation_root {
+                insertPipeline(object: PipelineInsertInput!): PipelineMutationResponse!
+            }
+
+            type subscription_root {
+                pipelineStream(where: PipelineBoolExp): [Pipeline!]!
+            }
+
+            type Pipeline {
+                id: uuid!
+                startedAt: timestamptz
+            }
+
+            input PipelineBoolExp {
+                id: UuidComparisonExp
+                startedAt: TimestamptzComparisonExp
+            }
+
+            input UuidComparisonExp {
+                _eq: uuid
+            }
+
+            input TimestamptzComparisonExp {
+                _eq: timestamptz
+            }
+
+            input PipelineInsertInput {
+                id: uuid
+                startedAt: timestamptz
+            }
+
+            type PipelineMutationResponse {
+                returning: [Pipeline!]!
+            }
+            """;
+
+    String transformed = assertDoesNotThrow(() -> service.transformSchema(schema));
+
+    assertTrue(transformed.contains("type Query {"));
+    assertTrue(transformed.contains("type Mutation {"));
+    assertTrue(transformed.contains("type Subscription {"));
+    assertTrue(transformed.contains("scalar uuid"));
+    assertTrue(transformed.contains("scalar timestamptz"));
+    assertTrue(transformed.contains("id: uuid!"));
+    assertTrue(transformed.contains("startedAt: timestamptz"));
+  }
 }
