@@ -23,6 +23,7 @@ import org.apache.maven.artifact.Artifact;
 public class CodegenExecutor {
   private final SchemaFileService schemaFileService;
   private final TypeMappingService typeMappingService;
+  private final Logger logger;
 
   /**
    * Constructor for CodegenExecutor.
@@ -31,9 +32,10 @@ public class CodegenExecutor {
    * @param typeMappingService the type mapping service
    */
   public CodegenExecutor(
-      SchemaFileService schemaFileService, TypeMappingService typeMappingService) {
+      SchemaFileService schemaFileService, TypeMappingService typeMappingService, Logger logger) {
     this.schemaFileService = schemaFileService;
     this.typeMappingService = typeMappingService;
+    this.logger = logger;
   }
 
   /**
@@ -48,7 +50,7 @@ public class CodegenExecutor {
     // get the schema paths that might have changed or all of them.
     if (request.isOnlyGenerateChanged()) {
       schemaFileService.loadExpandedSchemaPaths(request.getSchemaPaths());
-      Logger.info("expanded schema paths: {}", schemaFileService.getSchemaPaths());
+      logger.info("expanded schema paths: {}", schemaFileService.getSchemaPaths());
     } else {
       schemaFileService.setSchemaPaths(request.getSchemaPaths());
     }
@@ -63,11 +65,11 @@ public class CodegenExecutor {
 
     if (request.isOnlyGenerateChanged()) {
       schemaFileService.filterChangedSchemaFiles();
-      Logger.info("changed schema files: {}", schemaFileService.getSchemaPaths());
+      logger.info("changed schema files: {}", schemaFileService.getSchemaPaths());
     }
 
     if (schemaFileService.noWorkToDo()) {
-      Logger.info("no files to generate");
+      logger.info("no files to generate");
       return;
     }
 
@@ -131,11 +133,11 @@ public class CodegenExecutor {
             .build();
 
     if (request.isOmitNullInputFields()) {
-      Logger.warn(
+      logger.warn(
           "omitNullInputFields is no longer supported by graphql-dgs-codegen-core >= 8.2.1; ignoring.");
     }
 
-    Logger.info("Codegen config: \n{}", config);
+    logger.info("Codegen config: \n{}", config);
     final CodeGen codeGen = new CodeGen(config);
     codeGen.generate();
 

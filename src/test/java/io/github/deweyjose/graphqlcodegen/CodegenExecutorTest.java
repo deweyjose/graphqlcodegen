@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 class CodegenExecutorTest {
 
   private RemoteSchemaService remoteSchemaService;
+  private Logger logger;
   private SchemaTransformationService schemaTransformationService;
   private SchemaFileService schemaFileService;
   private TypeMappingService typeMappingService;
@@ -35,7 +36,8 @@ class CodegenExecutorTest {
   @BeforeEach
   void setUp() {
     remoteSchemaService = mock(RemoteSchemaService.class);
-    schemaTransformationService = new SchemaTransformationService();
+    logger = new Slf4jLogger();
+    schemaTransformationService = new SchemaTransformationService(logger);
     typeMappingService = new TypeMappingService();
 
     // Setup single output directory
@@ -55,7 +57,7 @@ class CodegenExecutorTest {
     schemaFileService =
         new SchemaFileService(
             outputDir, manifestService, remoteSchemaService, schemaTransformationService);
-    executor = new CodegenExecutor(schemaFileService, typeMappingService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);
 
     TestCodegenProvider config = new TestCodegenProvider();
     config.setSchemaPaths(Set.of(schemaFile));
@@ -84,7 +86,7 @@ class CodegenExecutorTest {
     schemaFileService =
         new SchemaFileService(
             outputDir, manifestService, remoteSchemaService, schemaTransformationService);
-    executor = new CodegenExecutor(schemaFileService, typeMappingService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);
 
     TestCodegenProvider config = new TestCodegenProvider();
     config.setOutputDir(outputDir);
@@ -118,7 +120,7 @@ class CodegenExecutorTest {
     schemaFileService =
         new SchemaFileService(
             outputDir, manifestService, remoteSchemaService, schemaTransformationService);
-    executor = new CodegenExecutor(schemaFileService, typeMappingService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);
 
     TestCodegenProvider config = new TestCodegenProvider();
     config.setSchemaPaths(Set.of(schemaFile));
@@ -155,7 +157,7 @@ class CodegenExecutorTest {
     schemaFileService =
         new SchemaFileService(
             outputDir, manifestService, remoteSchemaService, schemaTransformationService);
-    executor = new CodegenExecutor(schemaFileService, typeMappingService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);
 
     TestCodegenProvider config = new TestCodegenProvider();
     config.setSchemaPaths(Set.of(schemaFile));
@@ -211,7 +213,7 @@ class CodegenExecutorTest {
     schemaFileService =
         new SchemaFileService(
             outputDir, manifestService, remoteSchemaService, schemaTransformationService);
-    executor = new CodegenExecutor(schemaFileService, typeMappingService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);
 
     executor.execute(config, new HashSet<>(), new File("."));
 
@@ -253,7 +255,7 @@ class CodegenExecutorTest {
     schemaFileService =
         new SchemaFileService(
             outputDir, manifestService, remoteSchemaService, schemaTransformationService);
-    executor = new CodegenExecutor(schemaFileService, typeMappingService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);
 
     executor.execute(config, new HashSet<>(), new File("."));
 

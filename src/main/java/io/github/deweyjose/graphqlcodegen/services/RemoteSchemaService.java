@@ -31,6 +31,7 @@ import lombok.SneakyThrows;
 public class RemoteSchemaService {
   private final HttpClient httpClient;
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final Logger logger;
 
   /**
    * Represents a GraphQL introspection operation, including the query and optional operation name.
@@ -46,7 +47,8 @@ public class RemoteSchemaService {
   }
 
   /** Constructs a new RemoteSchemaService using Java's built-in HttpClient. */
-  public RemoteSchemaService() {
+  public RemoteSchemaService(Logger logger) {
+    this.logger = logger;
     this.httpClient = HttpClient.newHttpClient();
   }
 
@@ -61,7 +63,7 @@ public class RemoteSchemaService {
   public String getRemoteSchemaFile(String url) throws IOException, InterruptedException {
     HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
     HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-    Logger.debug("Remote schema file: {}", response.body());
+    logger.debug("Remote schema file: {}", response.body());
     if (response.statusCode() != 200) {
       throw new IOException("Failed to get remote schema file: " + response.statusCode());
     }
@@ -91,7 +93,7 @@ public class RemoteSchemaService {
 
     HttpRequest request = builder.build();
     HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-    Logger.debug("Introspection results: {}", response.body());
+    logger.debug("Introspection results: {}", response.body());
     if (response.statusCode() != 200) {
       throw new IOException("Failed to get introspection results: " + response.statusCode());
     }

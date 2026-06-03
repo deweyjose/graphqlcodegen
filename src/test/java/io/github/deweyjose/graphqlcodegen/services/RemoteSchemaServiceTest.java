@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import io.github.deweyjose.graphqlcodegen.Slf4jLogger;
 import io.github.deweyjose.graphqlcodegen.TestUtils;
 import io.github.deweyjose.graphqlcodegen.services.RemoteSchemaService.IntrospectionOperation;
 import java.io.IOException;
@@ -16,9 +17,11 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class RemoteSchemaServiceTest {
+  private Slf4jLogger logger;
   private static HttpServer server;
   private static String baseUrl;
   private static final String GET_RESPONSE = "schema { query: Query }";
@@ -76,16 +79,21 @@ class RemoteSchemaServiceTest {
     server.stop(0);
   }
 
+  @BeforeEach
+  void setUp() {
+    logger = new Slf4jLogger();
+  }
+
   @Test
   void testGetRemoteSchemaFile_success() throws Exception {
-    RemoteSchemaService service = new RemoteSchemaService();
+    RemoteSchemaService service = new RemoteSchemaService(logger);
     String result = service.getRemoteSchemaFile(baseUrl + "/schema");
     assertEquals(GET_RESPONSE, result);
   }
 
   @Test
   void testGetIntrospectionResults_success() throws Exception {
-    RemoteSchemaService service = new RemoteSchemaService();
+    RemoteSchemaService service = new RemoteSchemaService(logger);
     String query = INTROSPECTION_QUERY;
     Map<String, String> headers = new HashMap<>();
     headers.put("X-Test-Header", "test");
@@ -110,7 +118,7 @@ class RemoteSchemaServiceTest {
 
   @Test
   void testGetRemoteSchemaFile_notFound() {
-    RemoteSchemaService service = new RemoteSchemaService();
+    RemoteSchemaService service = new RemoteSchemaService(logger);
     Exception ex =
         assertThrows(
             IOException.class,
@@ -143,7 +151,7 @@ class RemoteSchemaServiceTest {
     String url = "http://localhost:" + port + "/graphql";
     Map<String, String> headers = Map.of("X-Custom-Header", "expected-value");
 
-    RemoteSchemaService service = new RemoteSchemaService();
+    RemoteSchemaService service = new RemoteSchemaService(logger);
     String query = INTROSPECTION_QUERY;
     IntrospectionOperation operation =
         IntrospectionOperation.builder().query(query).operationName("IntrospectionQuery").build();

@@ -1,5 +1,6 @@
 package io.github.deweyjose.graphqlcodegen.services;
 
+import io.github.deweyjose.graphqlcodegen.Logger;
 import io.github.deweyjose.graphqlcodegen.parameters.IntrospectionRequest;
 import io.github.deweyjose.graphqlcodegen.services.RemoteSchemaService.IntrospectionOperation;
 import java.io.File;
@@ -36,9 +37,14 @@ public class SchemaFileService {
    *
    * @param outputDir the output directory to save the schema files
    * @param manifest the manifest service to use
+   * @param logger the maven logger
    */
-  public SchemaFileService(File outputDir, SchemaManifestService manifest) {
-    this(outputDir, manifest, new RemoteSchemaService(), new SchemaTransformationService());
+  public SchemaFileService(File outputDir, SchemaManifestService manifest, Logger logger) {
+    this(
+        outputDir,
+        manifest,
+        new RemoteSchemaService(logger),
+        new SchemaTransformationService(logger));
   }
 
   /**

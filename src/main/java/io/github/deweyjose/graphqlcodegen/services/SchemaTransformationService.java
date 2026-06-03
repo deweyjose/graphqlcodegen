@@ -11,9 +11,14 @@ import lombok.SneakyThrows;
 
 /** Service for transforming GraphQL schemas. */
 public class SchemaTransformationService {
+  private final Logger logger;
   private static final String QUERY = "Query";
   private static final String MUTATION = "Mutation";
   private static final String SUBSCRIPTION = "Subscription";
+
+  public SchemaTransformationService(Logger logger) {
+    this.logger = logger;
+  }
 
   /**
    * Transforms GraphQL schema content by normalizing root operation type names.
@@ -27,7 +32,7 @@ public class SchemaTransformationService {
     Optional<SchemaDefinition> schemaDefOpt = registry.schemaDefinition();
 
     if (schemaDefOpt.isEmpty()) {
-      Logger.debug("No schema definition found, skipping transformation");
+      logger.debug("No schema definition found, skipping transformation");
       return schemaContent;
     }
 
@@ -35,7 +40,7 @@ public class SchemaTransformationService {
     Map<String, String> typeMappings = extractRootTypeMappings(schemaDef);
 
     if (typeMappings.isEmpty()) {
-      Logger.debug("No custom root types found, skipping transformation");
+      logger.debug("No custom root types found, skipping transformation");
       return schemaContent;
     }
 
@@ -58,8 +63,8 @@ public class SchemaTransformationService {
   public String transformSchemaFile(Path schemaFile) {
     String content = Files.readString(schemaFile);
     String transformed = transformSchema(content);
-    Logger.debug("Original schema: {}", content);
-    Logger.debug("Transformed schema: {}", transformed);
+    logger.debug("Original schema: {}", content);
+    logger.debug("Transformed schema: {}", transformed);
     if (!content.equals(transformed)) {
       Files.writeString(schemaFile, transformed);
     }
