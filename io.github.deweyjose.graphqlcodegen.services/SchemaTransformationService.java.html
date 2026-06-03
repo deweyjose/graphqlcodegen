@@ -124,23 +124,19 @@ public class SchemaTransformationService {
    */
   private void renameTypeAndExtensions(
       TypeDefinitionRegistry registry, String oldName, String newName) {
-<span class="fc" id="L127">    registry</span>
-<span class="fc" id="L128">        .getType(oldName)</span>
-<span class="fc" id="L129">        .ifPresent(</span>
-            type -&gt; {
-<span class="pc bpc" id="L131" title="1 of 2 branches missed.">              if (type instanceof ObjectTypeDefinition objType) {</span>
-<span class="fc" id="L132">                registry.remove(type);</span>
-<span class="fc" id="L133">                registry.add(objType.transform(builder -&gt; builder.name(newName)));</span>
-              }
-<span class="fc" id="L135">            });</span>
+<span class="fc" id="L127">    TypeDefinition&lt;?&gt; type = registry.getTypeOrNull(oldName);</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">    if (type instanceof ObjectTypeDefinition objType) {</span>
+<span class="fc" id="L129">      registry.remove(type);</span>
+<span class="fc" id="L130">      registry.add(objType.transform(builder -&gt; builder.name(newName)));</span>
+    }
 
-<span class="fc" id="L137">    List&lt;ObjectTypeExtensionDefinition&gt; extensions =</span>
-<span class="fc" id="L138">        new ArrayList&lt;&gt;(registry.objectTypeExtensions().getOrDefault(oldName, List.of()));</span>
-<span class="fc bfc" id="L139" title="All 2 branches covered.">    for (ObjectTypeExtensionDefinition ext : extensions) {</span>
-<span class="fc" id="L140">      registry.remove(ext);</span>
-<span class="fc" id="L141">      registry.add(ext.transformExtension(builder -&gt; builder.name(newName)));</span>
-<span class="fc" id="L142">    }</span>
-<span class="fc" id="L143">  }</span>
+<span class="fc" id="L133">    List&lt;ObjectTypeExtensionDefinition&gt; extensions =</span>
+<span class="fc" id="L134">        new ArrayList&lt;&gt;(registry.objectTypeExtensions().getOrDefault(oldName, List.of()));</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">    for (ObjectTypeExtensionDefinition ext : extensions) {</span>
+<span class="fc" id="L136">      registry.remove(ext);</span>
+<span class="fc" id="L137">      registry.add(ext.transformExtension(builder -&gt; builder.name(newName)));</span>
+<span class="fc" id="L138">    }</span>
+<span class="fc" id="L139">  }</span>
 
   /**
    * Rebuilds the schema definition with the new operation type names.
@@ -151,65 +147,65 @@ public class SchemaTransformationService {
    */
   private SchemaDefinition rebuildSchemaDefinition(
       SchemaDefinition original, Map&lt;String, String&gt; typeMappings) {
-<span class="fc" id="L154">    List&lt;OperationTypeDefinition&gt; newOps = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L155" title="All 2 branches covered.">    for (OperationTypeDefinition op : original.getOperationTypeDefinitions()) {</span>
-<span class="fc" id="L156">      String updatedName =</span>
-<span class="fc" id="L157">          typeMappings.getOrDefault(op.getTypeName().getName(), op.getTypeName().getName());</span>
-<span class="fc" id="L158">      newOps.add(</span>
-<span class="fc" id="L159">          op.transform(</span>
-<span class="fc" id="L160">              builder -&gt; builder.typeName(TypeName.newTypeName().name(updatedName).build())));</span>
-<span class="fc" id="L161">    }</span>
-<span class="fc" id="L162">    return original.transform(builder -&gt; builder.operationTypeDefinitions(newOps));</span>
+<span class="fc" id="L150">    List&lt;OperationTypeDefinition&gt; newOps = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">    for (OperationTypeDefinition op : original.getOperationTypeDefinitions()) {</span>
+<span class="fc" id="L152">      String updatedName =</span>
+<span class="fc" id="L153">          typeMappings.getOrDefault(op.getTypeName().getName(), op.getTypeName().getName());</span>
+<span class="fc" id="L154">      newOps.add(</span>
+<span class="fc" id="L155">          op.transform(</span>
+<span class="fc" id="L156">              builder -&gt; builder.typeName(TypeName.newTypeName().name(updatedName).build())));</span>
+<span class="fc" id="L157">    }</span>
+<span class="fc" id="L158">    return original.transform(builder -&gt; builder.operationTypeDefinitions(newOps));</span>
   }
 
   private String printSchema(TypeDefinitionRegistry registry) {
-<span class="fc" id="L166">    GraphQLSchema schema =</span>
-<span class="fc" id="L167">        new SchemaGenerator().makeExecutableSchema(registry, SCHEMA_PRINTING_WIRING);</span>
-<span class="fc" id="L168">    return new SchemaPrinter().print(schema);</span>
+<span class="fc" id="L162">    GraphQLSchema schema =</span>
+<span class="fc" id="L163">        new SchemaGenerator().makeExecutableSchema(registry, SCHEMA_PRINTING_WIRING);</span>
+<span class="fc" id="L164">    return new SchemaPrinter().print(schema);</span>
   }
 
   private static final class SchemaPrintingWiringFactory implements WiringFactory {
     @Override
     public boolean providesTypeResolver(InterfaceWiringEnvironment environment) {
-<span class="nc" id="L174">      return true;</span>
+<span class="nc" id="L170">      return true;</span>
     }
 
     @Override
     public TypeResolver getTypeResolver(InterfaceWiringEnvironment environment) {
-<span class="nc" id="L179">      return NO_OP_TYPE_RESOLVER;</span>
+<span class="nc" id="L175">      return NO_OP_TYPE_RESOLVER;</span>
     }
 
     @Override
     public boolean providesTypeResolver(UnionWiringEnvironment environment) {
-<span class="nc" id="L184">      return true;</span>
+<span class="nc" id="L180">      return true;</span>
     }
 
     @Override
     public TypeResolver getTypeResolver(UnionWiringEnvironment environment) {
-<span class="nc" id="L189">      return NO_OP_TYPE_RESOLVER;</span>
+<span class="nc" id="L185">      return NO_OP_TYPE_RESOLVER;</span>
     }
 
     @Override
     public boolean providesDataFetcher(FieldWiringEnvironment environment) {
-<span class="fc" id="L194">      return true;</span>
+<span class="fc" id="L190">      return true;</span>
     }
 
     @Override
     public DataFetcher&lt;?&gt; getDataFetcher(FieldWiringEnvironment environment) {
-<span class="fc" id="L199">      return NO_OP_DATA_FETCHER;</span>
+<span class="fc" id="L195">      return NO_OP_DATA_FETCHER;</span>
     }
 
     @Override
     public boolean providesScalar(ScalarWiringEnvironment environment) {
-<span class="fc bfc" id="L204" title="All 2 branches covered.">      return !ScalarInfo.isGraphqlSpecifiedScalar(environment.getScalarTypeDefinition().getName());</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">      return !ScalarInfo.isGraphqlSpecifiedScalar(environment.getScalarTypeDefinition().getName());</span>
     }
 
     @Override
     public GraphQLScalarType getScalar(ScalarWiringEnvironment environment) {
-<span class="fc" id="L209">      return GraphQLScalarType.newScalar()</span>
-<span class="fc" id="L210">          .name(environment.getScalarTypeDefinition().getName())</span>
-<span class="fc" id="L211">          .coercing(PASS_THROUGH_COERCING)</span>
-<span class="fc" id="L212">          .build();</span>
+<span class="fc" id="L205">      return GraphQLScalarType.newScalar()</span>
+<span class="fc" id="L206">          .name(environment.getScalarTypeDefinition().getName())</span>
+<span class="fc" id="L207">          .coercing(PASS_THROUGH_COERCING)</span>
+<span class="fc" id="L208">          .build();</span>
     }
   }
 }
