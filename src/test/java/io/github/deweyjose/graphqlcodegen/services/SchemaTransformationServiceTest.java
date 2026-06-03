@@ -158,7 +158,7 @@ class SchemaTransformationServiceTest {
   }
 
   @Test
-    void shouldHandleCustomScalarsInIntrospectionStyleSchema() {
+  void shouldHandleCustomScalarsInIntrospectionStyleSchema() {
     String schema =
         """
             schema {
