@@ -53,7 +53,7 @@
     <lombok.version>1.18.42</lombok.version>
     <kotlinpoet-jvm.version>1.18.1</kotlinpoet-jvm.version>
     <spotless.version>3.0.0</spotless.version>
-    <maven-core.version>3.9.10</maven-core.version>
+    <maven-core.version>3.9.12</maven-core.version>
   </properties>
 
   <dependencyManagement>
