@@ -22,16 +22,46 @@ and clients from `.graphqls` schemas during the build.
 Always use the Maven wrapper (`./mvnw`), never a system `mvn` — it pins the build version.
 
 ```bash
-./mvnw -B -ntp verify        # full build + all tests + spotless:check (what CI runs)
-./mvnw test                  # tests only
+./mvnw -B -ntp verify        # plugin build + unit tests + spotless:check (what Java CI runs)
+./mvnw test                  # plugin unit tests only
 ./mvnw test -Dtest=SchemaTransformationServiceTest          # single test class
 ./mvnw test -Dtest=SchemaTransformationServiceTest#methodName   # single test method
 ./mvnw spotless:apply        # auto-format; ALWAYS run before committing
 ```
 
+These commands act on the **plugin module only** — the example modules are behind the
+`examples` profile and are NOT built or tested by a plain `verify`/`test` (see below).
+
+### Running the example tests (REQUIRED when you change codegen behavior)
+
+The vendored example harness under `examples/graphqlcodegen-example` is a real Maven submodule
+set that compiles generated code and runs a DGS runtime test against your **just-built** plugin.
+**Run it whenever you change generation behavior or the example config** — a green plugin
+`verify` alone does not prove the examples still generate and compile.
+
+```bash
+# Serve the schema the `server` module fetches (avoids a network dependency), then build the
+# example modules under -Pexamples. `install` builds the plugin FIRST, so the examples use it.
+python3 -m http.server 8000 \
+  --directory examples/graphqlcodegen-example/server/src/main/resources/schema &
+./mvnw -B -ntp -Pexamples install \
+  -pl '!examples/graphqlcodegen-example/client-introspection' \
+  -Dcodegen.server.schemaUrl=http://localhost:8000/main.graphqls
+```
+
+- This runs the plugin unit tests **and** the example's DGS runtime test (`ShowsDatafetcherTest`),
+  compiling all generated client/server/datafetcher code.
+- Use `install` (or `verify`), **not `test`** — `schemaJarFilesFromDependencies` reads `common`
+  as a packaged jar, which only exists from the `package` phase onward.
+- `client-introspection` is excluded because it generates from a **live** server. To exercise it,
+  run the full staged build the way the `E2E Example` workflow does (start the DGS server, then
+  build that module) — see `.github/workflows/e2e-example.yaml`.
+
 **Definition of done for any change:** `./mvnw -B -ntp verify` is green *and* `spotless:apply`
 has been run (otherwise `spotless:check` fails CI). google-java-format reformats aggressively,
 including test code — formatting-only diffs after edits are normal, so apply and re-stage.
+**If the change touches generation behavior or the example config, the example tests
+(`-Pexamples`, above) must also be green.**
 
 ## Architecture — request flow
 

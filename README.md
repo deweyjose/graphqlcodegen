@@ -9,7 +9,17 @@ Found [here](https://github.com/Netflix/dgs-codegen).
 
 # Architecture
 
-This project is organized as a single Maven module at the repository root:
+This project is a multi-module Maven reactor. The root `pom.xml` is a `pom`-packaging
+aggregator; the published artifact lives in the `graphqlcodegen-maven-plugin` module. The example
+project is vendored in and wired as Maven modules behind an `examples` profile, so the default
+build and release stay plugin-only.
+
+```
+.                                 # aggregator (pom)
+├── graphqlcodegen-maven-plugin/  # the published plugin (built by default)
+└── examples/graphqlcodegen-example/   # end-to-end harness (built only with -Pexamples)
+    ├── common/  server/  client/  client-introspection/
+```
 
 ## graphqlcodegen-maven-plugin
 This is the Maven plugin that users apply to their projects. It provides goals for generating Java (or Kotlin) code from GraphQL schemas, mirroring the functionality of the Netflix DGS Gradle codegen plugin. It is responsible for:
@@ -17,7 +27,16 @@ This is the Maven plugin that users apply to their projects. It provides goals f
 - Resolving schema files from the local project and dependencies.
 - Invoking the DGS codegen library with the correct configuration.
 - Managing incremental code generation and manifest tracking.
-- Holding a checked-in `CodeGenConfigBuilder` (`src/main/java/io/github/deweyjose/graphqlcodegen`) that mirrors the upstream `CodeGenConfig` constructor shape.
+- Holding a checked-in `CodeGenConfigBuilder` (`graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen`) that mirrors the upstream `CodeGenConfig` constructor shape.
+
+## examples/graphqlcodegen-example
+A vendored, multi-module DGS project that exercises the plugin end to end: jar-embedded schemas,
+remote/introspection schemas, type mappings, and client-API generation. It builds **only** under
+the `examples` profile and is validated on every push by the **E2E Example** GitHub Actions
+workflow, which builds it against the plugin compiled from the current commit. Spring Boot and the
+DGS framework live entirely in these modules and never enter the plugin's own build (a
+`maven-enforcer` rule bans Spring Boot from the plugin). See [Testing with the example
+project](#testing-with-the-example-project).
 
 # Contributing
 
@@ -34,22 +53,37 @@ When constructor parameters change upstream:
 
 - Update `CodeGenConfigBuilder` to match the latest constructor shape and ordering.
 - Wire new options through:
-  - `src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java`
-  - `src/main/java/io/github/deweyjose/graphqlcodegen/CodegenConfigProvider.java`
-  - `src/main/java/io/github/deweyjose/graphqlcodegen/CodegenExecutor.java`
+  - `graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java`
+  - `graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/CodegenConfigProvider.java`
+  - `graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/CodegenExecutor.java`
 - Add/update tests and document options in this README.
 
 Process:
 
-1. Bump the version in [pom.xml](pom.xml)
-2. Run `mvn spotless:apply clean install` locally to ensure the project still builds and is formatted
-3. Adjust [Codegen](src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) and related classes to support new options if needed
-4. **Test with the example project:**
-   - Clone [graphqlcodegen-example](https://github.com/deweyjose/graphqlcodegen-example)
-   - Bump the plugin version in its `pom.xml` to match your changes
-   - Run `mvn spotless:apply clean install` in the example project to ensure everything works as expected
+1. Bump the version in both [`graphqlcodegen-maven-plugin/pom.xml`](graphqlcodegen-maven-plugin/pom.xml) and the root aggregator [`pom.xml`](pom.xml) (keep them in sync).
+2. Run `./mvnw spotless:apply clean install` locally to ensure the plugin still builds and is formatted.
+3. Adjust [`Codegen.java`](graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) and related classes to support new options if needed.
+4. **Test with the example project** (now vendored in this repo — no separate clone needed). See below.
 
-> **Note:** In the future, the example repo will be folded into this repository as a set of test modules to make testing and validation even easier.
+## Testing with the example project
+
+The example project lives in `examples/graphqlcodegen-example` and builds against the plugin you
+just built. The **E2E Example** CI workflow runs the full chain on every push; to run it locally:
+
+```bash
+# Serve the schema the `server` module fetches (no network dependency), then build the example
+# modules under -Pexamples. `install` builds the plugin first, so the examples use it.
+python3 -m http.server 8000 \
+  --directory examples/graphqlcodegen-example/server/src/main/resources/schema &
+./mvnw -B -ntp -Pexamples install \
+  -pl '!examples/graphqlcodegen-example/client-introspection' \
+  -Dcodegen.server.schemaUrl=http://localhost:8000/main.graphqls
+```
+
+This compiles all generated code and runs the example's DGS runtime test. The
+`client-introspection` module is excluded because it generates from a **live** server; the
+`E2E Example` workflow starts the DGS server and then builds it (see
+[`.github/workflows/e2e-example.yaml`](.github/workflows/e2e-example.yaml)).
 
 # Overview
 

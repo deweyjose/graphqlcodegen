@@ -22,7 +22,7 @@
     <!--
       Remote schema URL the `server` module fetches at codegen time. Defaults to the
       schema published on `main`; CI overrides it (-Dcodegen.server.schemaUrl=...) to
-      point at a locally-served copy of the pinned schema so the e2e build has no
+      point at a locally-served copy of the in-repo schema so the e2e build has no
       external network dependency and stays consistent with the tested commit.
     -->
     <codegen.server.schemaUrl>https://raw.githubusercontent.com/deweyjose/graphqlcodegen-example/refs/heads/main/server/src/main/resources/schema/main.graphqls</codegen.server.schemaUrl>

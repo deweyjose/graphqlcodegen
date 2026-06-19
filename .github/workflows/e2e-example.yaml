@@ -44,7 +44,7 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Testing example against plugin version: $VERSION"
 
-      # Serve the pinned schema locally so the `server` module's <schemaUrls> codegen
+      # Serve the in-repo schema locally so the `server` module's <schemaUrls> codegen
       # has no external network dependency and uses the schema from the tested commit.
       - name: Serve example schema locally
         working-directory: examples/graphqlcodegen-example/server/src/main/resources/schema
