@@ -9,7 +9,10 @@ A **Maven plugin** (`io.github.deweyjose:graphqlcodegen-maven-plugin`) that wrap
 DGS codegen (`graphql-dgs-codegen-core`) so projects can generate GraphQL Java/Kotlin types
 and clients from `.graphqls` schemas during the build.
 
-- Single Maven module. Build descriptor: root `pom.xml`. Java **17**.
+- **Multi-module Maven reactor.** Root `pom.xml` is a `pom`-packaging **aggregator**; the plugin
+  lives in the **`graphqlcodegen-maven-plugin/`** module (this is the published artifact). The
+  vendored example harness under `examples/graphqlcodegen-example` builds only under the
+  **`examples` profile** — the default build and release are plugin-only. Java **17**.
 - The plugin exposes one goal: **`generate`** (`@Mojo(name = "generate")`), bound by default
   to the `generate-sources` phase.
 - Consumers configure it entirely through Maven `<configuration>` parameters.
@@ -94,15 +97,18 @@ all layers or it is silently unreachable from Maven. To add one:
 ## End-to-end example harness
 
 `examples/graphqlcodegen-example` is a **vendored copy** (plain tracked files) of the
-[`deweyjose/graphqlcodegen-example`](https://github.com/deweyjose/graphqlcodegen-example) project.
-The `E2E Example` workflow installs the plugin from source, then builds all four example modules
-against it (`common` → `server` → `client` → `client-introspection`), starting the DGS server so
+[`deweyjose/graphqlcodegen-example`](https://github.com/deweyjose/graphqlcodegen-example) project,
+wired into the reactor as Maven modules under the **`examples` profile**. The `E2E Example`
+workflow installs the plugin from source, then builds all four example modules against it
+(`common` → `server` → `client` → `client-introspection`), starting the DGS server so
 `client-introspection` can generate from live introspection. This validates real Maven-reactor
 behavior the mocked unit tests cannot.
 
-- **The example is never part of the plugin's Maven build.** Do **not** add it to `<modules>`; the
-  plugin's root `pom.xml` is not an aggregator. The example is built only by the workflow, in a
-  separate `mvn` invocation, with its own Spring Boot parent.
+- **The example is gated behind the `examples` profile**, so the default build/release builds only
+  the plugin module — Spring Boot never enters the plugin's own build. `./mvnw -Pexamples ...`
+  builds the plugin then the example modules (plugin first in reactor order, so the examples use the
+  just-built artifact). `client-introspection` additionally needs a running server, so the workflow
+  still stages the server start before building it.
 - **Dependency isolation is enforced.** The plugin must never depend on Spring Boot. The
   `maven-enforcer` `ban-spring-boot` rule (runs during every build, incl. `verify`) fails if it
   leaks in. The DGS framework core (`com.netflix.graphql.dgs:graphql-dgs`) is a legitimate
@@ -117,7 +123,8 @@ behavior the mocked unit tests cannot.
 
 Releasing publishes to **Maven Central** and is **irreversible** — only release green `main`.
 
-1. Bump the version in `pom.xml` → `<version>` (the only place it lives).
+1. Bump the version in **both** `graphqlcodegen-maven-plugin/pom.xml` (the published artifact) and
+   the root aggregator `pom.xml` → keep them in sync.
 2. `./mvnw spotless:apply`, commit, push to `main`, and wait for `main` CI to pass.
 3. Publish a **GitHub Release** with tag `graphqlcodegen-maven-plugin-<version>` targeting `main`.
    The `release: published` event triggers `publish.yaml`, which deploys to Maven Central via

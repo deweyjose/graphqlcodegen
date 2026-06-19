@@ -35,12 +35,12 @@ jobs:
       # 'ban-spring-boot' rule runs here, failing the job if Spring Boot ever leaks
       # into the plugin's own dependency graph.
       - name: Build & install plugin from source
-        run: ./mvnw -B -ntp install -DskipTests
+        run: ./mvnw -B -ntp install -DskipTests -pl graphqlcodegen-maven-plugin
 
       - name: Resolve plugin version
         id: plugin
         run: |
-          VERSION=$(./mvnw -q -DforceStdout help:evaluate -Dexpression=project.version)
+          VERSION=$(./mvnw -q -pl graphqlcodegen-maven-plugin -DforceStdout help:evaluate -Dexpression=project.version)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Testing example against plugin version: $VERSION"
 

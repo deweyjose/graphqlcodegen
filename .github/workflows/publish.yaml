@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        run: ./mvnw -B -ntp package --file pom.xml
+        run: ./mvnw -B -ntp package -pl graphqlcodegen-maven-plugin
 
       - name: Set up Apache Maven Central
         uses: actions/setup-java@v4
@@ -36,7 +36,7 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
       - name: Publish graphqlcodegen-maven-plugin to Apache Maven Central
-        run: ./mvnw -Prelease deploy
+        run: ./mvnw -Prelease deploy -pl graphqlcodegen-maven-plugin
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
