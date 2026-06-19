@@ -394,20 +394,6 @@ Example:
 <outputDir>${project.build.directory}/generated-sources</outputDir>
 ```
 
-## autoAddSource
-
-Controls whether the plugin automatically adds the generated sources directory to the Maven compile classpath. This eliminates the need for the build-helper-maven-plugin in most setups. 
-
-- Type: boolean
-- Required: false
-- Default: true
-
-Example:
-
-```xml
-<autoAddSource>true</autoAddSource>
-```
-
 ## exampleOutputDir
 
 - Type: string

@@ -260,11 +260,6 @@ public interface CodegenConfigProvider {
   List<String> getSchemaUrls();
 
   /**
-   * @return whether to auto add source
-   */
-  boolean isAutoAddSource();
-
-  /**
    * @return introspection requests
    */
   List<IntrospectionRequest> getIntrospectionRequests();

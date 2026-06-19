@@ -186,9 +186,6 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   @Parameter(property = "disableDatesInGeneratedAnnotation", defaultValue = "false")
   private boolean disableDatesInGeneratedAnnotation;
 
-  @Parameter(property = "autoAddSource", defaultValue = "true")
-  private boolean autoAddSource;
-
   @Parameter(property = "introspectionRequests")
   private List<IntrospectionRequest> introspectionRequests;
 
@@ -211,8 +208,6 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
     var executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);
     executor.execute(this, artifacts, project.getBasedir());
 
-    if (autoAddSource) {
-      project.addCompileSourceRoot(outputDir.getAbsolutePath());
-    }
+    project.addCompileSourceRoot(outputDir.getAbsolutePath());
   }
 }

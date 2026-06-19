@@ -61,7 +61,6 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   private Map<String, ParameterMap> includeClassImports = new HashMap<>();
   private boolean disableDatesInGeneratedAnnotation = false;
   private List<String> schemaUrls = Collections.emptyList();
-  private boolean autoAddSource = true;
   private List<IntrospectionRequest> introspectionRequests = Collections.emptyList();
 
   // Setters for test customization
@@ -348,11 +347,6 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   @Override
   public List<String> getSchemaUrls() {
     return schemaUrls;
-  }
-
-  @Override
-  public boolean isAutoAddSource() {
-    return autoAddSource;
   }
 
   @Override
