@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.1.0</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+
+  <groupId>io.github.deweyjose.graphqlcodegen-example</groupId>
+  <artifactId>graphqlcodegen-example-project</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>graphqlcodegen-example</name>
+  <description>Demo project for GraphQL Codegen</description>
+  <packaging>pom</packaging>
+
+  <properties>
+    <java.version>17</java.version>
+    <!--
+      Remote schema URL the `server` module fetches at codegen time. Defaults to the
+      schema published on `main`; CI overrides it (-Dcodegen.server.schemaUrl=...) to
+      point at a locally-served copy of the pinned schema so the e2e build has no
+      external network dependency and stays consistent with the tested commit.
+    -->
+    <codegen.server.schemaUrl>https://raw.githubusercontent.com/deweyjose/graphqlcodegen-example/refs/heads/main/server/src/main/resources/schema/main.graphqls</codegen.server.schemaUrl>
+    <junit.version>5.9.2</junit.version>
+    <project-surefire-plugin.version>3.0.0-M5</project-surefire-plugin.version>
+    <graphql-codegen-plugin.version>3.7.3</graphql-codegen-plugin.version>
+    <dgs.framework.version>8.2.2</dgs.framework.version>
+    <dgs.codegen.shared.core.version>8.0.2</dgs.codegen.shared.core.version>
+    <lombok.version>1.18.30</lombok.version>
+    <jackson-databind.version>2.15.0</jackson-databind.version>
+  </properties>
+
+  <modules>
+    <module>common</module>
+    <module>server</module>
+    <module>client</module>
+    <module>client-introspection</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.netflix.graphql.dgs</groupId>
+        <artifactId>graphql-dgs-platform-dependencies</artifactId>
+        <version>${dgs.framework.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.netflix.graphql.dgs.codegen</groupId>
+        <artifactId>graphql-dgs-codegen-shared-core</artifactId>
+        <version>${dgs.codegen.shared.core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-engine</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson-databind.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.0.0-M5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+        <plugin>
+          <groupId>io.github.deweyjose</groupId>
+          <artifactId>graphqlcodegen-maven-plugin</artifactId>
+          <version>${graphql-codegen-plugin.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>generate</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <generateIsGetterForPrimitiveBooleanFields>true
+            </generateIsGetterForPrimitiveBooleanFields>
+            <addGeneratedAnnotation>false</addGeneratedAnnotation>
+            <generateDocs>false</generateDocs>
+            <addGeneratedAnnotation>true</addGeneratedAnnotation>
+            <disableDatesInGeneratedAnnotation>true</disableDatesInGeneratedAnnotation>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>add-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>${project.build.directory}/generated-sources</source>
+                </sources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>2.43.0</version>
+          <configuration>
+            <java>
+              <googleJavaFormat/>
+            </java>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+              <phase>verify</phase>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

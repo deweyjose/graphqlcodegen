@@ -93,25 +93,25 @@ all layers or it is silently unreachable from Maven. To add one:
 
 ## End-to-end example harness
 
-`examples/graphqlcodegen-example` is a **git submodule** (pinned to a known-good SHA) of
-[`deweyjose/graphqlcodegen-example`](https://github.com/deweyjose/graphqlcodegen-example). The
-`E2E Example` workflow installs the plugin from source, then builds all four example modules
+`examples/graphqlcodegen-example` is a **vendored copy** (plain tracked files) of the
+[`deweyjose/graphqlcodegen-example`](https://github.com/deweyjose/graphqlcodegen-example) project.
+The `E2E Example` workflow installs the plugin from source, then builds all four example modules
 against it (`common` → `server` → `client` → `client-introspection`), starting the DGS server so
 `client-introspection` can generate from live introspection. This validates real Maven-reactor
 behavior the mocked unit tests cannot.
 
-- **The submodule is never part of the plugin's Maven build.** Do **not** add it to `<modules>`;
-  it is built only by the workflow, in a separate `mvn` invocation, with its own Spring Boot parent.
+- **The example is never part of the plugin's Maven build.** Do **not** add it to `<modules>`; the
+  plugin's root `pom.xml` is not an aggregator. The example is built only by the workflow, in a
+  separate `mvn` invocation, with its own Spring Boot parent.
 - **Dependency isolation is enforced.** The plugin must never depend on Spring Boot. The
   `maven-enforcer` `ban-spring-boot` rule (runs during every build, incl. `verify`) fails if it
   leaks in. The DGS framework core (`com.netflix.graphql.dgs:graphql-dgs`) is a legitimate
   transitive of `graphql-dgs-codegen-core` and is intentionally allowed.
-- **CI overrides two things on the example** (no other edits): the plugin version
-  (`-Dgraphql-codegen-plugin.version=<built version>`) and the server's remote schema URL
+- **CI overrides two things on the example** (no edits to the vendored files needed): the plugin
+  version (`-Dgraphql-codegen-plugin.version=<built version>`) and the server's remote schema URL
   (`-Dcodegen.server.schemaUrl=http://localhost:8000/...`, served locally to avoid a network dep).
-- **Updating the example:** change `deweyjose/graphqlcodegen-example`, push, then bump the submodule
-  SHA here in the same PR so plugin and example stay in lockstep. After cloning, run
-  `git submodule update --init` to populate it.
+- **Keeping it current:** the files under `examples/graphqlcodegen-example/` are the source of
+  truth for the e2e build. Edit them here directly when the plugin gains a feature worth exercising.
 
 ## Release process
 

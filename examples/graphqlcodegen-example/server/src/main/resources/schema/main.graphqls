@@ -1,0 +1,18 @@
+type Query {
+    shows(titleFilter: String): [Show!]
+    theaters: [Theater!]
+}
+
+type Mutation {
+   createShow(showInput: ShowInput!): Show!
+}
+
+type Subscription {
+  commentAdded(postID: ID!): Comment
+}
+
+type Theater {
+    id: ID!
+    name: String!
+    location: String!
+}

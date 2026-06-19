@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.github.deweyjose.graphqlcodegen-example</groupId>
+    <artifactId>graphqlcodegen-example-project</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>server</artifactId>
+  <packaging>jar</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.github.deweyjose.graphqlcodegen-example</groupId>
+      <artifactId>common</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.netflix.graphql.dgs</groupId>
+      <artifactId>graphql-dgs-subscriptions-websockets-autoconfigure</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.netflix.graphql.dgs</groupId>
+      <artifactId>graphql-dgs-spring-boot-starter</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.netflix.graphql.dgs.codegen</groupId>
+      <artifactId>graphql-dgs-codegen-shared-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>io.github.deweyjose</groupId>
+        <artifactId>graphqlcodegen-maven-plugin</artifactId>
+        <configuration>
+          <packageName>com.acme</packageName>
+          <schemaUrls>
+            <url>${codegen.server.schemaUrl}</url>
+          </schemaUrls>
+          <schemaPaths>
+            <path>src/main/resources/schema/Actor.graphqls</path>
+            <path>src/main/resources/schema/main.graphqls</path>
+          </schemaPaths>
+          <schemaJarFilesFromDependencies>
+            <param>io.github.deweyjose.graphqlcodegen-example:common:0.0.1-SNAPSHOT</param>
+          </schemaJarFilesFromDependencies>
+          <generateBoxedTypes>true</generateBoxedTypes>
+          <writeToFiles>true</writeToFiles>
+          <generateInterfaceSetters>true</generateInterfaceSetters>
+          <generateInterfaceMethodsForInterfaceFields>false
+          </generateInterfaceMethodsForInterfaceFields>
+          <localTypeMappingPropertiesFiles>
+            <localTypeMappingPropertiesFile>src/main/resources/type-mapping.properties</localTypeMappingPropertiesFile>
+          </localTypeMappingPropertiesFiles>
+          <typeMappingPropertiesFiles>
+            <typeMappingPropertiesFile>graphql/common-type-mappings.properties</typeMappingPropertiesFile>
+          </typeMappingPropertiesFiles>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
