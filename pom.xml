@@ -37,6 +37,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
     <graphql-dgs-codegen-core.version>8.3.0</graphql-dgs-codegen-core.version>
     <java.version>17</java.version>
     <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
@@ -208,6 +209,40 @@
 
   <build>
     <plugins>
+      <!--
+        Dependency isolation guard. The graphqlcodegen-example e2e build (see
+        examples/graphqlcodegen-example + .github/workflows/e2e-example.yaml) pulls in
+        Spring Boot, but the plugin itself must never depend on it. This fails the build
+        if Spring Boot (or any DGS spring-boot starter, which transitively requires it)
+        ever leaks onto the plugin's classpath. The DGS framework core (graphql-dgs) is a
+        legitimate transitive of graphql-dgs-codegen-core and is intentionally not banned.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${maven-enforcer-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>ban-spring-boot</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <excludes>
+                    <exclude>org.springframework.boot</exclude>
+                  </excludes>
+                  <message>The plugin must not depend on Spring Boot. The
+                    graphqlcodegen-example e2e harness exercises Spring Boot in its own
+                    separate Maven build; it must not leak into the plugin.</message>
+                </bannedDependencies>
+              </rules>
+              <fail>true</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>flatten-maven-plugin</artifactId>

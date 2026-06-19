@@ -87,6 +87,31 @@ all layers or it is silently unreachable from Maven. To add one:
   (`./mvnw -B -ntp verify`) before merging; do not assume green checks mean it was tested.
 - `build.yaml` runs `verify` and a separate `spotless:check` — unformatted code fails the build.
 - `coverage.yml` (`Java CI with JaCoCo`) runs on push and PR and publishes a coverage badge on `main`.
+- **`E2E Example` (`e2e-example.yaml`) runs on push.** It builds the `graphqlcodegen-example`
+  project against the plugin built from the current commit, proving generated sources compile and
+  run end-to-end (see below).
+
+## End-to-end example harness
+
+`examples/graphqlcodegen-example` is a **git submodule** (pinned to a known-good SHA) of
+[`deweyjose/graphqlcodegen-example`](https://github.com/deweyjose/graphqlcodegen-example). The
+`E2E Example` workflow installs the plugin from source, then builds all four example modules
+against it (`common` → `server` → `client` → `client-introspection`), starting the DGS server so
+`client-introspection` can generate from live introspection. This validates real Maven-reactor
+behavior the mocked unit tests cannot.
+
+- **The submodule is never part of the plugin's Maven build.** Do **not** add it to `<modules>`;
+  it is built only by the workflow, in a separate `mvn` invocation, with its own Spring Boot parent.
+- **Dependency isolation is enforced.** The plugin must never depend on Spring Boot. The
+  `maven-enforcer` `ban-spring-boot` rule (runs during every build, incl. `verify`) fails if it
+  leaks in. The DGS framework core (`com.netflix.graphql.dgs:graphql-dgs`) is a legitimate
+  transitive of `graphql-dgs-codegen-core` and is intentionally allowed.
+- **CI overrides two things on the example** (no other edits): the plugin version
+  (`-Dgraphql-codegen-plugin.version=<built version>`) and the server's remote schema URL
+  (`-Dcodegen.server.schemaUrl=http://localhost:8000/...`, served locally to avoid a network dep).
+- **Updating the example:** change `deweyjose/graphqlcodegen-example`, push, then bump the submodule
+  SHA here in the same PR so plugin and example stay in lockstep. After cloning, run
+  `git submodule update --init` to populate it.
 
 ## Release process
 

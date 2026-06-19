@@ -1,0 +1,4 @@
+[submodule "examples/graphqlcodegen-example"]
+	path = examples/graphqlcodegen-example
+	url = https://github.com/deweyjose/graphqlcodegen-example.git
+	branch = claude/stoic-lamport-0ky2jk
