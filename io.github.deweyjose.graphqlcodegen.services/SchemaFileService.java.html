@@ -40,12 +40,12 @@ public class SchemaFileService {
    * @param logger the maven logger
    */
   public SchemaFileService(File outputDir, SchemaManifestService manifest, Logger logger) {
-<span class="nc" id="L43">    this(</span>
+<span class="fc" id="L43">    this(</span>
         outputDir,
         manifest,
         new RemoteSchemaService(logger),
         new SchemaTransformationService(logger));
-<span class="nc" id="L48">  }</span>
+<span class="fc" id="L48">  }</span>
 
   /**
    * Constructs a new SchemaFileService with the given output directory, manifest, and remote schema
@@ -162,11 +162,11 @@ public class SchemaFileService {
   /** Syncs the manifest by writing the current state to disk. Prints stack trace on error. */
   public void syncManifest() {
     try {
-<span class="nc" id="L165">      manifest.syncManifest();</span>
+<span class="fc" id="L165">      manifest.syncManifest();</span>
 <span class="nc" id="L166">    } catch (Exception e) {</span>
 <span class="nc" id="L167">      e.printStackTrace();</span>
-<span class="nc" id="L168">    }</span>
-<span class="nc" id="L169">  }</span>
+<span class="fc" id="L168">    }</span>
+<span class="fc" id="L169">  }</span>
 
   /** Filters schemaPaths to only include files that have changed according to the manifest. */
   public void filterChangedSchemaFiles() {
@@ -216,7 +216,7 @@ public class SchemaFileService {
 <span class="fc" id="L216">    Set&lt;File&gt; result = new HashSet&lt;&gt;();</span>
 
 <span class="fc" id="L218">    File[] contents = directory.listFiles();</span>
-<span class="pc bpc" id="L219" title="1 of 2 branches missed.">    if (contents != null) {</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">    if (contents != null) {</span>
 <span class="fc bfc" id="L220" title="All 2 branches covered.">      for (File content : contents) {</span>
 <span class="pc bpc" id="L221" title="1 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
 <span class="fc" id="L222">          result.add(content);</span>

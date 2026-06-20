@@ -8,36 +8,36 @@ import org.slf4j.helpers.MessageFormatter;
 class MavenLogger implements Logger {
   private final Log mavenLog;
 
-<span class="nc" id="L11">  MavenLogger(Log log) {</span>
-<span class="nc" id="L12">    mavenLog = Objects.requireNonNull(log);</span>
-<span class="nc" id="L13">  }</span>
+<span class="fc" id="L11">  MavenLogger(Log log) {</span>
+<span class="fc" id="L12">    mavenLog = Objects.requireNonNull(log);</span>
+<span class="fc" id="L13">  }</span>
 
   @Override
   public void info(String format, Object... args) {
-<span class="nc bnc" id="L17" title="All 2 branches missed.">    if (mavenLog.isInfoEnabled()) {</span>
-<span class="nc" id="L18">      mavenLog.info(MessageFormatter.arrayFormat(format, args).getMessage());</span>
+<span class="fc bfc" id="L17" title="All 2 branches covered.">    if (mavenLog.isInfoEnabled()) {</span>
+<span class="fc" id="L18">      mavenLog.info(MessageFormatter.arrayFormat(format, args).getMessage());</span>
     }
-<span class="nc" id="L20">  }</span>
+<span class="fc" id="L20">  }</span>
 
   @Override
   public void debug(String format, Object... args) {
-<span class="nc bnc" id="L24" title="All 2 branches missed.">    if (mavenLog.isDebugEnabled()) {</span>
-<span class="nc" id="L25">      mavenLog.debug(MessageFormatter.arrayFormat(format, args).getMessage());</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">    if (mavenLog.isDebugEnabled()) {</span>
+<span class="fc" id="L25">      mavenLog.debug(MessageFormatter.arrayFormat(format, args).getMessage());</span>
     }
-<span class="nc" id="L27">  }</span>
+<span class="fc" id="L27">  }</span>
 
   @Override
   public void warn(String format, Object... args) {
-<span class="nc bnc" id="L31" title="All 2 branches missed.">    if (mavenLog.isWarnEnabled()) {</span>
-<span class="nc" id="L32">      mavenLog.warn(MessageFormatter.arrayFormat(format, args).getMessage());</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">    if (mavenLog.isWarnEnabled()) {</span>
+<span class="fc" id="L32">      mavenLog.warn(MessageFormatter.arrayFormat(format, args).getMessage());</span>
     }
-<span class="nc" id="L34">  }</span>
+<span class="fc" id="L34">  }</span>
 
   @Override
   public void error(String format, Object... args) {
-<span class="nc bnc" id="L38" title="All 2 branches missed.">    if (mavenLog.isErrorEnabled()) {</span>
-<span class="nc" id="L39">      mavenLog.error(MessageFormatter.arrayFormat(format, args).getMessage());</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">    if (mavenLog.isErrorEnabled()) {</span>
+<span class="fc" id="L39">      mavenLog.error(MessageFormatter.arrayFormat(format, args).getMessage());</span>
     }
-<span class="nc" id="L41">  }</span>
+<span class="fc" id="L41">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

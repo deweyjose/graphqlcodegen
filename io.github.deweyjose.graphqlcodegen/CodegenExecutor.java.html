@@ -48,9 +48,9 @@ public class CodegenExecutor {
 <span class="pc" id="L48">  @SneakyThrows</span>
   public void execute(CodegenConfigProvider request, Set&lt;Artifact&gt; artifacts, File projectBaseDir) {
     // get the schema paths that might have changed or all of them.
-<span class="pc bpc" id="L51" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="nc" id="L52">      schemaFileService.loadExpandedSchemaPaths(request.getSchemaPaths());</span>
-<span class="nc" id="L53">      logger.info(&quot;expanded schema paths: {}&quot;, schemaFileService.getSchemaPaths());</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="fc" id="L52">      schemaFileService.loadExpandedSchemaPaths(request.getSchemaPaths());</span>
+<span class="fc" id="L53">      logger.info(&quot;expanded schema paths: {}&quot;, schemaFileService.getSchemaPaths());</span>
     } else {
 <span class="fc" id="L55">      schemaFileService.setSchemaPaths(request.getSchemaPaths());</span>
     }
@@ -63,9 +63,9 @@ public class CodegenExecutor {
 <span class="fc" id="L63">    schemaFileService.loadIntrospectedSchemas(request.getIntrospectionRequests());</span>
 <span class="fc" id="L64">    schemaFileService.checkHasSchemaFiles();</span>
 
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="nc" id="L67">      schemaFileService.filterChangedSchemaFiles();</span>
-<span class="nc" id="L68">      logger.info(&quot;changed schema files: {}&quot;, schemaFileService.getSchemaPaths());</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="fc" id="L67">      schemaFileService.filterChangedSchemaFiles();</span>
+<span class="fc" id="L68">      logger.info(&quot;changed schema files: {}&quot;, schemaFileService.getSchemaPaths());</span>
     }
 
 <span class="pc bpc" id="L71" title="1 of 2 branches missed.">    if (schemaFileService.noWorkToDo()) {</span>
@@ -141,8 +141,8 @@ public class CodegenExecutor {
 <span class="fc" id="L141">    final CodeGen codeGen = new CodeGen(config);</span>
 <span class="fc" id="L142">    codeGen.generate();</span>
 
-<span class="pc bpc" id="L144" title="1 of 2 branches missed.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="nc" id="L145">      schemaFileService.syncManifest();</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="fc" id="L145">      schemaFileService.syncManifest();</span>
     }
 <span class="fc" id="L147">  }</span>
 
