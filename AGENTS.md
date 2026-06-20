@@ -113,8 +113,21 @@ all layers or it is silently unreachable from Maven. To add one:
   checks mean it was tested.
 - `build.yaml` runs `verify -pl graphqlcodegen-maven-plugin` and a separate `spotless:check` (also
   plugin-scoped) — fast, plugin-only; unformatted code fails the build.
-- `coverage.yml` (`Java CI with JaCoCo`) runs on push and PR (plugin-scoped) and publishes a
-  coverage badge on `main`.
+- `coverage.yml` (`Java CI with JaCoCo`) runs on push/PR to `main` and publishes the badge. It
+  reports **merged** coverage of the plugin's classes: unit tests (`jacoco.exec`) **plus** the
+  `Codegen` Mojo executing during the example reactor build (`jacoco-it.exec`, captured by a JaCoCo
+  agent on the Maven JVM via `MAVEN_OPTS`). The two are combined with `jacoco:merge@merge-all` +
+  `jacoco:report@report-merged` (executions in the plugin pom). To reproduce locally:
+  ```bash
+  AGENT=$(find ~/.m2 -name 'org.jacoco.agent-*-runtime.jar' | sort | tail -1)
+  python3 -m http.server 8000 --directory examples/graphqlcodegen-example/server/src/main/resources/schema &
+  MAVEN_OPTS="-javaagent:$AGENT=destfile=$PWD/graphqlcodegen-maven-plugin/target/jacoco-it.exec,append=true,includes=io.github.deweyjose.graphqlcodegen.*" \
+    ./mvnw -B -ntp clean install -Dcodegen.server.schemaUrl=http://localhost:8000/main.graphqls
+  ./mvnw -pl graphqlcodegen-maven-plugin \
+    org.jacoco:jacoco-maven-plugin:0.8.14:merge@merge-all \
+    org.jacoco:jacoco-maven-plugin:0.8.14:report@report-merged
+  # open graphqlcodegen-maven-plugin/target/site/jacoco/index.html
+  ```
 - **`E2E Example` (`e2e-example.yaml`) runs on push.** It runs the whole reactor (`./mvnw install`)
   against the plugin built from the current commit, proving the example generates, compiles, and
   runs end-to-end (see below).

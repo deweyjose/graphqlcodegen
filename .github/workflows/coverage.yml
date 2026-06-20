@@ -20,8 +20,29 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build with Maven
-        run: mvn clean verify -pl graphqlcodegen-maven-plugin
+      # Serve the in-repo schema for the `server` module's codegen (no network dependency).
+      - name: Serve example schema locally
+        working-directory: examples/graphqlcodegen-example/server/src/main/resources/schema
+        run: |
+          nohup python3 -m http.server 8000 > /tmp/schema-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8000/main.graphqls > /dev/null && break
+            sleep 1
+          done
+
+      # Coverage of the plugin's classes from BOTH sources:
+      #   - unit tests (Surefire) -> jacoco.exec
+      #   - the Codegen Mojo running during the example reactor build, captured by a JaCoCo
+      #     agent on the Maven JVM -> jacoco-it.exec
+      # Then merge the two and report (jacoco:merge@merge-all + jacoco:report@report-merged).
+      - name: Build with Maven (unit + example-driven coverage)
+        run: |
+          AGENT=$(find ~/.m2 -name 'org.jacoco.agent-*-runtime.jar' | sort | tail -1)
+          MAVEN_OPTS="-javaagent:${AGENT}=destfile=$PWD/graphqlcodegen-maven-plugin/target/jacoco-it.exec,append=true,includes=io.github.deweyjose.graphqlcodegen.*" \
+            mvn -B -ntp clean install -Dcodegen.server.schemaUrl=http://localhost:8000/main.graphqls
+          mvn -B -ntp -pl graphqlcodegen-maven-plugin \
+            org.jacoco:jacoco-maven-plugin:0.8.14:merge@merge-all \
+            org.jacoco:jacoco-maven-plugin:0.8.14:report@report-merged
 
       - name: Upload JaCoCo Report
         uses: actions/upload-artifact@v4
