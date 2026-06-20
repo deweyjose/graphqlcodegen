@@ -11,13 +11,14 @@ Found [here](https://github.com/Netflix/dgs-codegen).
 
 This project is a multi-module Maven reactor. The root `pom.xml` is a `pom`-packaging
 aggregator; the published artifact lives in the `graphqlcodegen-maven-plugin` module. The example
-project is vendored in and wired as Maven modules behind an `examples` profile, so the default
-build and release stay plugin-only.
+project is vendored in and wired as Maven modules that build **by default**, so a single
+`./mvnw install` runs the plugin's unit tests and the example tests together. Release stays
+plugin-only (scoped with `-pl`), and Spring Boot lives only in the example modules.
 
 ```
 .                                 # aggregator (pom)
-├── graphqlcodegen-maven-plugin/  # the published plugin (built by default)
-└── examples/graphqlcodegen-example/   # end-to-end harness (built only with -Pexamples)
+├── graphqlcodegen-maven-plugin/  # the published plugin
+└── examples/graphqlcodegen-example/   # end-to-end harness (built by default)
     ├── common/  server/  client/  client-introspection/
 ```
 
@@ -31,10 +32,11 @@ This is the Maven plugin that users apply to their projects. It provides goals f
 
 ## examples/graphqlcodegen-example
 A vendored, multi-module DGS project that exercises the plugin end to end: jar-embedded schemas,
-remote/introspection schemas, type mappings, and client-API generation. It builds **only** under
-the `examples` profile and is validated on every push by the **E2E Example** GitHub Actions
-workflow, which builds it against the plugin compiled from the current commit. Spring Boot and the
-DGS framework live entirely in these modules and never enter the plugin's own build (a
+remote/introspection schemas, type mappings, and client-API generation. It builds **by default**
+(plugin first in reactor order, so the examples use the just-built plugin) and is validated on every
+push by the **E2E Example** GitHub Actions workflow. The `client-introspection` module starts its
+own DGS server for live introspection, so no externally-running server is needed. Spring Boot and
+the DGS framework live entirely in these modules and never enter the plugin's own build (a
 `maven-enforcer` rule bans Spring Boot from the plugin). See [Testing with the example
 project](#testing-with-the-example-project).
 
@@ -60,29 +62,31 @@ When constructor parameters change upstream:
 
 Process:
 
-1. Bump the version in both [`graphqlcodegen-maven-plugin/pom.xml`](graphqlcodegen-maven-plugin/pom.xml) and the root aggregator [`pom.xml`](pom.xml) (keep them in sync).
-2. Run `./mvnw spotless:apply clean install` locally to ensure the plugin still builds and is formatted.
-3. Adjust [`Codegen.java`](graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) and related classes to support new options if needed.
-4. **Test with the example project** (now vendored in this repo — no separate clone needed). See below.
+1. Bump the version in both [`graphqlcodegen-maven-plugin/pom.xml`](graphqlcodegen-maven-plugin/pom.xml) and the root aggregator [`pom.xml`](pom.xml), and the example's `graphql-codegen-plugin.version` property (keep them in sync).
+2. Adjust [`Codegen.java`](graphqlcodegen-maven-plugin/src/main/java/io/github/deweyjose/graphqlcodegen/Codegen.java) and related classes to support new options if needed.
+3. Run `./mvnw spotless:apply install` locally — this builds and tests the plugin **and** the example modules (see below).
 
 ## Testing with the example project
 
-The example project lives in `examples/graphqlcodegen-example` and builds against the plugin you
-just built. The **E2E Example** CI workflow runs the full chain on every push; to run it locally:
+The example project lives in `examples/graphqlcodegen-example` and builds **by default** as part of
+the reactor, against the plugin you just built. A single command runs the plugin unit tests and the
+example tests (including the `client-introspection` module, which starts its own DGS server):
 
 ```bash
-# Serve the schema the `server` module fetches (no network dependency), then build the example
-# modules under -Pexamples. `install` builds the plugin first, so the examples use it.
-python3 -m http.server 8000 \
-  --directory examples/graphqlcodegen-example/server/src/main/resources/schema &
-./mvnw -B -ntp -Pexamples install \
-  -pl '!examples/graphqlcodegen-example/client-introspection' \
-  -Dcodegen.server.schemaUrl=http://localhost:8000/main.graphqls
+./mvnw -B -ntp install
 ```
 
-This compiles all generated code and runs the example's DGS runtime test. The
-`client-introspection` module is excluded because it generates from a **live** server; the
-`E2E Example` workflow starts the DGS server and then builds it (see
+`install` (not `verify`) ensures the plugin is installed first so the examples resolve it. The
+`server` module fetches its schema over HTTP from `main` by default; to build fully offline, serve
+the in-repo schema and override the URL:
+
+```bash
+python3 -m http.server 8000 \
+  --directory examples/graphqlcodegen-example/server/src/main/resources/schema &
+./mvnw -B -ntp install -Dcodegen.server.schemaUrl=http://localhost:8000/main.graphqls
+```
+
+The **E2E Example** CI workflow runs exactly this on every push (see
 [`.github/workflows/e2e-example.yaml`](.github/workflows/e2e-example.yaml)).
 
 # Overview

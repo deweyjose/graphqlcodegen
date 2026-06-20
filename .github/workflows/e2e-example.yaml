@@ -1,11 +1,11 @@
 name: E2E Example
 
-# End-to-end integration test: builds the graphqlcodegen-example multi-module
-# project (vendored under examples/) against the plugin built from THIS commit,
-# proving the generated sources actually compile and run against DGS + Spring Boot.
-# The example's runtime stack lives entirely in its own, separate Maven build and
-# never enters the plugin's build (enforced by the maven-enforcer ban-spring-boot
-# rule that runs during the plugin install below).
+# End-to-end integration test: builds the whole reactor (the plugin + the vendored example
+# modules) with a single `./mvnw install`, proving the generated sources compile and run
+# against DGS + Spring Boot. The plugin builds first in reactor order, so the examples
+# exercise the just-built plugin, and the client-introspection module starts its own DGS
+# server for live introspection. Spring Boot never enters the plugin's own build (enforced
+# by the maven-enforcer ban-spring-boot rule that runs during the plugin module build).
 
 on:
   push:
@@ -30,22 +30,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # Build + install the plugin from source into the local ~/.m2 so the example
-      # resolves the just-built artifact instead of Maven Central. The enforcer
-      # 'ban-spring-boot' rule runs here, failing the job if Spring Boot ever leaks
-      # into the plugin's own dependency graph.
-      - name: Build & install plugin from source
-        run: ./mvnw -B -ntp install -DskipTests -pl graphqlcodegen-maven-plugin
-
-      - name: Resolve plugin version
-        id: plugin
-        run: |
-          VERSION=$(./mvnw -q -pl graphqlcodegen-maven-plugin -DforceStdout help:evaluate -Dexpression=project.version)
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Testing example against plugin version: $VERSION"
-
-      # Serve the in-repo schema locally so the `server` module's <schemaUrls> codegen
-      # has no external network dependency and uses the schema from the tested commit.
+      # Serve the in-repo schema locally so the `server` module's <schemaUrls> codegen has
+      # no external network dependency and uses the schema from the tested commit.
       - name: Serve example schema locally
         working-directory: examples/graphqlcodegen-example/server/src/main/resources/schema
         run: |
@@ -56,43 +42,8 @@ jobs:
           done
           curl -sf http://localhost:8000/main.graphqls | head -1
 
-      - name: Install example parent POM
-        working-directory: examples/graphqlcodegen-example
-        run: mvn -B -ntp -N install
-
-      # common (jar-embedded schema) -> server (local + remote + jar schema) -> client
-      # (client API generation). server's remote schema URL is overridden to the local
-      # server above; the plugin version is overridden to the build-from-source artifact.
-      - name: Build common, server, client
-        working-directory: examples/graphqlcodegen-example
-        run: |
-          mvn -B -ntp install -pl common,server,client \
-            -Dgraphql-codegen-plugin.version=${{ steps.plugin.outputs.version }} \
-            -Dcodegen.server.schemaUrl=http://localhost:8000/main.graphqls
-
-      # client-introspection generates from LIVE introspection, so the server must be up.
-      - name: Start DGS server
-        working-directory: examples/graphqlcodegen-example
-        run: |
-          nohup mvn -B -ntp -pl server spring-boot:run > /tmp/server.log 2>&1 &
-          echo "Waiting for http://localhost:8080/graphql ..."
-          for i in $(seq 1 60); do
-            if curl -sf -X POST http://localhost:8080/graphql \
-                 -H 'Content-Type: application/json' \
-                 -d '{"query":"{__typename}"}' > /dev/null; then
-              echo "Server is up."
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "Server did not become ready in time:"; tail -50 /tmp/server.log; exit 1
-
-      - name: Build client-introspection (live introspection)
-        working-directory: examples/graphqlcodegen-example
-        run: |
-          mvn -B -ntp install -pl client-introspection \
-            -Dgraphql-codegen-plugin.version=${{ steps.plugin.outputs.version }}
-
-      - name: Server log (on failure)
-        if: failure()
-        run: tail -100 /tmp/server.log 2>/dev/null || true
+      # Whole reactor: plugin (built + installed first) then the four example modules. The
+      # client-introspection module self-starts the DGS server for its live introspection,
+      # so no server orchestration is needed here.
+      - name: Build reactor (plugin + examples)
+        run: ./mvnw -B -ntp install -Dcodegen.server.schemaUrl=http://localhost:8000/main.graphqls

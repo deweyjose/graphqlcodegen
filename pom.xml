@@ -11,27 +11,21 @@
 
   <name>GraphQL Code Generator (build reactor)</name>
   <description>Reactor aggregator for the graphqlcodegen Maven plugin and its example
-    harness. The published artifact is the plugin module; the example modules build only
-    under the `examples` profile and are never part of the default build or release.</description>
+    harness. The published artifact is the plugin module; the example modules are built and
+    tested alongside it so a single `mvn install` exercises both.</description>
   <url>https://github.com/deweyjose/graphqlcodegen</url>
 
   <!--
-    Default build = the plugin only. This keeps `mvn verify`, coverage, and release
-    plugin-only (and Spring-Boot-free). The example harness is exercised end-to-end by
-    the `E2E Example` workflow and can be built locally with `-Pexamples` (note its
-    client-introspection module additionally needs a running server - see the workflow).
+    Both the plugin and the example harness build by default, so `./mvnw install` runs the
+    plugin's unit tests AND the example tests against the just-built plugin (it installs
+    first in reactor order; the introspection module starts its own server). Use `install`
+    (not `verify`) so the examples resolve the freshly-built plugin. Spring Boot lives only
+    in the example modules - the plugin module stays Spring-Boot-free (enforced by
+    maven-enforcer), and release is scoped to the plugin module (see publish.yaml).
   -->
   <modules>
     <module>graphqlcodegen-maven-plugin</module>
+    <module>examples/graphqlcodegen-example</module>
   </modules>
-
-  <profiles>
-    <profile>
-      <id>examples</id>
-      <modules>
-        <module>examples/graphqlcodegen-example</module>
-      </modules>
-    </profile>
-  </profiles>
 
 </project>

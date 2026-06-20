@@ -22,9 +22,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+      # Fast unit CI: plugin module only. The example harness (Spring Boot/DGS) is built
+      # end-to-end by the separate E2E Example workflow.
       - name: Build/Test with Maven
         if: matrix.job == 'test'
-        run: ./mvnw -B -ntp verify
+        run: ./mvnw -B -ntp verify -pl graphqlcodegen-maven-plugin
       - name: Run Spotless
         if: matrix.job == 'spotless'
         run: ./mvnw spotless:check -pl graphqlcodegen-maven-plugin
