@@ -1,0 +1,6 @@
+type Show {
+    id: Int!
+    title: String
+    releaseYear: Int
+    comments: [Comment]
+}

@@ -1,0 +1,4 @@
+input ShowInput {
+    title: String!
+    releaseYear: Int!
+}

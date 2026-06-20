@@ -1,0 +1,49 @@
+name: E2E Example
+
+# End-to-end integration test: builds the whole reactor (the plugin + the vendored example
+# modules) with a single `./mvnw install`, proving the generated sources compile and run
+# against DGS + Spring Boot. The plugin builds first in reactor order, so the examples
+# exercise the just-built plugin, and the client-introspection module starts its own DGS
+# server for live introspection. Spring Boot never enters the plugin's own build (enforced
+# by the maven-enforcer ban-spring-boot rule that runs during the plugin module build).
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '*.*'
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # Serve the in-repo schema locally so the `server` module's <schemaUrls> codegen has
+      # no external network dependency and uses the schema from the tested commit.
+      - name: Serve example schema locally
+        working-directory: examples/graphqlcodegen-example/server/src/main/resources/schema
+        run: |
+          nohup python3 -m http.server 8000 > /tmp/schema-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8000/main.graphqls > /dev/null && break
+            sleep 1
+          done
+          curl -sf http://localhost:8000/main.graphqls | head -1
+
+      # Whole reactor: plugin (built + installed first) then the four example modules. The
+      # client-introspection module self-starts the DGS server for its live introspection,
+      # so no server orchestration is needed here.
+      - name: Build reactor (plugin + examples)
+        run: ./mvnw -B -ntp install -Dcodegen.server.schemaUrl=http://localhost:8000/main.graphqls

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.github.deweyjose.graphqlcodegen-example</groupId>
+    <artifactId>graphqlcodegen-example-project</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>client</artifactId>
+  <packaging>jar</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.github.deweyjose.graphqlcodegen-example</groupId>
+      <artifactId>common</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.netflix.graphql.dgs.codegen</groupId>
+      <artifactId>graphql-dgs-codegen-shared-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.netflix.graphql.dgs</groupId>
+      <artifactId>graphql-dgs-client</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>io.github.deweyjose</groupId>
+        <artifactId>graphqlcodegen-maven-plugin</artifactId>
+        <configuration>
+          <autoAddSource>false</autoAddSource>
+          <typeMapping>
+            <Locale>java.util.Locale</Locale>
+            <Show>io.github.deweyjose.graphqlcodegen.example.common.Show</Show>
+          </typeMapping>
+          <packageName>com.acme</packageName>
+          <schemaJarFilesFromDependencies>
+            <param>io.github.deweyjose.graphqlcodegen-example:common:0.0.1-SNAPSHOT</param>
+          </schemaJarFilesFromDependencies>
+          <generateBoxedTypes>true</generateBoxedTypes>
+          <generateClientApi>true</generateClientApi>
+          <writeToFiles>true</writeToFiles>
+          <includeQueries>
+            <param>shows</param>
+            <param>theaters</param>
+          </includeQueries>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

@@ -20,19 +20,46 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build with Maven
-        run: mvn clean verify
+      # Serve the in-repo schema for the `server` module's codegen (no network dependency).
+      - name: Serve example schema locally
+        working-directory: examples/graphqlcodegen-example/server/src/main/resources/schema
+        run: |
+          nohup python3 -m http.server 8000 > /tmp/schema-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8000/main.graphqls > /dev/null && break
+            sleep 1
+          done
+
+      # Coverage of the plugin's classes from BOTH sources:
+      #   - unit tests (Surefire) -> jacoco.exec
+      #   - the Codegen Mojo running during the example reactor build, captured by a JaCoCo
+      #     agent on the Maven JVM -> jacoco-it.exec
+      # Then merge the two and report (jacoco:merge@merge-all + jacoco:report@report-merged).
+      - name: Build with Maven (unit + example-driven coverage)
+        run: |
+          # Resolve the JaCoCo agent jar into ~/.m2 first (the runner's cache may be empty),
+          # then attach it to the Maven JVM to capture the Mojo running during the examples.
+          mvn -B -ntp org.apache.maven.plugins:maven-dependency-plugin:3.6.1:get \
+            -Dartifact=org.jacoco:org.jacoco.agent:0.8.14:jar:runtime
+          AGENT=$(find ~/.m2 -name 'org.jacoco.agent-0.8.14-runtime.jar' | head -1)
+          [ -n "$AGENT" ] || { echo "JaCoCo agent jar not found in ~/.m2"; exit 1; }
+          echo "JaCoCo agent: $AGENT"
+          MAVEN_OPTS="-javaagent:${AGENT}=destfile=$PWD/graphqlcodegen-maven-plugin/target/jacoco-it.exec,append=true,includes=io.github.deweyjose.graphqlcodegen.*" \
+            mvn -B -ntp clean install -Dcodegen.server.schemaUrl=http://localhost:8000/main.graphqls
+          mvn -B -ntp -pl graphqlcodegen-maven-plugin \
+            org.jacoco:jacoco-maven-plugin:0.8.14:merge@merge-all \
+            org.jacoco:jacoco-maven-plugin:0.8.14:report@report-merged
 
       - name: Upload JaCoCo Report
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
-          path: target/site/jacoco
+          path: graphqlcodegen-maven-plugin/target/site/jacoco
       
       - name: JaCoCo Report
         uses: madrapps/jacoco-report@v1.7.2
         with:
-          paths: target/site/jacoco/jacoco.xml
+          paths: graphqlcodegen-maven-plugin/target/site/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 80
           min-coverage-changed-files: 90
@@ -42,7 +69,7 @@ jobs:
       - name: Generate Coverage Badge        
         uses: cicirello/jacoco-badge-generator@v2
         with:
-          jacoco-csv-file: target/site/jacoco/jacoco.csv
+          jacoco-csv-file: graphqlcodegen-maven-plugin/target/site/jacoco/jacoco.csv
           badges-directory: badges
 
       - name: Commit and push coverage badge
@@ -61,7 +88,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/site/jacoco
+          publish_dir: ./graphqlcodegen-maven-plugin/target/site/jacoco
           publish_branch: gh-pages
 
 permissions:
