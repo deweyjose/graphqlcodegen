@@ -37,7 +37,13 @@ jobs:
       # Then merge the two and report (jacoco:merge@merge-all + jacoco:report@report-merged).
       - name: Build with Maven (unit + example-driven coverage)
         run: |
-          AGENT=$(find ~/.m2 -name 'org.jacoco.agent-*-runtime.jar' | sort | tail -1)
+          # Resolve the JaCoCo agent jar into ~/.m2 first (the runner's cache may be empty),
+          # then attach it to the Maven JVM to capture the Mojo running during the examples.
+          mvn -B -ntp org.apache.maven.plugins:maven-dependency-plugin:3.6.1:get \
+            -Dartifact=org.jacoco:org.jacoco.agent:0.8.14:jar:runtime
+          AGENT=$(find ~/.m2 -name 'org.jacoco.agent-0.8.14-runtime.jar' | head -1)
+          [ -n "$AGENT" ] || { echo "JaCoCo agent jar not found in ~/.m2"; exit 1; }
+          echo "JaCoCo agent: $AGENT"
           MAVEN_OPTS="-javaagent:${AGENT}=destfile=$PWD/graphqlcodegen-maven-plugin/target/jacoco-it.exec,append=true,includes=io.github.deweyjose.graphqlcodegen.*" \
             mvn -B -ntp clean install -Dcodegen.server.schemaUrl=http://localhost:8000/main.graphqls
           mvn -B -ntp -pl graphqlcodegen-maven-plugin \
