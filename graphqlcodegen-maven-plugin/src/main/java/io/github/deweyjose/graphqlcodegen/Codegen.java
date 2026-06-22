@@ -186,6 +186,9 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   @Parameter(property = "disableDatesInGeneratedAnnotation", defaultValue = "false")
   private boolean disableDatesInGeneratedAnnotation;
 
+  @Parameter(property = "generatedAnnotationType")
+  private String generatedAnnotationType;
+
   @Parameter(property = "autoAddSource", defaultValue = "true")
   private boolean autoAddSource;
 

@@ -369,6 +369,11 @@ Example
 
 ## generateClientApiv2
 
+> **Deprecated / no-op since graphql-dgs-codegen-core 8.4.0.** Upstream removed the
+> `generateClientApiv2` option (the v2 client API path was consolidated). The parameter is still
+> accepted so existing POMs keep parsing, but it no longer has any effect. Use `generateClientApi`
+> instead.
+
 - Type: boolean
 - Required: false
 - Default: false
@@ -819,6 +824,23 @@ Example
 ```xml
 
 <disableDatesInGeneratedAnnotation>true</disableDatesInGeneratedAnnotation>
+```
+
+## generatedAnnotationType
+
+Fully-qualified class name of the `@Generated` annotation to apply to generated types. When unset,
+graphql-dgs-codegen-core uses its default (`<packageName>.Generated`). Added in
+graphql-dgs-codegen-core 8.5.0.
+
+- Type: string
+- Required: false
+- Default: (unset)
+
+Example
+
+```xml
+
+<generatedAnnotationType>javax.annotation.processing.Generated</generatedAnnotationType>
 ```
 
 ## introspectionRequests

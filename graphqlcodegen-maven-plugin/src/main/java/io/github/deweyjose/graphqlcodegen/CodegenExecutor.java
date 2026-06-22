@@ -127,6 +127,7 @@ public class CodegenExecutor {
             .setImplementSerializable(request.isImplementSerializable())
             .setAddGeneratedAnnotation(request.isAddGeneratedAnnotation())
             .setDisableDatesInGeneratedAnnotation(request.isDisableDatesInGeneratedAnnotation())
+            .setGeneratedAnnotationType(request.getGeneratedAnnotationType())
             .setAddDeprecatedAnnotation(request.isAddDeprecatedAnnotation())
             .setTrackInputFieldSet(request.isTrackInputFieldSet())
             .setGenerateJSpecifyAnnotations(request.isGenerateJSpecifyAnnotations())
