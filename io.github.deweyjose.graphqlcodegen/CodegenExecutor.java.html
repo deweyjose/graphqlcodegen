@@ -127,24 +127,25 @@ public class CodegenExecutor {
 <span class="fc" id="L127">            .setImplementSerializable(request.isImplementSerializable())</span>
 <span class="fc" id="L128">            .setAddGeneratedAnnotation(request.isAddGeneratedAnnotation())</span>
 <span class="fc" id="L129">            .setDisableDatesInGeneratedAnnotation(request.isDisableDatesInGeneratedAnnotation())</span>
-<span class="fc" id="L130">            .setAddDeprecatedAnnotation(request.isAddDeprecatedAnnotation())</span>
-<span class="fc" id="L131">            .setTrackInputFieldSet(request.isTrackInputFieldSet())</span>
-<span class="fc" id="L132">            .setGenerateJSpecifyAnnotations(request.isGenerateJSpecifyAnnotations())</span>
-<span class="fc" id="L133">            .build();</span>
+<span class="fc" id="L130">            .setGeneratedAnnotationType(request.getGeneratedAnnotationType())</span>
+<span class="fc" id="L131">            .setAddDeprecatedAnnotation(request.isAddDeprecatedAnnotation())</span>
+<span class="fc" id="L132">            .setTrackInputFieldSet(request.isTrackInputFieldSet())</span>
+<span class="fc" id="L133">            .setGenerateJSpecifyAnnotations(request.isGenerateJSpecifyAnnotations())</span>
+<span class="fc" id="L134">            .build();</span>
 
-<span class="pc bpc" id="L135" title="1 of 2 branches missed.">    if (request.isOmitNullInputFields()) {</span>
-<span class="nc" id="L136">      logger.warn(</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">    if (request.isOmitNullInputFields()) {</span>
+<span class="nc" id="L137">      logger.warn(</span>
           &quot;omitNullInputFields is no longer supported by graphql-dgs-codegen-core &gt;= 8.2.1; ignoring.&quot;);
     }
 
-<span class="fc" id="L140">    logger.info(&quot;Codegen config: \n{}&quot;, config);</span>
-<span class="fc" id="L141">    final CodeGen codeGen = new CodeGen(config);</span>
-<span class="fc" id="L142">    codeGen.generate();</span>
+<span class="fc" id="L141">    logger.info(&quot;Codegen config: \n{}&quot;, config);</span>
+<span class="fc" id="L142">    final CodeGen codeGen = new CodeGen(config);</span>
+<span class="fc" id="L143">    codeGen.generate();</span>
 
-<span class="fc bfc" id="L144" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="fc" id="L145">      schemaFileService.syncManifest();</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="fc" id="L146">      schemaFileService.syncManifest();</span>
     }
-<span class="fc" id="L147">  }</span>
+<span class="fc" id="L148">  }</span>
 
   /**
    * Converts a map of ParameterMap to a map of string-to-string maps.
@@ -153,12 +154,12 @@ public class CodegenExecutor {
    * @return a map of string to string maps
    */
   public static Map&lt;String, Map&lt;String, String&gt;&gt; toMap(Map&lt;String, ParameterMap&gt; m) {
-<span class="fc bfc" id="L156" title="All 2 branches covered.">    if (m == null) return Collections.emptyMap();</span>
-<span class="fc" id="L157">    return m.entrySet().stream()</span>
-<span class="fc" id="L158">        .collect(</span>
-<span class="fc" id="L159">            Collectors.toMap(</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">    if (m == null) return Collections.emptyMap();</span>
+<span class="fc" id="L158">    return m.entrySet().stream()</span>
+<span class="fc" id="L159">        .collect(</span>
+<span class="fc" id="L160">            Collectors.toMap(</span>
                 Map.Entry::getKey,
-<span class="pc bpc" id="L161" title="1 of 2 branches missed.">                e -&gt; e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">                e -&gt; e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

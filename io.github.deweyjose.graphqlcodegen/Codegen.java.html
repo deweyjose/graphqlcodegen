@@ -186,6 +186,9 @@ import org.apache.maven.project.MavenProject;
   @Parameter(property = &quot;disableDatesInGeneratedAnnotation&quot;, defaultValue = &quot;false&quot;)
   private boolean disableDatesInGeneratedAnnotation;
 
+  @Parameter(property = &quot;generatedAnnotationType&quot;)
+  private String generatedAnnotationType;
+
   @Parameter(property = &quot;autoAddSource&quot;, defaultValue = &quot;true&quot;)
   private boolean autoAddSource;
 
@@ -194,26 +197,26 @@ import org.apache.maven.project.MavenProject;
 
   @Override
   public void execute() {
-<span class="fc" id="L197">    Logger logger = new MavenLogger(getLog());</span>
+<span class="fc" id="L200">    Logger logger = new MavenLogger(getLog());</span>
 
-<span class="pc bpc" id="L199" title="1 of 2 branches missed.">    if (skip) {</span>
-<span class="nc" id="L200">      logger.info(&quot;Skipping code generation as requested (skip=true)&quot;);</span>
-<span class="nc" id="L201">      return;</span>
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">    if (skip) {</span>
+<span class="nc" id="L203">      logger.info(&quot;Skipping code generation as requested (skip=true)&quot;);</span>
+<span class="nc" id="L204">      return;</span>
     }
 
-<span class="fc" id="L204">    SchemaManifestService manifest =</span>
-<span class="fc" id="L205">        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());</span>
-<span class="fc" id="L206">    TypeMappingService typeMappingService = new TypeMappingService();</span>
-<span class="fc" id="L207">    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest, logger);</span>
+<span class="fc" id="L207">    SchemaManifestService manifest =</span>
+<span class="fc" id="L208">        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());</span>
+<span class="fc" id="L209">    TypeMappingService typeMappingService = new TypeMappingService();</span>
+<span class="fc" id="L210">    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest, logger);</span>
 
-<span class="fc" id="L209">    Set&lt;Artifact&gt; artifacts = project.getArtifacts();</span>
+<span class="fc" id="L212">    Set&lt;Artifact&gt; artifacts = project.getArtifacts();</span>
 
-<span class="fc" id="L211">    var executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);</span>
-<span class="fc" id="L212">    executor.execute(this, artifacts, project.getBasedir());</span>
+<span class="fc" id="L214">    var executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);</span>
+<span class="fc" id="L215">    executor.execute(this, artifacts, project.getBasedir());</span>
 
-<span class="fc bfc" id="L214" title="All 2 branches covered.">    if (autoAddSource) {</span>
-<span class="fc" id="L215">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">    if (autoAddSource) {</span>
+<span class="fc" id="L218">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
     }
-<span class="fc" id="L217">  }</span>
+<span class="fc" id="L220">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
