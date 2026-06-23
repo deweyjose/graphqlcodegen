@@ -60,6 +60,7 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   private Map<String, ParameterMap> includeEnumImports = new HashMap<>();
   private Map<String, ParameterMap> includeClassImports = new HashMap<>();
   private boolean disableDatesInGeneratedAnnotation = false;
+  private String generatedAnnotationType = null;
   private List<String> schemaUrls = Collections.emptyList();
   private boolean autoAddSource = true;
   private List<IntrospectionRequest> introspectionRequests = Collections.emptyList();
@@ -343,6 +344,11 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   @Override
   public boolean isDisableDatesInGeneratedAnnotation() {
     return disableDatesInGeneratedAnnotation;
+  }
+
+  @Override
+  public String getGeneratedAnnotationType() {
+    return generatedAnnotationType;
   }
 
   @Override

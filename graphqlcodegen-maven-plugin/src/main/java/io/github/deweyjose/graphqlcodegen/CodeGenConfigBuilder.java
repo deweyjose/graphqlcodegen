@@ -40,7 +40,11 @@ public class CodeGenConfigBuilder {
 
   private boolean generateClientApi;
 
-  private boolean generateClientApiv2;
+  /**
+   * No longer forwarded to {@link CodeGenConfig}: graphql-dgs-codegen-core removed the {@code
+   * generateClientApiv2} option in 8.4.0. Retained only for source compatibility.
+   */
+  @Deprecated private boolean generateClientApiv2;
 
   private boolean generateInterfaces;
 
@@ -89,6 +93,8 @@ public class CodeGenConfigBuilder {
   private boolean addGeneratedAnnotation;
 
   private boolean disableDatesInGeneratedAnnotation;
+
+  private String generatedAnnotationType;
 
   private boolean addDeprecatedAnnotation;
 
@@ -173,6 +179,7 @@ public class CodeGenConfigBuilder {
     return this;
   }
 
+  @Deprecated
   public CodeGenConfigBuilder setGenerateClientApiv2(boolean generateClientApiv2) {
     this.generateClientApiv2 = generateClientApiv2;
     return this;
@@ -304,6 +311,11 @@ public class CodeGenConfigBuilder {
     return this;
   }
 
+  public CodeGenConfigBuilder setGeneratedAnnotationType(String generatedAnnotationType) {
+    this.generatedAnnotationType = generatedAnnotationType;
+    return this;
+  }
+
   public CodeGenConfigBuilder setAddDeprecatedAnnotation(boolean addDeprecatedAnnotation) {
     this.addDeprecatedAnnotation = addDeprecatedAnnotation;
     return this;
@@ -336,7 +348,6 @@ public class CodeGenConfigBuilder {
         generateBoxedTypes,
         generateIsGetterForPrimitiveBooleanFields,
         generateClientApi,
-        generateClientApiv2,
         generateInterfaces,
         generateKotlinNullableClasses,
         generateKotlinClosureProjections,
@@ -361,6 +372,7 @@ public class CodeGenConfigBuilder {
         implementSerializable,
         addGeneratedAnnotation,
         disableDatesInGeneratedAnnotation,
+        generatedAnnotationType,
         addDeprecatedAnnotation,
         trackInputFieldSet,
         generateJSpecifyAnnotations);
