@@ -255,6 +255,12 @@ public interface CodegenConfigProvider {
   boolean isDisableDatesInGeneratedAnnotation();
 
   /**
+   * @return fully-qualified class name of the @Generated annotation to apply to generated types, or
+   *     null to use the codegen default ({@code <packageName>.Generated})
+   */
+  String getGeneratedAnnotationType();
+
+  /**
    * @return remote schema URLs
    */
   List<String> getSchemaUrls();
