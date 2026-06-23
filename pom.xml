@@ -6,7 +6,7 @@
 
   <groupId>io.github.deweyjose</groupId>
   <artifactId>graphqlcodegen-parent</artifactId>
-  <version>3.7.3</version>
+  <version>3.8.0</version>
   <packaging>pom</packaging>
 
   <name>GraphQL Code Generator (build reactor)</name>
