@@ -641,6 +641,22 @@ classes are annotated with `@NullMarked` and nullable members with `@Nullable`.
 <generateJSpecifyAnnotations>true</generateJSpecifyAnnotations>
 ```
 
+### jacksonVersions
+
+Select which Jackson major version(s) the generated code targets. `2` uses the
+`com.fasterxml.jackson` package; `3` uses the `tools.jackson` package. When empty, the codegen
+default (Jackson 2) is used. Currently only affects the Kotlin generator path.
+
+- Type: set<string> (allowed values: `2`, `3`)
+- Required: false
+- Default: empty (Jackson 2)
+
+```xml
+<jacksonVersions>
+  <jacksonVersion>3</jacksonVersion>
+</jacksonVersions>
+```
+
 ### generateCustomAnnotations
 
 Generate custom annotations from `@annotate` directives in the schema. Used with

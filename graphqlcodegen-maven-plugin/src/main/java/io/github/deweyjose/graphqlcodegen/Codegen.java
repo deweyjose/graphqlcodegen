@@ -171,6 +171,9 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   @Parameter(property = "generateJSpecifyAnnotations", defaultValue = "false")
   private boolean generateJSpecifyAnnotations;
 
+  @Parameter(property = "jacksonVersions")
+  private Set<String> jacksonVersions;
+
   @Parameter(property = "generateCustomAnnotations", defaultValue = "false")
   private boolean generateCustomAnnotations;
 

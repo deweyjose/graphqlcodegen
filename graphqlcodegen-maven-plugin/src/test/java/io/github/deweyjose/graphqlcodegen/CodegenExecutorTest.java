@@ -182,6 +182,24 @@ class CodegenExecutorTest {
   }
 
   @Test
+  void testToJacksonVersionsNullEmptyAndNormal() {
+    assertEquals(Collections.emptySet(), CodegenExecutor.toJacksonVersions(null));
+    assertEquals(Collections.emptySet(), CodegenExecutor.toJacksonVersions(Collections.emptySet()));
+
+    assertEquals(
+        Set.of(com.netflix.graphql.dgs.codegen.JacksonVersion.JACKSON_2),
+        CodegenExecutor.toJacksonVersions(Set.of("2")));
+    assertEquals(
+        Set.of(
+            com.netflix.graphql.dgs.codegen.JacksonVersion.JACKSON_2,
+            com.netflix.graphql.dgs.codegen.JacksonVersion.JACKSON_3),
+        CodegenExecutor.toJacksonVersions(Set.of("2", "3")));
+
+    assertThrows(
+        IllegalArgumentException.class, () -> CodegenExecutor.toJacksonVersions(Set.of("bogus")));
+  }
+
+  @Test
   void testToMapNullAndEmptyAndNormal() {
     assertEquals(Collections.emptyMap(), CodegenExecutor.toMap(null));
     assertEquals(Collections.emptyMap(), CodegenExecutor.toMap(Collections.emptyMap()));
