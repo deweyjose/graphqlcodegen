@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ main ]
 
+# Queue runs per ref instead of racing: back-to-back merges to main each push a
+# badge commit, and the loser's non-fast-forward push fails the workflow.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -79,6 +85,9 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add badges/*.svg
           git commit -m "Update coverage badge" || echo "No changes to commit"
+          # Belt and braces alongside the workflow-level concurrency group: rebase over
+          # anything that landed on main since checkout so the push is fast-forward.
+          git pull --rebase origin main
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
