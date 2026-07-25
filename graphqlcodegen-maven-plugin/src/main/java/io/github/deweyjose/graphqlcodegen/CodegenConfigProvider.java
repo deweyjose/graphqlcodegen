@@ -235,6 +235,13 @@ public interface CodegenConfigProvider {
   boolean isGenerateCustomAnnotations();
 
   /**
+   * @return the Jackson major versions to target in generated code ({@code "2"} for {@code
+   *     com.fasterxml.jackson}, {@code "3"} for {@code tools.jackson}). Empty means the codegen
+   *     default (Jackson 2). Only affects the Kotlin generator path.
+   */
+  Set<String> getJacksonVersions();
+
+  /**
    * @return included imports
    */
   Map<String, String> getIncludeImports();

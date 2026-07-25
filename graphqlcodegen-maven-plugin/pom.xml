@@ -7,7 +7,7 @@
   <groupId>io.github.deweyjose</groupId>
   <artifactId>graphqlcodegen-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>3.8.0</version>
+  <version>3.9.0</version>
 
   <name>GraphQL Code Generator Maven Plugin</name>
   <description>Maven plugin for GraphQL code generation</description>
@@ -38,7 +38,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
     <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
-    <graphql-dgs-codegen-core.version>8.5.0</graphql-dgs-codegen-core.version>
+    <graphql-dgs-codegen-core.version>8.6.0</graphql-dgs-codegen-core.version>
     <java.version>17</java.version>
     <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
     <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
