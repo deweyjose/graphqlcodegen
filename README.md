@@ -645,7 +645,10 @@ classes are annotated with `@NullMarked` and nullable members with `@Nullable`.
 
 Select which Jackson major version(s) the generated code targets. `2` uses the
 `com.fasterxml.jackson` package; `3` uses the `tools.jackson` package. When empty, the codegen
-default (Jackson 2) is used. Currently only affects the Kotlin generator path.
+default (Jackson 2) is used. Currently only affects the builder deserialization annotations
+(`@JsonDeserialize` / `@JsonPOJOBuilder`) on Kotlin classes generated with
+[generateKotlinNullableClasses](#generatekotlinnullableclasses); listing both versions emits
+both sets of annotations.
 
 - Type: set<string> (allowed values: `2`, `3`)
 - Required: false

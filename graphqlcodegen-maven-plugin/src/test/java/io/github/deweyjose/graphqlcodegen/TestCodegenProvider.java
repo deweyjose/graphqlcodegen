@@ -104,6 +104,14 @@ public class TestCodegenProvider implements CodegenConfigProvider {
     this.jacksonVersions = jacksonVersions;
   }
 
+  public void setLanguage(String language) {
+    this.language = language;
+  }
+
+  public void setGenerateKotlinNullableClasses(boolean generateKotlinNullableClasses) {
+    this.generateKotlinNullableClasses = generateKotlinNullableClasses;
+  }
+
   // Add more setters as needed
 
   @Override

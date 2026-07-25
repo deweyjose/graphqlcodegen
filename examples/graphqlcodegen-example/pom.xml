@@ -40,6 +40,7 @@
     <module>server</module>
     <module>client</module>
     <module>client-introspection</module>
+    <module>kotlin-jackson3</module>
   </modules>
 
   <dependencyManagement>
