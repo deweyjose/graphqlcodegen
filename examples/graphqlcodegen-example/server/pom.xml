@@ -22,12 +22,7 @@
 
     <dependency>
       <groupId>com.netflix.graphql.dgs</groupId>
-      <artifactId>graphql-dgs-subscriptions-websockets-autoconfigure</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.netflix.graphql.dgs</groupId>
-      <artifactId>graphql-dgs-spring-boot-starter</artifactId>
+      <artifactId>graphql-dgs-spring-graphql-starter</artifactId>
     </dependency>
 
     <dependency>
@@ -37,7 +32,13 @@
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.netflix.graphql.dgs</groupId>
+      <artifactId>graphql-dgs-spring-graphql-starter-test</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>

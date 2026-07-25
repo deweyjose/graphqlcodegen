@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.1.0</version>
+    <version>4.0.7</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -26,13 +26,15 @@
       external network dependency and stays consistent with the tested commit.
     -->
     <codegen.server.schemaUrl>https://raw.githubusercontent.com/deweyjose/graphqlcodegen-example/refs/heads/main/server/src/main/resources/schema/main.graphqls</codegen.server.schemaUrl>
-    <junit.version>5.9.2</junit.version>
-    <project-surefire-plugin.version>3.0.0-M5</project-surefire-plugin.version>
     <graphql-codegen-plugin.version>3.9.0</graphql-codegen-plugin.version>
-    <dgs.framework.version>8.2.2</dgs.framework.version>
-    <dgs.codegen.shared.core.version>8.0.2</dgs.codegen.shared.core.version>
-    <lombok.version>1.18.30</lombok.version>
-    <jackson-databind.version>2.15.0</jackson-databind.version>
+    <dgs.framework.version>12.0.1</dgs.framework.version>
+    <!--
+      The Spring Boot parent's dependencyManagement wins over the imported DGS platform BOM,
+      but DGS 12 needs json-path 3.x (Jackson3JsonProvider); override Boot's property.
+    -->
+    <json-path.version>3.0.0</json-path.version>
+    <dgs.codegen.shared.core.version>8.6.0</dgs.codegen.shared.core.version>
+    <lombok.version>1.18.46</lombok.version>
   </properties>
 
   <modules>
@@ -56,17 +58,6 @@
         <groupId>com.netflix.graphql.dgs.codegen</groupId>
         <artifactId>graphql-dgs-codegen-shared-core</artifactId>
         <version>${dgs.codegen.shared.core.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-engine</artifactId>
-        <version>${junit.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${jackson-databind.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

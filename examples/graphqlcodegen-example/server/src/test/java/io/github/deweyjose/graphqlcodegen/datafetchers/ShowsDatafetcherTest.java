@@ -3,7 +3,7 @@ package io.github.deweyjose.graphqlcodegen.datafetchers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.netflix.graphql.dgs.DgsQueryExecutor;
-import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration;
+import com.netflix.graphql.dgs.test.EnableDgsTest;
 import io.github.deweyjose.graphqlcodegen.example.common.Show;
 import io.github.deweyjose.graphqlcodegen.example.server.datafetchers.ShowsDatafetcher;
 import io.github.deweyjose.graphqlcodegen.example.server.services.ShowsServiceImpl;
@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(
-    classes = {ShowsDatafetcher.class, ShowsServiceImpl.class, DgsAutoConfiguration.class})
+@SpringBootTest(classes = {ShowsDatafetcher.class, ShowsServiceImpl.class})
+@EnableDgsTest
 class ShowsDatafetcherTest {
   @Autowired DgsQueryExecutor dgsQueryExecutor;
 
