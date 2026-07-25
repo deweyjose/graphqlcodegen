@@ -56,6 +56,7 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   private boolean trackInputFieldSet = false;
   private boolean generateJSpecifyAnnotations = false;
   private boolean generateCustomAnnotations = false;
+  private Set<String> jacksonVersions = new HashSet<>();
   private Map<String, String> includeImports = new HashMap<>();
   private Map<String, ParameterMap> includeEnumImports = new HashMap<>();
   private Map<String, ParameterMap> includeClassImports = new HashMap<>();
@@ -97,6 +98,18 @@ public class TestCodegenProvider implements CodegenConfigProvider {
 
   public void setGenerateJSpecifyAnnotations(boolean generateJSpecifyAnnotations) {
     this.generateJSpecifyAnnotations = generateJSpecifyAnnotations;
+  }
+
+  public void setJacksonVersions(Set<String> jacksonVersions) {
+    this.jacksonVersions = jacksonVersions;
+  }
+
+  public void setLanguage(String language) {
+    this.language = language;
+  }
+
+  public void setGenerateKotlinNullableClasses(boolean generateKotlinNullableClasses) {
+    this.generateKotlinNullableClasses = generateKotlinNullableClasses;
   }
 
   // Add more setters as needed
@@ -324,6 +337,11 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   @Override
   public boolean isGenerateCustomAnnotations() {
     return generateCustomAnnotations;
+  }
+
+  @Override
+  public Set<String> getJacksonVersions() {
+    return jacksonVersions;
   }
 
   @Override

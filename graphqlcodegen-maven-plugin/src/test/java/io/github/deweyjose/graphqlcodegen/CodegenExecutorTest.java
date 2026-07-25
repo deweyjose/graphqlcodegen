@@ -181,6 +181,94 @@ class CodegenExecutorTest {
         "Projection methods with arguments should not use raw types");
   }
 
+  @SneakyThrows
+  @Test
+  void testGenerateKotlinDefaultsToJackson2() {
+    File generatedUserType = generateKotlinUserType(Collections.emptySet());
+
+    String content = Files.readString(generatedUserType.toPath());
+    assertTrue(
+        content.contains("com.fasterxml.jackson.databind"),
+        "Empty jacksonVersions should keep the pre-8.6.0 Jackson 2 databind annotations");
+    assertTrue(
+        content.contains("@JsonDeserialize(builder = User.Builder::class)"),
+        "Generated data class should use builder-based deserialization");
+    assertFalse(
+        content.contains("tools.jackson"),
+        "Empty jacksonVersions should not emit Jackson 3 annotations");
+  }
+
+  @SneakyThrows
+  @Test
+  void testGenerateKotlinWithJacksonVersion3() {
+    File generatedUserType = generateKotlinUserType(Set.of("3"));
+
+    String content = Files.readString(generatedUserType.toPath());
+    assertTrue(
+        content.contains("tools.jackson.databind"),
+        "jacksonVersions=3 should emit tools.jackson databind annotations");
+    assertFalse(
+        content.contains("com.fasterxml.jackson.databind"),
+        "jacksonVersions=3 should not emit Jackson 2 databind annotations");
+  }
+
+  @SneakyThrows
+  @Test
+  void testGenerateKotlinWithBothJacksonVersions() {
+    File generatedUserType = generateKotlinUserType(Set.of("2", "3"));
+
+    String content = Files.readString(generatedUserType.toPath());
+    assertTrue(
+        content.contains("com.fasterxml.jackson.databind"),
+        "jacksonVersions=2,3 should emit Jackson 2 databind annotations");
+    assertTrue(
+        content.contains("tools.jackson.databind"),
+        "jacksonVersions=2,3 should also emit Jackson 3 databind annotations");
+  }
+
+  @SneakyThrows
+  private File generateKotlinUserType(Set<String> jacksonVersions) {
+    File schemaFile = TestUtils.getFile("schema/test-schema-with-user.graphqls");
+
+    SchemaManifestService manifestService = new SchemaManifestService(outputDir, outputDir);
+    schemaFileService =
+        new SchemaFileService(
+            outputDir, manifestService, remoteSchemaService, schemaTransformationService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);
+
+    TestCodegenProvider config = new TestCodegenProvider();
+    config.setSchemaPaths(Set.of(schemaFile));
+    config.setOutputDir(outputDir);
+    config.setSchemaManifestOutputDir(outputDir);
+    config.setLanguage("kotlin");
+    config.setGenerateKotlinNullableClasses(true);
+    config.setJacksonVersions(jacksonVersions);
+
+    executor.execute(config, new HashSet<>(), new File("."));
+
+    File generatedUserType = new File(outputDir, "com/example/types/User.kt");
+    assertTrue(generatedUserType.exists(), "Should generate Kotlin User type file");
+    return generatedUserType;
+  }
+
+  @Test
+  void testToJacksonVersionsNullEmptyAndNormal() {
+    assertEquals(Collections.emptySet(), CodegenExecutor.toJacksonVersions(null));
+    assertEquals(Collections.emptySet(), CodegenExecutor.toJacksonVersions(Collections.emptySet()));
+
+    assertEquals(
+        Set.of(com.netflix.graphql.dgs.codegen.JacksonVersion.JACKSON_2),
+        CodegenExecutor.toJacksonVersions(Set.of("2")));
+    assertEquals(
+        Set.of(
+            com.netflix.graphql.dgs.codegen.JacksonVersion.JACKSON_2,
+            com.netflix.graphql.dgs.codegen.JacksonVersion.JACKSON_3),
+        CodegenExecutor.toJacksonVersions(Set.of("2", "3")));
+
+    assertThrows(
+        IllegalArgumentException.class, () -> CodegenExecutor.toJacksonVersions(Set.of("bogus")));
+  }
+
   @Test
   void testToMapNullAndEmptyAndNormal() {
     assertEquals(Collections.emptyMap(), CodegenExecutor.toMap(null));
