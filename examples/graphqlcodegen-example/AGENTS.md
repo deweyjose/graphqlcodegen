@@ -1,42 +1,48 @@
-# AGENTS.md
+# AGENTS.md — examples/graphqlcodegen-example (vendored e2e harness)
 
-Guidance for AI agents making changes in this repository. Read this before editing — it
-encodes the architecture, the conventions, and the gotchas that are easy to miss.
+Guidance for AI agents editing the example harness. Read the repo-root `AGENTS.md` first for
+reactor layout, build commands, and CI; this file covers what each example module demonstrates
+and how to extend it.
 
-## What this project is
+## What this is
 
-A **demo/reference project** showing how to consume the
-[`io.github.deweyjose:graphqlcodegen-maven-plugin`](https://github.com/deweyjose/graphqlcodegen)
-(which wraps Netflix DGS codegen) in a real multi-module Maven build. It is *not* the plugin
+A **vendored copy** of the [`deweyjose/graphqlcodegen-example`](https://github.com/deweyjose/graphqlcodegen-example)
+demo project, wired into this repo's Maven reactor as **default modules**. It is *not* the plugin
 itself — it exists to exercise and document the plugin's configuration surface end to end:
 schema files, jar-embedded schemas, remote schema URLs, GraphQL introspection, type mappings,
-and client-API generation.
+and client-API generation. The files here are the **source of truth** — edit them directly; there
+is no submodule or sync step.
 
-- Multi-module Maven build. Parent is Spring Boot (`spring-boot-starter-parent`). Java **17**
-  (`.tool-versions` pins `temurin-17.0.7+7`).
-- Modules: **`common`**, **`server`**, **`client`**, **`client-introspection`** (declared in
-  root `pom.xml`).
-- The plugin version is centralized in the root `pom.xml` property
-  `graphql-codegen-plugin.version`. Currently **3.7.3** (latest — check
-  `gh release list -R deweyjose/graphqlcodegen` before bumping).
+- Parent pom is Spring Boot (`spring-boot-starter-parent`). Java **17**. Spring Boot must never
+  leak into the plugin module (enforced there by maven-enforcer).
+- Modules, in reactor order: **`common`** → **`server`** → **`client`** → **`client-introspection`**.
+- The plugin version is centralized in this directory's root `pom.xml` property
+  **`graphql-codegen-plugin.version`** and must stay **in sync with the in-repo plugin version**
+  (root aggregator + `graphqlcodegen-maven-plugin/pom.xml`). No release lookup needed — the
+  version to match lives in this repo.
 
 ## Build & run
 
-Use the system `mvn` — this repo has no Maven wrapper.
+Build from the **repo root** with the Maven wrapper — the examples resolve the *just-built*
+plugin only when the whole reactor runs with `install`:
 
 ```bash
-mvn -B install                 # build all modules; runs codegen + tests
-mvn -B -pl server test         # tests for a single module
+./mvnw -B -ntp install                              # plugin + all example modules (the e2e test)
+./mvnw -B -ntp install -pl examples/graphqlcodegen-example/server -am   # one example module + its deps
 ```
 
-Codegen is bound to `generate-sources` and runs automatically during the build. Generated
-sources land in `target/generated-sources` and are **not** checked in.
+The `server` module's codegen fetches `codegen.server.schemaUrl` over HTTP (defaults to the
+schema on `main`). To build offline, serve the in-repo schema and override the property — see
+the root `AGENTS.md`.
 
-To see it in action (the `client-introspection` build needs the server running):
+Codegen is bound to `generate-sources` and runs automatically. Generated sources land in each
+module's `target/generated-sources` and are **not** checked in.
+
+To run the demo interactively (from this directory):
 
 ```bash
-cd server && mvn spring-boot:run          # starts GraphQL server on http://localhost:8080/graphql
-cd client && mvn spring-boot:run          # queries the server, prints shows/theaters
+cd server && mvn spring-boot:run     # GraphQL server on http://localhost:8080/graphql
+cd client && mvn spring-boot:run     # queries the server, prints shows/theaters
 ```
 
 ## Module architecture — what each one demonstrates
@@ -47,38 +53,44 @@ cd client && mvn spring-boot:run          # queries the server, prints shows/the
    generated code maps onto) and `graphql/common-type-mappings.properties` (a classpath
    type-mapping file consumed via `<typeMappingPropertiesFiles>`).
 2. **`server`** — DGS Spring Boot GraphQL server. Demonstrates the **widest plugin config**:
-   local `<schemaPaths>`, a remote `<schemaUrls>`, jar-embedded schemas, and both local
-   (`<localTypeMappingPropertiesFiles>`) and classpath (`<typeMappingPropertiesFiles>`) type
-   mappings. Datafetchers under `datafetchers/` resolve the schema; services under `services/`
-   back them. Generated types use package `com.acme`.
+   local `<schemaPaths>`, a remote `<schemaUrls>` (the `codegen.server.schemaUrl` property),
+   jar-embedded schemas, and both local (`<localTypeMappingPropertiesFiles>`) and classpath
+   (`<typeMappingPropertiesFiles>`) type mappings. Datafetchers under `datafetchers/` resolve the
+   schema; services under `services/` back them. `ShowsDatafetcherTest` is the DGS runtime test
+   that makes this a real e2e check. Generated types use package `com.acme`.
 3. **`client`** — DGS client. Demonstrates **client-API generation** (`<generateClientApi>`,
-   `<includeQueries>`) plus inline `<typeMapping>`. `Main.java` builds typed queries with the
-   generated `*GraphQLQuery` / `*ProjectionRoot` classes (package `com.acme`).
+   `<includeQueries>`), inline `<typeMapping>`, and `<autoAddSource>false</autoAddSource>` with
+   the build-helper plugin instead. `Main.java` builds typed queries with the generated
+   `*GraphQLQuery` / `*ProjectionRoot` classes (package `com.acme`).
 4. **`client-introspection`** — same as `client`, but the schema comes from **live GraphQL
    introspection** (`<introspectionRequests>` against `http://localhost:8080/graphql`).
-   Generated types use package `com.acme.introspection`. **This module's build requires the
-   server to be running** — that's the intended demonstration, not a bug.
+   **Self-contained:** its pom binds the `spring-boot-maven-plugin` `start`/`stop` goals around
+   codegen, so it launches the `server` app itself during the build — no externally-running
+   server needed. Don't remove those executions or the `server` dependency. Generated types use
+   package `com.acme.introspection`.
 
 ## How the plugin is wired
 
-The plugin is declared once in the root `pom.xml` `<pluginManagement>` (binding the `generate`
-goal + global options like `addGeneratedAnnotation`), then each module adds its own `<plugin>`
-block under `<build><plugins>` with module-specific `<configuration>`. To change generation
-behavior, edit the relevant module's `<configuration>` — the four modules deliberately use
-different option combinations, so don't assume a change in one applies to the others.
+The plugin is declared once in this directory's root `pom.xml` `<pluginManagement>` (binding the
+`generate` goal + global options like `addGeneratedAnnotation`), then each module adds its own
+`<plugin>` block under `<build><plugins>` with module-specific `<configuration>`. To change
+generation behavior, edit the relevant module's `<configuration>` — the four modules deliberately
+use different option combinations, so don't assume a change in one applies to the others.
 
 ## The most common task: showcasing a plugin option
 
-This repo's purpose is to be a living example. When the plugin gains a feature worth
+This harness's purpose is to be a living example. When the plugin gains a feature worth
 demonstrating:
 
-1. Bump `graphql-codegen-plugin.version` in the root `pom.xml` to a version that has it.
-2. Add the `<configuration>` option to whichever module best illustrates it.
-3. Add schema/fixtures under that module's `src/main/resources/schema/` (or
-   `common`'s `META-INF/schema/` for jar-shared schemas) if the option needs them.
-4. Reference the new generated code from `Main.java` / datafetchers so the build actually
+1. Add the `<configuration>` option to whichever module best illustrates it.
+2. Add schema/fixtures under that module's `src/main/resources/schema/` (or `common`'s
+   `META-INF/schema/` for jar-shared schemas) if the option needs them.
+3. Reference the new generated code from `Main.java` / datafetchers / tests so the build actually
    compiles against it — that proves the option works, which is the whole point.
-5. `mvn -B install` must be green (build the full reactor, not just one module).
+4. `./mvnw -B -ntp install` from the repo root must be green (full reactor, not just one module).
+5. If the release bumping the plugin version hasn't happened yet, the examples still work: the
+   reactor installs the in-repo plugin at the current version first, and
+   `graphql-codegen-plugin.version` points at that version.
 
 ## Conventions & gotchas
 
@@ -89,17 +101,12 @@ demonstrating:
 - **Generated package names are intentional**: `com.acme` (client/server),
   `com.acme.introspection` (introspection). `Main.java` imports from these — renaming a
   `<packageName>` breaks the imports.
-- **`client-introspection` will fail to build with the server down.** Start the server first.
 - **Generated sources are not committed** and live in `target/`; never edit generated files —
   change the schema or the plugin config instead.
 - **Hand-written vs generated types**: `common/Show.java` is hand-written and wired in via type
   mappings so the generated code reuses it. Don't let codegen regenerate a competing `Show`.
 - The `client` schema includes a `doNotCodeGen` query intentionally excluded via
   `<includeQueries>` — it demonstrates query filtering; leave it as a negative example.
-
-## When asked to "update to the latest plugin"
-
-The plugin lives at `deweyjose/graphqlcodegen`. Get the real latest from
-`gh release list -R deweyjose/graphqlcodegen` (the Maven Central search API lags). Update only
-the `graphql-codegen-plugin.version` property in the root `pom.xml`, then run `mvn -B install`
-to confirm the new version still generates and compiles across all modules.
+- **`codegen.server.schemaUrl` must stay overridable.** CI points it at a locally-served copy of
+  the in-repo schema; if you rename the property or hardcode the URL, the E2E and coverage
+  workflows break. `RemoteSchemaService` is HTTP-only — a `file:` URL won't work.

@@ -3,6 +3,17 @@
 Guidance for AI agents making changes in this repository. Read this before editing — it
 encodes the architecture, the conventions CI enforces, and the gotchas that are easy to miss.
 
+## Doc map
+
+- **This file** — repo-wide: reactor layout, build/test commands, CI, release.
+- [`graphqlcodegen-maven-plugin/AGENTS.md`](graphqlcodegen-maven-plugin/AGENTS.md) — the plugin's
+  code: request flow, services, the option-wiring checklist, module-level gotchas.
+- [`examples/graphqlcodegen-example/AGENTS.md`](examples/graphqlcodegen-example/AGENTS.md) — the
+  vendored example harness: what each module demonstrates, how to extend it.
+- [`README.md`](README.md) — the **consumer-facing option reference**. Its documented types and
+  defaults must match the `@Parameter` declarations in `Codegen.java`; keep it in sync whenever
+  options change.
+
 ## What this project is
 
 A **Maven plugin** (`io.github.deweyjose:graphqlcodegen-maven-plugin`) that wraps Netflix
@@ -55,43 +66,25 @@ tests) *and* `spotless:apply` has been run (otherwise `spotless:check` fails CI)
 reformats aggressively, including test code — formatting-only diffs after edits are normal, so apply
 and re-stage.
 
-## Architecture — request flow
+## Architecture — request flow (summary)
 
 The Mojo collects config, hands it to an executor, which builds a DGS config and runs codegen:
 
 1. **`Codegen.java`** — the `@Mojo`. Every user-facing option is an `@Parameter` field here
    (~50 of them). Implements `CodegenConfigProvider` (it *is* the request object).
-2. **`CodegenConfigProvider.java`** — interface of getters the executor reads. `Codegen` uses
-   Lombok `@Getter` to satisfy it.
-3. **`CodegenExecutor.java`** — `execute(...)` orchestrates: resolves schema files, applies
-   transformations/type mappings, and forwards every option to `CodeGenConfigBuilder`.
+2. **`CodegenConfigProvider.java`** — interface of getters the executor reads.
+3. **`CodegenExecutor.java`** — orchestrates: resolves schema files (local, jar, URL,
+   introspection), applies type mappings, forwards every option to the builder.
 4. **`CodeGenConfigBuilder.java`** — a **checked-in** builder mirroring upstream DGS
-   `CodeGenConfig`. This is the seam between our plugin and DGS. See gotcha below.
-5. **`services/`** — focused helpers, each independently unit-tested:
-   - `SchemaFileService` — expands/resolves schema paths and jar-embedded schemas.
-   - `RemoteSchemaService` — fetches remote schemas, including GraphQL introspection.
-   - `SchemaTransformationService` — normalizes schemas (e.g. root-type renaming, custom scalars).
-   - `SchemaManifestService` — tracks schema hashes for `onlyGenerateChanged` incremental builds.
-   - `TypeMappingService` — merges type-mapping properties (local files + classpath).
-6. **`parameters/`** — structured `@Parameter` value types (`IntrospectionRequest`, `ParameterMap`).
-7. **`Logger` / `MavenLogger`** — logging abstraction so services log without a hard Maven dependency.
+   `CodeGenConfig`. This is the seam between the plugin and DGS.
+5. **`services/`** — focused, independently unit-tested helpers (schema files, remote schemas,
+   transformations, incremental-build manifest, type mappings).
 
-## The most common task: exposing a new DGS codegen option
+Full detail — including **the checklist for exposing a new DGS codegen option** (the most common
+task in this repo) and module-level gotchas — lives in
+[`graphqlcodegen-maven-plugin/AGENTS.md`](graphqlcodegen-maven-plugin/AGENTS.md).
 
-A DGS option existing in upstream `CodeGenConfig` is **not enough** — it must be wired through
-all layers or it is silently unreachable from Maven. To add one:
-
-1. Confirm the option exists in the pinned `graphql-dgs-codegen-core.version` (root `pom.xml`,
-   property `graphql-dgs-codegen-core.version`). Check upstream release notes before bumping —
-   often the fix is wiring, not a version bump.
-2. Add an `@Parameter` field (with default) in **`Codegen.java`**.
-3. Add the getter to **`CodegenConfigProvider.java`**.
-4. Forward it to the builder in **`CodegenExecutor.java`**.
-5. Ensure **`CodeGenConfigBuilder.java`** sets it on the DGS config.
-6. Add/extend tests in `CodegenExecutorTest` and any fixtures under `src/test/resources/schema`.
-7. Document the option in `README.md` (consumers rely on it as the option reference).
-
-## Conventions & gotchas
+## Repo-wide conventions & gotchas
 
 - **`CodeGenConfigBuilder` is checked in.** When bumping `graphql-dgs-codegen-core.version`,
   verify its constructor args and setter surface still match upstream `CodeGenConfig`, then wire
@@ -99,9 +92,12 @@ all layers or it is silently unreachable from Maven. To add one:
 - **Primitive `boolean` options hide gaps.** A missing setter call usually does *not* fail
   compilation because the field defaults to `false`, so a feature can look wired but be inert.
   Add a test that asserts the option actually takes effect.
-- **Mojo is `threadSafe = true`.** Do not introduce shared mutable static state in the request path.
-- **Lombok** is used (`@Getter`, etc.); annotation processing is configured — don't hand-write
-  generated accessors.
+- **Some parameters are intentional no-ops** (`generateClientApiv2`, `omitNullInputFields`,
+  `maxProjectionDepth`) — kept so existing POMs parse after upstream removed the options. Don't
+  wire them up without checking upstream first; don't delete them either.
+- **README is the option reference and it drifts.** When touching any `@Parameter`, cross-check
+  the README section for that option (name, type, default).
+- **Lombok** is used (`@Getter`, etc.); don't hand-write generated accessors.
 - Prefer **name-based test assertions** over hardcoded counts (e.g. assert a fixture name is
   present, not that there are exactly N fixtures) — brittle counts break when fixtures are added.
 
@@ -117,15 +113,15 @@ all layers or it is silently unreachable from Maven. To add one:
   reports **merged** coverage of the plugin's classes: unit tests (`jacoco.exec`) **plus** the
   `Codegen` Mojo executing during the example reactor build (`jacoco-it.exec`, captured by a JaCoCo
   agent on the Maven JVM via `MAVEN_OPTS`). The two are combined with `jacoco:merge@merge-all` +
-  `jacoco:report@report-merged` (executions in the plugin pom). To reproduce locally:
+  `jacoco:report@report-merged` (executions in the plugin pom). Note: `coverage.yml` hardcodes its
+  own JaCoCo agent version — when dependabot bumps `jacoco-maven-plugin` in the plugin pom, check
+  whether the workflow's pinned agent version should follow. To reproduce locally:
   ```bash
   AGENT=$(find ~/.m2 -name 'org.jacoco.agent-*-runtime.jar' | sort | tail -1)
   python3 -m http.server 8000 --directory examples/graphqlcodegen-example/server/src/main/resources/schema &
   MAVEN_OPTS="-javaagent:$AGENT=destfile=$PWD/graphqlcodegen-maven-plugin/target/jacoco-it.exec,append=true,includes=io.github.deweyjose.graphqlcodegen.*" \
     ./mvnw -B -ntp clean install -Dcodegen.server.schemaUrl=http://localhost:8000/main.graphqls
-  ./mvnw -pl graphqlcodegen-maven-plugin \
-    org.jacoco:jacoco-maven-plugin:0.8.14:merge@merge-all \
-    org.jacoco:jacoco-maven-plugin:0.8.14:report@report-merged
+  ./mvnw -pl graphqlcodegen-maven-plugin jacoco:merge@merge-all jacoco:report@report-merged
   # open graphqlcodegen-maven-plugin/target/site/jacoco/index.html
   ```
 - **`E2E Example` (`e2e-example.yaml`) runs on push.** It runs the whole reactor (`./mvnw install`)
@@ -158,14 +154,16 @@ the mocked unit tests cannot, and the `E2E Example` workflow runs exactly this o
   `file:` URL won't work.
 - **Keeping it current:** the files under `examples/graphqlcodegen-example/` are the source of truth.
   Edit them here directly when the plugin gains a feature worth exercising, and keep the example's
-  `graphql-codegen-plugin.version` property in sync with the plugin version.
+  `graphql-codegen-plugin.version` property in sync with the plugin version. See
+  [`examples/graphqlcodegen-example/AGENTS.md`](examples/graphqlcodegen-example/AGENTS.md).
 
 ## Release process
 
 Releasing publishes to **Maven Central** and is **irreversible** — only release green `main`.
 
 1. Bump the version in **both** `graphqlcodegen-maven-plugin/pom.xml` (the published artifact) and
-   the root aggregator `pom.xml` → keep them in sync.
+   the root aggregator `pom.xml` → keep them in sync (and bump the example's
+   `graphql-codegen-plugin.version` property to match).
 2. `./mvnw spotless:apply`, commit, push to `main`, and wait for `main` CI to pass.
 3. Publish a **GitHub Release** with tag `graphqlcodegen-maven-plugin-<version>` targeting `main`.
    The `release: published` event triggers `publish.yaml`, which deploys to Maven Central via

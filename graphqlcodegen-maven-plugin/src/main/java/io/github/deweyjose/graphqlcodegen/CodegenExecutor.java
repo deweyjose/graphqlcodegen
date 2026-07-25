@@ -2,6 +2,7 @@ package io.github.deweyjose.graphqlcodegen;
 
 import com.netflix.graphql.dgs.codegen.CodeGen;
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
+import com.netflix.graphql.dgs.codegen.JacksonVersion;
 import com.netflix.graphql.dgs.codegen.Language;
 import io.github.deweyjose.graphqlcodegen.parameters.ParameterMap;
 import io.github.deweyjose.graphqlcodegen.services.SchemaFileService;
@@ -9,6 +10,7 @@ import io.github.deweyjose.graphqlcodegen.services.TypeMappingService;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -131,6 +133,7 @@ public class CodegenExecutor {
             .setAddDeprecatedAnnotation(request.isAddDeprecatedAnnotation())
             .setTrackInputFieldSet(request.isTrackInputFieldSet())
             .setGenerateJSpecifyAnnotations(request.isGenerateJSpecifyAnnotations())
+            .setJacksonVersions(toJacksonVersions(request.getJacksonVersions()))
             .build();
 
     if (request.isOmitNullInputFields()) {
@@ -160,5 +163,22 @@ public class CodegenExecutor {
             Collectors.toMap(
                 Map.Entry::getKey,
                 e -> e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));
+  }
+
+  /**
+   * Converts the plugin's string-valued jacksonVersions parameter ({@code "2"} / {@code "3"}) into
+   * the codegen's {@link JacksonVersion} set. A null or empty input yields an empty set, which the
+   * codegen treats as its default (Jackson 2).
+   *
+   * @param versions the configured Jackson major versions as strings
+   * @return the corresponding set of {@link JacksonVersion}
+   */
+  public static Set<JacksonVersion> toJacksonVersions(Set<String> versions) {
+    if (versions == null || versions.isEmpty()) {
+      return Collections.emptySet();
+    }
+    return versions.stream()
+        .map(JacksonVersion.Companion::fromString)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 }

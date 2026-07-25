@@ -28,7 +28,7 @@
     <codegen.server.schemaUrl>https://raw.githubusercontent.com/deweyjose/graphqlcodegen-example/refs/heads/main/server/src/main/resources/schema/main.graphqls</codegen.server.schemaUrl>
     <junit.version>5.9.2</junit.version>
     <project-surefire-plugin.version>3.0.0-M5</project-surefire-plugin.version>
-    <graphql-codegen-plugin.version>3.8.0</graphql-codegen-plugin.version>
+    <graphql-codegen-plugin.version>3.9.0</graphql-codegen-plugin.version>
     <dgs.framework.version>8.2.2</dgs.framework.version>
     <dgs.codegen.shared.core.version>8.0.2</dgs.codegen.shared.core.version>
     <lombok.version>1.18.30</lombok.version>
@@ -40,6 +40,7 @@
     <module>server</module>
     <module>client</module>
     <module>client-introspection</module>
+    <module>kotlin-jackson3</module>
   </modules>
 
   <dependencyManagement>
@@ -95,7 +96,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.0.0-M5</version>
+          <version>3.6.0-M1</version>
         </plugin>
         <plugin>
           <groupId>org.springframework.boot</groupId>
@@ -141,7 +142,7 @@
         <plugin>
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
-          <version>2.43.0</version>
+          <version>3.7.0</version>
           <configuration>
             <java>
               <googleJavaFormat/>

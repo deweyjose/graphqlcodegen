@@ -1,9 +1,11 @@
 package io.github.deweyjose.graphqlcodegen;
 
 import com.netflix.graphql.dgs.codegen.CodeGenConfig;
+import com.netflix.graphql.dgs.codegen.JacksonVersion;
 import com.netflix.graphql.dgs.codegen.Language;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,6 +103,8 @@ public class CodeGenConfigBuilder {
   private boolean trackInputFieldSet;
 
   private boolean generateJSpecifyAnnotations;
+
+  private Set<JacksonVersion> jacksonVersions = Collections.emptySet();
 
   public CodeGenConfigBuilder setSchemas(Set<String> schemas) {
     this.schemas = schemas;
@@ -331,6 +335,11 @@ public class CodeGenConfigBuilder {
     return this;
   }
 
+  public CodeGenConfigBuilder setJacksonVersions(Set<JacksonVersion> jacksonVersions) {
+    this.jacksonVersions = jacksonVersions == null ? Collections.emptySet() : jacksonVersions;
+    return this;
+  }
+
   public CodeGenConfig build() {
     return new CodeGenConfig(
         schemas,
@@ -375,6 +384,7 @@ public class CodeGenConfigBuilder {
         generatedAnnotationType,
         addDeprecatedAnnotation,
         trackInputFieldSet,
-        generateJSpecifyAnnotations);
+        generateJSpecifyAnnotations,
+        jacksonVersions);
   }
 }
