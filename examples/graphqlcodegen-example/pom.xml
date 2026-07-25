@@ -26,7 +26,7 @@
       external network dependency and stays consistent with the tested commit.
     -->
     <codegen.server.schemaUrl>https://raw.githubusercontent.com/deweyjose/graphqlcodegen-example/refs/heads/main/server/src/main/resources/schema/main.graphqls</codegen.server.schemaUrl>
-    <junit.version>6.1.2</junit.version>
+    <junit.version>5.9.2</junit.version>
     <project-surefire-plugin.version>3.0.0-M5</project-surefire-plugin.version>
     <graphql-codegen-plugin.version>3.9.0</graphql-codegen-plugin.version>
     <dgs.framework.version>8.2.2</dgs.framework.version>
