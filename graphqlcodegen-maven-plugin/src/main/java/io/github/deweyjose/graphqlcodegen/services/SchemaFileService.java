@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.shared.utils.StringUtils;
 
 /** Service for managing schema files. */
 @Getter
@@ -275,14 +276,32 @@ public class SchemaFileService {
     final String cleanRef = artifactRef.trim();
 
     for (final Artifact artifact : dependencyArtifacts) {
-      final String ref =
-          String.format(
-              "%s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());
 
+      final String ref = formatArtifactAsRef(cleanRef, artifact);
       if (ref.equals(cleanRef)) {
         return java.util.Optional.of(artifact);
       }
     }
     return Optional.empty();
+  }
+
+  /**
+   * Format a Maven {@link Artifact} as an Maven coordinate string according to an
+   * artifact ref model. Supported Maven coordinate model string are the
+   * groupId:artifactId:version or groupId:artifactId:version:classifier.
+   * 
+   * @param artifactRefModel a Maven coordinate string
+   * @param artifact         a maven dependency artifact
+   * @return a Maven coordinate string formatted according the artifact ref model.
+   */
+  private static String formatArtifactAsRef(String artifactRefModel, Artifact artifact) {
+
+    final int nbrSeparator = StringUtils.countMatches(artifactRefModel, ":");
+    String ref = String.join(":", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion());
+    if (nbrSeparator == 3) {
+      ref = String.join(":", ref, artifact.getClassifier());
+    }
+
+    return ref;
   }
 }

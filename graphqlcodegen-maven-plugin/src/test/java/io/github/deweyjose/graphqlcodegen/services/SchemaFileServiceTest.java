@@ -176,7 +176,7 @@ class SchemaFileServiceTest {
     org.apache.maven.artifact.Artifact artifact = mock(org.apache.maven.artifact.Artifact.class);
     when(artifact.getGroupId()).thenReturn("com.example");
     when(artifact.getArtifactId()).thenReturn("foo");
-    when(artifact.getVersion()).thenReturn("1.0.0");
+    when(artifact.getBaseVersion()).thenReturn("1.0.0");
     File file = new File("foo-1.0.0.jar");
     when(artifact.getFile()).thenReturn(file);
 
@@ -186,6 +186,26 @@ class SchemaFileServiceTest {
     java.util.Collection<String> deps = java.util.List.of("com.example:foo:1.0.0");
     java.util.List<File> result =
         SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+
+    assertEquals(1, result.size());
+    assertEquals(file, result.get(0));
+  }
+
+  @Test
+  void extractSchemaFilesFromDependencies_whenArtifactRefParamContainsClassifier_returnsMatchingArtifactFile() {
+    org.apache.maven.artifact.Artifact artifact = mock(org.apache.maven.artifact.Artifact.class);
+    when(artifact.getGroupId()).thenReturn("com.example");
+    when(artifact.getArtifactId()).thenReturn("foo");
+    when(artifact.getBaseVersion()).thenReturn("1.0.0");
+    when(artifact.getClassifier()).thenReturn("schema");
+    File file = new File("foo-1.0.0-schema.jar");
+    when(artifact.getFile()).thenReturn(file);
+
+    Set<org.apache.maven.artifact.Artifact> artifacts = new java.util.HashSet<>();
+    artifacts.add(artifact);
+
+    java.util.Collection<String> deps = java.util.List.of("com.example:foo:1.0.0:schema");
+    java.util.List<File> result = SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
 
     assertEquals(1, result.size());
     assertEquals(file, result.get(0));
