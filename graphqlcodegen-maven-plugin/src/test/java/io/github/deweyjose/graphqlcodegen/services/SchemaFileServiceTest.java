@@ -7,39 +7,52 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.deweyjose.graphqlcodegen.TestUtils;
 import io.github.deweyjose.graphqlcodegen.parameters.IntrospectionRequest;
+import jakarta.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
+import lombok.Builder;
 import lombok.SneakyThrows;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.artifact.handler.DefaultArtifactHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class SchemaFileServiceTest {
 
-  private SchemaManifestService schemaManifestService;
-  private SchemaFileService schemaFileService;
-  private RemoteSchemaService remoteSchemaService;
-  private SchemaTransformationService schemaTransformationService;
+  @Mock private SchemaManifestService schemaManifestService;
+
+  @Mock private RemoteSchemaService remoteSchemaService;
+
+  @Mock private SchemaTransformationService schemaTransformationService;
+
+  private SchemaFileService underTest;
 
   @BeforeEach
   void setUp() {
     File manifestDir = new File("target/test-classes/schema");
-    schemaManifestService = mock(SchemaManifestService.class);
-    remoteSchemaService = mock(RemoteSchemaService.class);
-    schemaTransformationService = mock(SchemaTransformationService.class);
-    schemaFileService =
+    underTest =
         new SchemaFileService(
             manifestDir, schemaManifestService, remoteSchemaService, schemaTransformationService);
   }
@@ -61,8 +74,8 @@ class SchemaFileServiceTest {
 
     // Test with both files and directories
     Set<File> schemaPaths = Set.of(schemaFile, schemaDir);
-    schemaFileService.loadExpandedSchemaPaths(schemaPaths);
-    Set<File> result = schemaFileService.getSchemaPaths();
+    underTest.loadExpandedSchemaPaths(schemaPaths);
+    Set<File> result = underTest.getSchemaPaths();
 
     // Should find all 3 schema files
     assertEquals(3, result.size());
@@ -74,8 +87,8 @@ class SchemaFileServiceTest {
   @Test
   void testSetSchemaPaths() {
     Set<File> schemaPaths = Set.of(new File("a.graphqls"), new File("b.graphqls"));
-    schemaFileService.setSchemaPaths(schemaPaths);
-    assertEquals(schemaPaths, schemaFileService.getSchemaPaths());
+    underTest.setSchemaPaths(schemaPaths);
+    assertEquals(schemaPaths, underTest.getSchemaPaths());
   }
 
   @Test
@@ -83,17 +96,17 @@ class SchemaFileServiceTest {
     Set<File> allFiles = Set.of(new File("a.graphqls"), new File("b.graphqls"));
     when(schemaManifestService.getChangedFiles())
         .thenReturn(Collections.singleton(new File("b.graphqls")));
-    schemaFileService.setSchemaPaths(allFiles);
+    underTest.setSchemaPaths(allFiles);
 
-    schemaFileService.filterChangedSchemaFiles();
-    Set<File> result = schemaFileService.getSchemaPaths();
+    underTest.filterChangedSchemaFiles();
+    Set<File> result = underTest.getSchemaPaths();
     assertEquals(1, result.size());
     assertTrue(result.contains(new File("b.graphqls")));
   }
 
   @Test
   void testVerifySchemaFilesThrowsOnEmpty() {
-    assertThrows(IllegalArgumentException.class, () -> schemaFileService.checkHasSchemaFiles());
+    assertThrows(IllegalArgumentException.class, () -> underTest.checkHasSchemaFiles());
   }
 
   @Test
@@ -151,7 +164,7 @@ class SchemaFileServiceTest {
     String url = TestUtils.TEST_SCHEMA_URL;
     String expectedContent = "type Query { hello: String }";
     when(remoteSchemaService.getRemoteSchemaFile(url)).thenReturn(expectedContent);
-    String content = schemaFileService.fetchSchema(url);
+    String content = underTest.fetchSchema(url);
     assertNotNull(content);
     assertEquals(expectedContent, content);
     verify(remoteSchemaService, times(1)).getRemoteSchemaFile(url);
@@ -163,8 +176,8 @@ class SchemaFileServiceTest {
     String url = TestUtils.TEST_SCHEMA_URL;
     String expectedContent = "type Query { hello: String }";
     when(remoteSchemaService.getRemoteSchemaFile(url)).thenReturn(expectedContent);
-    schemaFileService.loadSchemaUrls(java.util.List.of(url));
-    File outFile = schemaFileService.getSchemaPaths().iterator().next();
+    underTest.loadSchemaUrls(java.util.List.of(url));
+    File outFile = underTest.getSchemaPaths().iterator().next();
     assertTrue(outFile.exists());
     String content = java.nio.file.Files.readString(outFile.toPath());
     assertEquals(expectedContent, content);
@@ -173,82 +186,264 @@ class SchemaFileServiceTest {
 
   @Test
   void extractSchemaFilesFromDependencies_returnsMatchingArtifactFile() {
-    org.apache.maven.artifact.Artifact artifact = mock(org.apache.maven.artifact.Artifact.class);
-    when(artifact.getGroupId()).thenReturn("com.example");
-    when(artifact.getArtifactId()).thenReturn("foo");
-    when(artifact.getBaseVersion()).thenReturn("1.0.0");
-    File file = new File("foo-1.0.0.jar");
-    when(artifact.getFile()).thenReturn(file);
 
-    Set<org.apache.maven.artifact.Artifact> artifacts = new java.util.HashSet<>();
-    artifacts.add(artifact);
+    final File artifactFileExpected = new File("foo-1.0.0.jar");
+    final File anotherArtifactFileExpected = new File("fqq-2.0.0-20260101.120000-3-schema.jar");
 
-    java.util.Collection<String> deps = java.util.List.of("com.example:foo:1.0.0");
-    java.util.List<File> result =
-        SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+    // Given
+    final Set<Artifact> dependencyArtifacts =
+        Set.of(
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("foo")
+                .version("1.0.0")
+                .type("jar")
+                .file(artifactFileExpected)
+                .build(),
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("fpp")
+                .version("1.0.0-20260101.120000-3")
+                .type("jar")
+                .file(new File("fpp-1.0.0-20260101.120000-3.jar"))
+                .build(),
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("fqq")
+                .classifier("schema")
+                .version("2.0.0-20260101.120000-3")
+                .type("jar")
+                .file(anotherArtifactFileExpected)
+                .build(),
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("frr")
+                .classifier("schema")
+                .version("1.0.0")
+                .type("jar")
+                .file(new File("frr-1.0.0.jar"))
+                .build());
+    final Collection<String> schemaJarFilesFromDependencies =
+        List.of(
+            " com.example:foo:1.0.0 ",
+            " com.example:fqq:schema:2.0.0-SNAPSHOT ",
+            // blank coordinate is skipped
+            "   ",
+            // unmatched coordinate
+            " com.example:unmatchedArtifact:1.0.0");
 
-    assertEquals(1, result.size());
-    assertEquals(file, result.get(0));
+    // When
+    final List<File> result =
+        SchemaFileService.extractSchemaFilesFromDependencies(
+            dependencyArtifacts, schemaJarFilesFromDependencies);
+
+    // Then
+    assertEquals(2, result.size());
+    assertTrue(result.contains(artifactFileExpected));
+    assertTrue(result.contains(anotherArtifactFileExpected));
   }
 
   @Test
-  void extractSchemaFilesFromDependencies_whenArtifactRefParamContainsClassifier_returnsMatchingArtifactFile() {
-    org.apache.maven.artifact.Artifact artifact = mock(org.apache.maven.artifact.Artifact.class);
-    when(artifact.getGroupId()).thenReturn("com.example");
-    when(artifact.getArtifactId()).thenReturn("foo");
-    when(artifact.getBaseVersion()).thenReturn("1.0.0");
-    when(artifact.getClassifier()).thenReturn("schema");
-    File file = new File("foo-1.0.0-schema.jar");
-    when(artifact.getFile()).thenReturn(file);
+  void
+      extractSchemaFilesFromDependencies_givenSchemaJarFilesFromDependencies_whenIsEmpty_returnEmptyList() {
 
-    Set<org.apache.maven.artifact.Artifact> artifacts = new java.util.HashSet<>();
-    artifacts.add(artifact);
+    // Given
+    final Set<Artifact> dependencyArtifacts =
+        Set.of(
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("foo")
+                .version("1.0.0")
+                .type("jar")
+                .file(new File("foo-1.0.0.jar"))
+                .build());
+    final Collection<String> schemaJarFilesFromDependencies = List.of();
 
-    java.util.Collection<String> deps = java.util.List.of("com.example:foo:1.0.0:schema");
-    java.util.List<File> result = SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+    // When
+    final List<File> result =
+        SchemaFileService.extractSchemaFilesFromDependencies(
+            dependencyArtifacts, schemaJarFilesFromDependencies);
 
-    assertEquals(1, result.size());
-    assertEquals(file, result.get(0));
+    // Then
+    assertEquals(0, result.size());
   }
 
   @Test
-  void extractSchemaFilesFromDependencies_skipsEmptyEntries() {
-    Set<org.apache.maven.artifact.Artifact> artifacts = java.util.Collections.emptySet();
+  void extractSchemaFilesFromDependencies_givenDependencyArtifacts_whenIsEmpty_returnEmptyList() {
 
-    java.util.Collection<String> deps = java.util.List.of("   ", "");
-    java.util.List<File> result =
-        SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+    // Given
+    final Set<Artifact> dependencyArtifacts = Set.of();
 
+    final Collection<String> schemaJarFilesFromDependencies = List.of(" com.example:foo:1.0.0 ");
+
+    // When
+    final List<File> result =
+        SchemaFileService.extractSchemaFilesFromDependencies(
+            dependencyArtifacts, schemaJarFilesFromDependencies);
+
+    // Then
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  void findArtifactFromDependencies_thenReturnFirstMatchingArtifact() {
+
+    final Artifact artifactExpected =
+        ArtifactImpl.builder()
+            .groupId("com.example.expected")
+            .artifactId("foo")
+            .classifier("schema")
+            .version("1.0.0")
+            .type("jar")
+            .build();
+
+    // Given
+    final Set<Artifact> dependencyArtifacts =
+        Set.of(
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("faa")
+                .version("1.0.0-20260101.120000-3")
+                .type("jar")
+                .build(),
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("fbb")
+                .version("1.0.0")
+                .type("jar")
+                .build(),
+            artifactExpected);
+    final String artifactRef = " com.example.expected:foo:schema:1.0.0  ";
+
+    // When
+    final Optional<Artifact> result =
+        SchemaFileService.findArtifactFromDependencies(dependencyArtifacts, artifactRef);
+
+    // Then
+    assertTrue(result.isPresent());
+    assertEquals(artifactExpected, result.get());
+  }
+
+  @Test
+  void findArtifactFromDependencies_whenNoMatchingArtifactFound_thenReturnOptionalEmpty() {
+
+    // Given
+    final Set<Artifact> dependencyArtifacts =
+        Set.of(
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("faa")
+                .version("1.0.0-20260101.120000-3")
+                .type("jar")
+                .build(),
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("fbb")
+                .version("1.0.0")
+                .type("jar")
+                .build());
+    final String artifactRef = " com.example.expected:foo:schema:1.0.0  ";
+
+    // When
+    final Optional<Artifact> result =
+        SchemaFileService.findArtifactFromDependencies(dependencyArtifacts, artifactRef);
+
+    // Then
     assertTrue(result.isEmpty());
   }
 
   @Test
-  void extractSchemaFilesFromDependencies_ignoresNonMatchingDependencies() {
-    org.apache.maven.artifact.Artifact artifact = mock(org.apache.maven.artifact.Artifact.class);
-    when(artifact.getGroupId()).thenReturn("com.example");
-    when(artifact.getArtifactId()).thenReturn("foo");
-    when(artifact.getVersion()).thenReturn("1.0.0");
-    when(artifact.getFile()).thenReturn(new File("foo-1.0.0.jar"));
+  void findArtifactFromDependencies_givenDependencyArtifacts_whenIsEmpty_thenReturnOptionalEmpty() {
 
-    Set<org.apache.maven.artifact.Artifact> artifacts = new java.util.HashSet<>();
-    artifacts.add(artifact);
+    // Given
+    final Set<Artifact> dependencyArtifacts = Set.of();
+    final String artifactRef = " com.example.expected:foo:schema:1.0.0  ";
 
-    java.util.Collection<String> deps = java.util.List.of("com.other:bar:2.0.0");
-    java.util.List<File> result =
-        SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+    // When
+    final Optional<Artifact> result =
+        SchemaFileService.findArtifactFromDependencies(dependencyArtifacts, artifactRef);
 
+    // Then
     assertTrue(result.isEmpty());
   }
 
   @Test
-  void extractSchemaFilesFromDependencies_returnsEmptyListIfNoDependencies() {
-    Set<Artifact> artifacts = java.util.Collections.emptySet();
+  void findArtifactFromDependencies_givenArtifactRef_whenIsBlank_thenReturnOptionalEmpty() {
 
-    java.util.Collection<String> deps = java.util.List.of("com.example:foo:1.0.0");
-    java.util.List<File> result =
-        SchemaFileService.extractSchemaFilesFromDependencies(artifacts, deps);
+    // Given
+    final Set<Artifact> dependencyArtifacts =
+        Set.of(
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("faa")
+                .version("1.0.0-20260101.120000-3")
+                .type("jar")
+                .build(),
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("fbb")
+                .version("1.0.0")
+                .type("jar")
+                .build());
+    final String artifactRef = "  ";
 
+    // When
+    final Optional<Artifact> result =
+        SchemaFileService.findArtifactFromDependencies(dependencyArtifacts, artifactRef);
+
+    // Then
     assertTrue(result.isEmpty());
+  }
+
+  static Stream<Arguments>
+      formatAsCoordinate_givenArtifact_thenReturnArtifactCoordinateAsExpected() {
+    return Stream.of(
+        Arguments.of(
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("foo")
+                .classifier("schema")
+                .version("1.0.0-20260101.120000-3")
+                .type("jar")
+                .build(),
+            "com.example:foo:schema:1.0.0-SNAPSHOT"),
+        Arguments.of(
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("foo")
+                .classifier("schema")
+                .version("1.0.0")
+                .type("jar")
+                .build(),
+            "com.example:foo:schema:1.0.0"),
+        Arguments.of(
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("foo")
+                .version("1.0.0-20260101.120000-3")
+                .type("jar")
+                .build(),
+            "com.example:foo:1.0.0-SNAPSHOT"),
+        Arguments.of(
+            ArtifactImpl.builder()
+                .groupId("com.example")
+                .artifactId("foo")
+                .version("1.0.0")
+                .type("jar")
+                .build(),
+            "com.example:foo:1.0.0"));
+  }
+
+  @MethodSource
+  @ParameterizedTest
+  void formatAsCoordinate_givenArtifact_thenReturnArtifactCoordinateAsExpected(
+      Artifact artifact, String coordinateExpected) {
+
+    // When
+    final String result = SchemaFileService.formatAsCoordinate(artifact);
+
+    // Then
+    assertEquals(coordinateExpected, result);
   }
 
   @Test
@@ -293,5 +488,22 @@ class SchemaFileServiceTest {
             argThat(
                 op -> op.getQuery().equals(query) && op.getOperationName().equals(operationName)),
             eq(headers));
+  }
+
+  private static class ArtifactImpl extends DefaultArtifact {
+
+    @Builder
+    public ArtifactImpl(
+        @Nullable String groupId,
+        String artifactId,
+        String version,
+        String scope,
+        String type,
+        @Nullable String classifier,
+        @Nullable File file) {
+      super(
+          groupId, artifactId, version, scope, type, classifier, new DefaultArtifactHandler(type));
+      setFile(file);
+    }
   }
 }

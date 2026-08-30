@@ -6,6 +6,7 @@ import io.github.deweyjose.graphqlcodegen.services.RemoteSchemaService.Introspec
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,12 +19,13 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.shared.utils.StringUtils;
 
 /** Service for managing schema files. */
 @Getter
 @Setter
+@Slf4j
 public class SchemaFileService {
   private final File outputDir;
   private final SchemaManifestService manifest;
@@ -245,7 +247,8 @@ public class SchemaFileService {
 
   /**
    * Extracts schema files from the given set of dependency artifacts, matching the provided
-   * dependency coordinates.
+   * dependency coordinates. If, at least, one provided dependency coordinate don't match any Maven
+   * dependency, a warning log is printed,
    *
    * @param dependencyArtifacts the set of Maven dependency artifacts
    * @param schemaJarFilesFromDependencies the collection of dependency coordinates to match
@@ -253,14 +256,26 @@ public class SchemaFileService {
    */
   public static List<File> extractSchemaFilesFromDependencies(
       Set<Artifact> dependencyArtifacts, Collection<String> schemaJarFilesFromDependencies) {
-    return schemaJarFilesFromDependencies.stream()
-        .map(String::trim)
-        .filter(jarDep -> !jarDep.isEmpty())
-        .map(jarDep -> findArtifactFromDependencies(dependencyArtifacts, jarDep))
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .map(Artifact::getFile)
-        .toList();
+
+    final List<File> schemaFilesExtracted = new ArrayList<>();
+    final Set<String> unmatchedCoordinates = new HashSet<>();
+
+    for (final String dependencyCoordinate : schemaJarFilesFromDependencies) {
+      if (!dependencyCoordinate.isBlank()) {
+        findArtifactFromDependencies(dependencyArtifacts, dependencyCoordinate)
+            .map(Artifact::getFile)
+            .ifPresentOrElse(
+                schemaFilesExtracted::add, () -> unmatchedCoordinates.add(dependencyCoordinate));
+      }
+    }
+
+    if (!unmatchedCoordinates.isEmpty()) {
+      log.warn(
+          "The provided dependency coordinates don't match any Maven dependency: {}",
+          String.join(", ", unmatchedCoordinates));
+    }
+
+    return schemaFilesExtracted;
   }
 
   /**
@@ -268,40 +283,39 @@ public class SchemaFileService {
    * string.
    *
    * @param dependencyArtifacts the set of Maven dependency artifacts
-   * @param artifactRef the Maven coordinate string (groupId:artifactId:version)
+   * @param artifactRef the Maven coordinate string (groupId:artifactId:[classifier:]version)
    * @return an Optional containing the matching Artifact, or empty if not found
    */
-  private static Optional<Artifact> findArtifactFromDependencies(
+  static Optional<Artifact> findArtifactFromDependencies(
       Set<Artifact> dependencyArtifacts, final String artifactRef) {
+
     final String cleanRef = artifactRef.trim();
-
-    for (final Artifact artifact : dependencyArtifacts) {
-
-      final String ref = formatArtifactAsRef(cleanRef, artifact);
-      if (ref.equals(cleanRef)) {
-        return java.util.Optional.of(artifact);
-      }
-    }
-    return Optional.empty();
+    return dependencyArtifacts.stream()
+        .filter(artifact -> formatAsCoordinate(artifact).equals(cleanRef))
+        .findFirst();
   }
 
   /**
-   * Format a Maven {@link Artifact} as an Maven coordinate string according to an
-   * artifact ref model. Supported Maven coordinate model string are the
-   * groupId:artifactId:version or groupId:artifactId:version:classifier.
-   * 
-   * @param artifactRefModel a Maven coordinate string
-   * @param artifact         a maven dependency artifact
-   * @return a Maven coordinate string formatted according the artifact ref model.
+   * Format this Maven {@link Artifact} as a Maven coordinate string
+   * groupId:artifactId:[classifier:]version (classifier is optional) Maven coordinate string
+   * returned won't include {@link Artifact} type and scope.
+   *
+   * @param artifact a maven dependency {@link Artifact} to format.
+   * @return a Maven {@link Artifact} coordinate string.
    */
-  private static String formatArtifactAsRef(String artifactRefModel, Artifact artifact) {
+  static String formatAsCoordinate(Artifact artifact) {
 
-    final int nbrSeparator = StringUtils.countMatches(artifactRefModel, ":");
-    String ref = String.join(":", artifact.getGroupId(), artifact.getArtifactId(), artifact.getBaseVersion());
-    if (nbrSeparator == 3) {
-      ref = String.join(":", ref, artifact.getClassifier());
+    final StringBuilder sb =
+        new StringBuilder()
+            .append(artifact.getGroupId())
+            .append(":")
+            .append(artifact.getArtifactId())
+            .append(":");
+
+    if (artifact.hasClassifier()) {
+      sb.append(artifact.getClassifier()).append(":");
     }
 
-    return ref;
+    return sb.append(artifact.getBaseVersion()).toString();
   }
 }
