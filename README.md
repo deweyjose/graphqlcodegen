@@ -87,7 +87,8 @@ paths, only files with the extensions `.graphql`, `.graphqls`, or `.gqls` are co
 
 ### schemaJarFilesFromDependencies
 
-Generate from schemas packaged inside dependency jars, referenced by `groupId:artifactId:version`
+Generate from schemas packaged inside dependency jars, referenced by `groupId:artifactId:version` or
+`groupId:artifactId:classifier:version`
 coordinates. The `.graphql(s)` files must live under the `META-INF` folder of the jar. See the
 [official DGS docs](https://netflix.github.io/dgs/generating-code-from-schema/#generating-code-from-external-schemas-in-jars).
 
