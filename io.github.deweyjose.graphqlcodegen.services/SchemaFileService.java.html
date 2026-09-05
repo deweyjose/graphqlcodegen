@@ -6,6 +6,7 @@ import io.github.deweyjose.graphqlcodegen.services.RemoteSchemaService.Introspec
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,11 +19,13 @@ import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.maven.artifact.Artifact;
 
 /** Service for managing schema files. */
 @Getter
 @Setter
+<span class="fc" id="L28">@Slf4j</span>
 public class SchemaFileService {
   private final File outputDir;
   private final SchemaManifestService manifest;
@@ -40,12 +43,12 @@ public class SchemaFileService {
    * @param logger the maven logger
    */
   public SchemaFileService(File outputDir, SchemaManifestService manifest, Logger logger) {
-<span class="fc" id="L43">    this(</span>
+<span class="fc" id="L46">    this(</span>
         outputDir,
         manifest,
         new RemoteSchemaService(logger),
         new SchemaTransformationService(logger));
-<span class="fc" id="L48">  }</span>
+<span class="fc" id="L51">  }</span>
 
   /**
    * Constructs a new SchemaFileService with the given output directory, manifest, and remote schema
@@ -60,13 +63,13 @@ public class SchemaFileService {
       File outputDir,
       SchemaManifestService manifest,
       RemoteSchemaService remoteSchemaService,
-<span class="fc" id="L63">      SchemaTransformationService schemaTransformationService) {</span>
-<span class="fc" id="L64">    this.schemaPaths = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L65">    this.outputDir = outputDir;</span>
-<span class="fc" id="L66">    this.manifest = manifest;</span>
-<span class="fc" id="L67">    this.remoteSchemaService = remoteSchemaService;</span>
-<span class="fc" id="L68">    this.schemaTransformationService = schemaTransformationService;</span>
-<span class="fc" id="L69">  }</span>
+<span class="fc" id="L66">      SchemaTransformationService schemaTransformationService) {</span>
+<span class="fc" id="L67">    this.schemaPaths = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L68">    this.outputDir = outputDir;</span>
+<span class="fc" id="L69">    this.manifest = manifest;</span>
+<span class="fc" id="L70">    this.remoteSchemaService = remoteSchemaService;</span>
+<span class="fc" id="L71">    this.schemaTransformationService = schemaTransformationService;</span>
+<span class="fc" id="L72">  }</span>
 
   /**
    * Loads the schema paths, expanding directories to include all GraphQL schema files within them.
@@ -74,19 +77,19 @@ public class SchemaFileService {
    * @param schemaPaths the collection of files or directories to load as schema paths
    */
   public void loadExpandedSchemaPaths(Collection&lt;File&gt; schemaPaths) {
-<span class="fc" id="L77">    setSchemaPaths(</span>
-<span class="fc" id="L78">        schemaPaths.stream()</span>
-<span class="fc" id="L79">            .map(</span>
+<span class="fc" id="L80">    setSchemaPaths(</span>
+<span class="fc" id="L81">        schemaPaths.stream()</span>
+<span class="fc" id="L82">            .map(</span>
                 path -&gt; {
-<span class="fc bfc" id="L81" title="All 2 branches covered.">                  if (path.isFile()) {</span>
-<span class="fc" id="L82">                    return Stream.of(path);</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">                  if (path.isFile()) {</span>
+<span class="fc" id="L85">                    return Stream.of(path);</span>
                   } else {
-<span class="fc" id="L84">                    return findGraphQLSFiles(path).stream();</span>
+<span class="fc" id="L87">                    return findGraphQLSFiles(path).stream();</span>
                   }
                 })
-<span class="fc" id="L87">            .flatMap(stream -&gt; stream)</span>
-<span class="fc" id="L88">            .collect(Collectors.toSet()));</span>
-<span class="fc" id="L89">  }</span>
+<span class="fc" id="L90">            .flatMap(stream -&gt; stream)</span>
+<span class="fc" id="L91">            .collect(Collectors.toSet()));</span>
+<span class="fc" id="L92">  }</span>
 
   /**
    * Loads the schema jar files from dependencies into the internal list.
@@ -97,9 +100,9 @@ public class SchemaFileService {
    */
   public void loadSchemaJarFilesFromDependencies(
       Set&lt;Artifact&gt; artifacts, Set&lt;String&gt; schemaJarFilesFromDependencies) {
-<span class="fc" id="L100">    this.schemaJarFilesFromDependencies =</span>
-<span class="fc" id="L101">        extractSchemaFilesFromDependencies(artifacts, schemaJarFilesFromDependencies);</span>
-<span class="fc" id="L102">  }</span>
+<span class="fc" id="L103">    this.schemaJarFilesFromDependencies =</span>
+<span class="fc" id="L104">        extractSchemaFilesFromDependencies(artifacts, schemaJarFilesFromDependencies);</span>
+<span class="fc" id="L105">  }</span>
 
   /**
    * Loads remote schema URLs and saves them as files in the output directory, adding them to
@@ -107,34 +110,34 @@ public class SchemaFileService {
    *
    * @param schemaUrls the list of schema URLs to load
    */
-<span class="pc" id="L110">  @SneakyThrows</span>
+<span class="pc" id="L113">  @SneakyThrows</span>
   public void loadSchemaUrls(List&lt;String&gt; schemaUrls) {
-<span class="fc bfc" id="L112" title="All 2 branches covered.">    for (String url : schemaUrls) {</span>
-<span class="fc" id="L113">      String content = remoteSchemaService.getRemoteSchemaFile(url);</span>
-<span class="fc" id="L114">      schemaPaths.add(saveUrlToFile(url, content));</span>
-<span class="fc" id="L115">    }</span>
-<span class="fc" id="L116">  }</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">    for (String url : schemaUrls) {</span>
+<span class="fc" id="L116">      String content = remoteSchemaService.getRemoteSchemaFile(url);</span>
+<span class="fc" id="L117">      schemaPaths.add(saveUrlToFile(url, content));</span>
+<span class="fc" id="L118">    }</span>
+<span class="fc" id="L119">  }</span>
 
   /**
    * Loads introspected schemas from the given collection of IntrospectionRequest objects.
    *
    * @param schemaUrls the collection of IntrospectionRequest objects to load
    */
-<span class="pc" id="L123">  @SneakyThrows</span>
+<span class="pc" id="L126">  @SneakyThrows</span>
   public void loadIntrospectedSchemas(Collection&lt;IntrospectionRequest&gt; schemaUrls) {
-<span class="fc bfc" id="L125" title="All 2 branches covered.">    for (IntrospectionRequest request : schemaUrls) {</span>
-<span class="fc" id="L126">      String query = Optional.ofNullable(request.getQuery()).orElse(Constants.DEFAULT_QUERY);</span>
-<span class="fc" id="L127">      String operationName =</span>
-<span class="fc" id="L128">          Optional.ofNullable(request.getOperationName()).orElse(Constants.DEFAULT_OPERATION_NAME);</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">    for (IntrospectionRequest request : schemaUrls) {</span>
+<span class="fc" id="L129">      String query = Optional.ofNullable(request.getQuery()).orElse(Constants.DEFAULT_QUERY);</span>
+<span class="fc" id="L130">      String operationName =</span>
+<span class="fc" id="L131">          Optional.ofNullable(request.getOperationName()).orElse(Constants.DEFAULT_OPERATION_NAME);</span>
       IntrospectionOperation operation =
-<span class="fc" id="L130">          IntrospectionOperation.builder().query(query).operationName(operationName).build();</span>
-<span class="fc" id="L131">      String content =</span>
-<span class="fc" id="L132">          remoteSchemaService.getIntrospectedSchemaFile(</span>
-<span class="fc" id="L133">              request.getUrl(), operation, request.getHeaders());</span>
-<span class="fc" id="L134">      String transformedContent = schemaTransformationService.transformSchema(content);</span>
-<span class="fc" id="L135">      schemaPaths.add(saveUrlToFile(request.getUrl(), transformedContent));</span>
-<span class="fc" id="L136">    }</span>
-<span class="fc" id="L137">  }</span>
+<span class="fc" id="L133">          IntrospectionOperation.builder().query(query).operationName(operationName).build();</span>
+<span class="fc" id="L134">      String content =</span>
+<span class="fc" id="L135">          remoteSchemaService.getIntrospectedSchemaFile(</span>
+<span class="fc" id="L136">              request.getUrl(), operation, request.getHeaders());</span>
+<span class="fc" id="L137">      String transformedContent = schemaTransformationService.transformSchema(content);</span>
+<span class="fc" id="L138">      schemaPaths.add(saveUrlToFile(request.getUrl(), transformedContent));</span>
+<span class="fc" id="L139">    }</span>
+<span class="fc" id="L140">  }</span>
 
   /**
    * Checks if there are any schema files or schema jars to generate. Throws if none are found.
@@ -142,13 +145,13 @@ public class SchemaFileService {
    * @throws IllegalArgumentException if no schema files or jars are found
    */
   public void checkHasSchemaFiles() {
-<span class="fc bfc" id="L145" title="All 2 branches covered.">    if (getSchemaPaths().isEmpty()</span>
-<span class="fc" id="L146">        &amp;&amp; Optional.ofNullable(getSchemaJarFilesFromDependencies())</span>
-<span class="fc" id="L147">            .orElse(Collections.emptyList())</span>
-<span class="pc bpc" id="L148" title="1 of 2 branches missed.">            .isEmpty()) {</span>
-<span class="fc" id="L149">      throw new IllegalArgumentException(&quot;No schema files found. Please check your configuration.&quot;);</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">    if (getSchemaPaths().isEmpty()</span>
+<span class="fc" id="L149">        &amp;&amp; Optional.ofNullable(getSchemaJarFilesFromDependencies())</span>
+<span class="fc" id="L150">            .orElse(Collections.emptyList())</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">            .isEmpty()) {</span>
+<span class="fc" id="L152">      throw new IllegalArgumentException(&quot;No schema files found. Please check your configuration.&quot;);</span>
     }
-<span class="fc" id="L151">  }</span>
+<span class="fc" id="L154">  }</span>
 
   /**
    * Returns true if there are no schema files or schema jars to process.
@@ -156,25 +159,25 @@ public class SchemaFileService {
    * @return true if there is no work to do, false otherwise
    */
   public boolean noWorkToDo() {
-<span class="pc bpc" id="L159" title="3 of 4 branches missed.">    return getSchemaPaths().isEmpty() &amp;&amp; getSchemaJarFilesFromDependencies().isEmpty();</span>
+<span class="pc bpc" id="L162" title="3 of 4 branches missed.">    return getSchemaPaths().isEmpty() &amp;&amp; getSchemaJarFilesFromDependencies().isEmpty();</span>
   }
 
   /** Syncs the manifest by writing the current state to disk. Prints stack trace on error. */
   public void syncManifest() {
     try {
-<span class="fc" id="L165">      manifest.syncManifest();</span>
-<span class="nc" id="L166">    } catch (Exception e) {</span>
-<span class="nc" id="L167">      e.printStackTrace();</span>
-<span class="fc" id="L168">    }</span>
-<span class="fc" id="L169">  }</span>
+<span class="fc" id="L168">      manifest.syncManifest();</span>
+<span class="nc" id="L169">    } catch (Exception e) {</span>
+<span class="nc" id="L170">      e.printStackTrace();</span>
+<span class="fc" id="L171">    }</span>
+<span class="fc" id="L172">  }</span>
 
   /** Filters schemaPaths to only include files that have changed according to the manifest. */
   public void filterChangedSchemaFiles() {
-<span class="fc" id="L173">    manifest.setFiles(new HashSet&lt;&gt;(schemaPaths));</span>
-<span class="fc" id="L174">    Set&lt;File&gt; changed = new HashSet&lt;&gt;(schemaPaths);</span>
-<span class="fc" id="L175">    changed.retainAll(manifest.getChangedFiles());</span>
-<span class="fc" id="L176">    setSchemaPaths(changed);</span>
-<span class="fc" id="L177">  }</span>
+<span class="fc" id="L176">    manifest.setFiles(new HashSet&lt;&gt;(schemaPaths));</span>
+<span class="fc" id="L177">    Set&lt;File&gt; changed = new HashSet&lt;&gt;(schemaPaths);</span>
+<span class="fc" id="L178">    changed.retainAll(manifest.getChangedFiles());</span>
+<span class="fc" id="L179">    setSchemaPaths(changed);</span>
+<span class="fc" id="L180">  }</span>
 
   /**
    * Fetches the contents of a remote schema from the given URL as a string.
@@ -185,7 +188,7 @@ public class SchemaFileService {
    * @throws InterruptedException if the thread is interrupted
    */
   public String fetchSchema(String url) throws IOException, InterruptedException {
-<span class="fc" id="L188">    return remoteSchemaService.getRemoteSchemaFile(url);</span>
+<span class="fc" id="L191">    return remoteSchemaService.getRemoteSchemaFile(url);</span>
   }
 
   /**
@@ -199,11 +202,11 @@ public class SchemaFileService {
    */
   private File saveUrlToFile(String url, String content) throws IOException, InterruptedException {
     String fileName =
-<span class="fc" id="L202">        &quot;remote-schemas/&quot; + Base64.getEncoder().encodeToString(url.getBytes()) + &quot;.graphqls&quot;;</span>
-<span class="fc" id="L203">    File outFile = new File(outputDir, fileName);</span>
-<span class="fc" id="L204">    Files.createDirectories(outFile.getParentFile().toPath());</span>
-<span class="fc" id="L205">    Files.writeString(outFile.toPath(), content);</span>
-<span class="fc" id="L206">    return outFile;</span>
+<span class="fc" id="L205">        &quot;remote-schemas/&quot; + Base64.getEncoder().encodeToString(url.getBytes()) + &quot;.graphqls&quot;;</span>
+<span class="fc" id="L206">    File outFile = new File(outputDir, fileName);</span>
+<span class="fc" id="L207">    Files.createDirectories(outFile.getParentFile().toPath());</span>
+<span class="fc" id="L208">    Files.writeString(outFile.toPath(), content);</span>
+<span class="fc" id="L209">    return outFile;</span>
   }
 
   /**
@@ -213,21 +216,21 @@ public class SchemaFileService {
    * @return a set of GraphQL schema files found
    */
   public static Set&lt;File&gt; findGraphQLSFiles(File directory) {
-<span class="fc" id="L216">    Set&lt;File&gt; result = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L219">    Set&lt;File&gt; result = new HashSet&lt;&gt;();</span>
 
-<span class="fc" id="L218">    File[] contents = directory.listFiles();</span>
-<span class="fc bfc" id="L219" title="All 2 branches covered.">    if (contents != null) {</span>
-<span class="fc bfc" id="L220" title="All 2 branches covered.">      for (File content : contents) {</span>
-<span class="pc bpc" id="L221" title="1 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
-<span class="fc" id="L222">          result.add(content);</span>
-<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        } else if (content.isDirectory()) {</span>
-<span class="fc" id="L224">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
-<span class="fc" id="L225">          result.addAll(subdirectoryGraphQLSFiles);</span>
+<span class="fc" id="L221">    File[] contents = directory.listFiles();</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">    if (contents != null) {</span>
+<span class="fc bfc" id="L223" title="All 2 branches covered.">      for (File content : contents) {</span>
+<span class="pc bpc" id="L224" title="1 of 4 branches missed.">        if (content.isFile() &amp;&amp; isGraphqlFile(content)) {</span>
+<span class="fc" id="L225">          result.add(content);</span>
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        } else if (content.isDirectory()) {</span>
+<span class="fc" id="L227">          Set&lt;File&gt; subdirectoryGraphQLSFiles = findGraphQLSFiles(content);</span>
+<span class="fc" id="L228">          result.addAll(subdirectoryGraphQLSFiles);</span>
         }
       }
     }
 
-<span class="fc" id="L230">    return result;</span>
+<span class="fc" id="L233">    return result;</span>
   }
 
   /**
@@ -237,14 +240,15 @@ public class SchemaFileService {
    * @return true if the file is a GraphQL schema file, false otherwise
    */
   public static boolean isGraphqlFile(File file) {
-<span class="fc bfc" id="L240" title="All 2 branches covered.">    return file.getName().endsWith(&quot;.graphqls&quot;)</span>
-<span class="fc bfc" id="L241" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.graphql&quot;)</span>
-<span class="fc bfc" id="L242" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.gqls&quot;);</span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">    return file.getName().endsWith(&quot;.graphqls&quot;)</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.graphql&quot;)</span>
+<span class="fc bfc" id="L245" title="All 2 branches covered.">        || file.getName().endsWith(&quot;.gqls&quot;);</span>
   }
 
   /**
    * Extracts schema files from the given set of dependency artifacts, matching the provided
-   * dependency coordinates.
+   * dependency coordinates. If, at least, one provided dependency coordinate don't match any Maven
+   * dependency, a warning log is printed,
    *
    * @param dependencyArtifacts the set of Maven dependency artifacts
    * @param schemaJarFilesFromDependencies the collection of dependency coordinates to match
@@ -252,14 +256,26 @@ public class SchemaFileService {
    */
   public static List&lt;File&gt; extractSchemaFilesFromDependencies(
       Set&lt;Artifact&gt; dependencyArtifacts, Collection&lt;String&gt; schemaJarFilesFromDependencies) {
-<span class="fc" id="L255">    return schemaJarFilesFromDependencies.stream()</span>
-<span class="fc" id="L256">        .map(String::trim)</span>
-<span class="fc bfc" id="L257" title="All 2 branches covered.">        .filter(jarDep -&gt; !jarDep.isEmpty())</span>
-<span class="fc" id="L258">        .map(jarDep -&gt; findArtifactFromDependencies(dependencyArtifacts, jarDep))</span>
-<span class="fc" id="L259">        .filter(Optional::isPresent)</span>
-<span class="fc" id="L260">        .map(Optional::get)</span>
-<span class="fc" id="L261">        .map(Artifact::getFile)</span>
-<span class="fc" id="L262">        .toList();</span>
+
+<span class="fc" id="L260">    final List&lt;File&gt; schemaFilesExtracted = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L261">    final Set&lt;String&gt; unmatchedCoordinates = new HashSet&lt;&gt;();</span>
+
+<span class="fc bfc" id="L263" title="All 2 branches covered.">    for (final String dependencyCoordinate : schemaJarFilesFromDependencies) {</span>
+<span class="fc bfc" id="L264" title="All 2 branches covered.">      if (!dependencyCoordinate.isBlank()) {</span>
+<span class="fc" id="L265">        findArtifactFromDependencies(dependencyArtifacts, dependencyCoordinate)</span>
+<span class="fc" id="L266">            .map(Artifact::getFile)</span>
+<span class="fc" id="L267">            .ifPresentOrElse(</span>
+<span class="fc" id="L268">                schemaFilesExtracted::add, () -&gt; unmatchedCoordinates.add(dependencyCoordinate));</span>
+      }
+<span class="fc" id="L270">    }</span>
+
+<span class="fc bfc" id="L272" title="All 2 branches covered.">    if (!unmatchedCoordinates.isEmpty()) {</span>
+<span class="fc" id="L273">      log.warn(</span>
+          &quot;The provided dependency coordinates don't match any Maven dependency: {}&quot;,
+<span class="fc" id="L275">          String.join(&quot;, &quot;, unmatchedCoordinates));</span>
+    }
+
+<span class="fc" id="L278">    return schemaFilesExtracted;</span>
   }
 
   /**
@@ -267,23 +283,40 @@ public class SchemaFileService {
    * string.
    *
    * @param dependencyArtifacts the set of Maven dependency artifacts
-   * @param artifactRef the Maven coordinate string (groupId:artifactId:version)
+   * @param artifactRef the Maven coordinate string (groupId:artifactId:[classifier:]version)
    * @return an Optional containing the matching Artifact, or empty if not found
    */
-  private static Optional&lt;Artifact&gt; findArtifactFromDependencies(
+  static Optional&lt;Artifact&gt; findArtifactFromDependencies(
       Set&lt;Artifact&gt; dependencyArtifacts, final String artifactRef) {
-<span class="fc" id="L275">    final String cleanRef = artifactRef.trim();</span>
 
-<span class="fc bfc" id="L277" title="All 2 branches covered.">    for (final Artifact artifact : dependencyArtifacts) {</span>
-<span class="fc" id="L278">      final String ref =</span>
-<span class="fc" id="L279">          String.format(</span>
-<span class="fc" id="L280">              &quot;%s:%s:%s&quot;, artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion());</span>
+<span class="fc" id="L292">    final String cleanRef = artifactRef.trim();</span>
+<span class="fc" id="L293">    return dependencyArtifacts.stream()</span>
+<span class="fc" id="L294">        .filter(artifact -&gt; formatAsCoordinate(artifact).equals(cleanRef))</span>
+<span class="fc" id="L295">        .findFirst();</span>
+  }
 
-<span class="fc bfc" id="L282" title="All 2 branches covered.">      if (ref.equals(cleanRef)) {</span>
-<span class="fc" id="L283">        return java.util.Optional.of(artifact);</span>
-      }
-<span class="fc" id="L285">    }</span>
-<span class="fc" id="L286">    return Optional.empty();</span>
+  /**
+   * Format this Maven {@link Artifact} as a Maven coordinate string
+   * groupId:artifactId:[classifier:]version (classifier is optional) Maven coordinate string
+   * returned won't include {@link Artifact} type and scope.
+   *
+   * @param artifact a maven dependency {@link Artifact} to format.
+   * @return a Maven {@link Artifact} coordinate string.
+   */
+  static String formatAsCoordinate(Artifact artifact) {
+
+<span class="fc" id="L308">    final StringBuilder sb =</span>
+        new StringBuilder()
+<span class="fc" id="L310">            .append(artifact.getGroupId())</span>
+<span class="fc" id="L311">            .append(&quot;:&quot;)</span>
+<span class="fc" id="L312">            .append(artifact.getArtifactId())</span>
+<span class="fc" id="L313">            .append(&quot;:&quot;);</span>
+
+<span class="fc bfc" id="L315" title="All 2 branches covered.">    if (artifact.hasClassifier()) {</span>
+<span class="fc" id="L316">      sb.append(artifact.getClassifier()).append(&quot;:&quot;);</span>
+    }
+
+<span class="fc" id="L319">    return sb.append(artifact.getBaseVersion()).toString();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
