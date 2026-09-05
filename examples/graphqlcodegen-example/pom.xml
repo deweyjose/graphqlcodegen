@@ -26,7 +26,7 @@
       external network dependency and stays consistent with the tested commit.
     -->
     <codegen.server.schemaUrl>https://raw.githubusercontent.com/deweyjose/graphqlcodegen-example/refs/heads/main/server/src/main/resources/schema/main.graphqls</codegen.server.schemaUrl>
-    <graphql-codegen-plugin.version>3.9.0</graphql-codegen-plugin.version>
+    <graphql-codegen-plugin.version>3.10.0</graphql-codegen-plugin.version>
     <dgs.framework.version>12.0.1</dgs.framework.version>
     <!--
       The Spring Boot parent's dependencyManagement wins over the imported DGS platform BOM,
