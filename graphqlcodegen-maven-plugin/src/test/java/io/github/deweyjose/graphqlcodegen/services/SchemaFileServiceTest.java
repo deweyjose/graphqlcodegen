@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import io.github.deweyjose.graphqlcodegen.TestUtils;
 import io.github.deweyjose.graphqlcodegen.parameters.IntrospectionRequest;
-import jakarta.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -494,13 +493,13 @@ class SchemaFileServiceTest {
 
     @Builder
     public ArtifactImpl(
-        @Nullable String groupId,
+        String groupId,
         String artifactId,
         String version,
         String scope,
         String type,
-        @Nullable String classifier,
-        @Nullable File file) {
+        String classifier,
+        File file) {
       super(
           groupId, artifactId, version, scope, type, classifier, new DefaultArtifactHandler(type));
       setFile(file);
