@@ -34,7 +34,7 @@
     -->
     <json-path.version>3.0.0</json-path.version>
     <dgs.codegen.shared.core.version>8.6.0</dgs.codegen.shared.core.version>
-    <lombok.version>1.18.46</lombok.version>
+    <lombok.version>1.18.48</lombok.version>
   </properties>
 
   <modules>

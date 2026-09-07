@@ -52,7 +52,7 @@
     <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
     <junit.version>6.1.2</junit.version>
     <mockito.version>5.23.0</mockito.version>
-    <lombok.version>1.18.46</lombok.version>
+    <lombok.version>1.18.48</lombok.version>
     <kotlinpoet-jvm.version>1.18.1</kotlinpoet-jvm.version>
     <spotless.version>3.8.0</spotless.version>
     <maven-core.version>3.9.12</maven-core.version>
