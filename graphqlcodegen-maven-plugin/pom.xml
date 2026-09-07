@@ -7,7 +7,7 @@
   <groupId>io.github.deweyjose</groupId>
   <artifactId>graphqlcodegen-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>3.10.0</version>
+  <version>3.10.1</version>
 
   <name>GraphQL Code Generator Maven Plugin</name>
   <description>Maven plugin for GraphQL code generation</description>
@@ -201,9 +201,24 @@
       <groupId>com.graphql-java</groupId>
       <artifactId>graphql-java</artifactId>
     </dependency>
+    <!--
+      jackson-annotations and jackson-core MUST be direct dependencies. flattenMode=ossrh
+      strips dependencyManagement from the published POM, so Maven mediation otherwise
+      picks graphql-dgs-codegen-core's jackson-annotations:2.18.3 over jackson-databind
+      2.22's requirement. JsonSerializeAs was added in annotations 2.21; without this
+      pin, RemoteSchemaService's ObjectMapper fails with NoClassDefFoundError (#353).
+    -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>

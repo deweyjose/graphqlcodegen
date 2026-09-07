@@ -80,6 +80,11 @@ all layers or it is silently unreachable from Maven:
   of `graphql-dgs-codegen-core` and is intentionally allowed.
 - Prefer **name-based test assertions** over hardcoded counts (assert a fixture name is
   present, not that there are exactly N fixtures).
+- **Flattened POM drops `dependencyManagement`.** Release uses `flatten-maven-plugin`
+  `flattenMode=ossrh`, which strips `dependencyManagement` from the published POM.
+  Version pins that only live there do not reach consumers. Keep `jackson-annotations`
+  and `jackson-core` as **direct** `<dependencies>` so they survive flattening and win
+  mediation over `graphql-dgs-codegen-core`'s older Jackson (issue #353).
 
 ## Build & test (from the repo root)
 
