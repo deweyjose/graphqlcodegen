@@ -56,7 +56,7 @@
     <kotlinpoet-jvm.version>1.18.1</kotlinpoet-jvm.version>
     <spotless.version>3.10.1</spotless.version>
     <maven-core.version>3.10.0</maven-core.version>
-    <jackson-bom.version>2.22.2</jackson-bom.version>
+    <jackson-bom.version>2.22.4</jackson-bom.version>
   </properties>
 
   <dependencyManagement>
