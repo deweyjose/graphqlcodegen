@@ -18,7 +18,9 @@ current_pom_hash() {
     printf '%s\n' ./.mvn/wrapper/maven-wrapper.properties
   } | LC_ALL=C sort -u | while IFS= read -r f; do
     if [[ -f "${f}" ]]; then
-      sha256sum "${f}"
+      # Strip leading ./ so sha256sum's path column (and thus the digest) is
+      # stable regardless of whether find emitted ./pom.xml or pom.xml.
+      sha256sum "${f#./}"
     fi
   done | sha256sum | awk '{print $1}'
 }

@@ -62,8 +62,9 @@ record_pom_hash() {
     } | LC_ALL=C sort -u | while IFS= read -r f; do
       # Skip missing optional paths without failing the hash.
       if [[ -f "${f}" ]]; then
-        # Strip leading ./ so the hash is path-stable.
-        sha256sum "${f}"
+        # Strip leading ./ so sha256sum's path column (and thus the digest) is
+        # stable regardless of whether find emitted ./pom.xml or pom.xml.
+        sha256sum "${f#./}"
       fi
     done | sha256sum | awk '{print $1}'
   )"
