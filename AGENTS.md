@@ -5,7 +5,7 @@ encodes the architecture, the conventions CI enforces, and the gotchas that are 
 
 ## Doc map
 
-- **This file** — repo-wide: reactor layout, build/test commands, CI, release.
+- **This file** — repo-wide: reactor layout, build/test commands, CI, release, Cloud Agent env.
 - [`graphqlcodegen-maven-plugin/AGENTS.md`](graphqlcodegen-maven-plugin/AGENTS.md) — the plugin's
   code: request flow, services, the option-wiring checklist, module-level gotchas.
 - [`examples/graphqlcodegen-example/AGENTS.md`](examples/graphqlcodegen-example/AGENTS.md) — the
@@ -13,6 +13,7 @@ encodes the architecture, the conventions CI enforces, and the gotchas that are 
 - [`README.md`](README.md) — the **consumer-facing option reference**. Its documented types and
   defaults must match the `@Parameter` declarations in `Codegen.java`; keep it in sync whenever
   options change.
+- [`.cursor/`](.cursor/) — Cursor Cloud Agent environment (Dockerfile + install/start scripts).
 
 ## What this project is
 
@@ -29,6 +30,30 @@ and clients from `.graphqls` schemas during the build.
 - The plugin exposes one goal: **`generate`** (`@Mojo(name = "generate")`), bound by default
   to the `generate-sources` phase.
 - Consumers configure it entirely through Maven `<configuration>` parameters.
+
+## Cloud Agent environment
+
+Cursor Cloud Agents boot from a prebuilt environment snapshot so they skip cold JDK/Maven
+downloads. Configuration lives under [`.cursor/`](.cursor/):
+
+| File | Role |
+| --- | --- |
+| [`environment.json`](.cursor/environment.json) | Wires the Dockerfile + `install` / `start` scripts |
+| [`Dockerfile`](.cursor/Dockerfile) | Lean Ubuntu 24.04 image with **JDK 17** only (no system Maven) |
+| [`install.sh`](.cursor/install.sh) | One-shot dependency prefetch (`./mvnw dependency:go-offline` + `resolve-plugins`) and pom hash |
+| [`start.sh`](.cursor/start.sh) | Minimal boot: warn if the snapshotted pom/wrapper hash is stale; no services |
+
+**Pins (keep in sync when bumping toolchains):**
+
+- **JDK 17** — `java.version` in the plugin and example poms; CI uses Temurin 17 /
+  `openjdk-17` in the image.
+- **Maven 3.9.6** via `./mvnw` — see `.mvn/wrapper/maven-wrapper.properties`
+  (`wrapperVersion=3.3.4`). Never install or invoke a system `mvn`.
+
+`install` is snapshotted; `start` runs on every agent boot and must stay cheap. Do not put
+credentials in these files. After changing poms or the wrapper on a branch that diverges from
+the snapshot, re-run `bash .cursor/install.sh` (or ignore the start warning and let Maven
+refresh what changed).
 
 ## Build, test, format
 
