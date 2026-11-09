@@ -268,6 +268,12 @@ public interface CodegenConfigProvider {
   String getGeneratedAnnotationType();
 
   /**
+   * @return maximum number of generated source files written concurrently, or null to use the
+   *     codegen default ({@code min(availableProcessors, 8)}). Set to 1 for serial writes.
+   */
+  Integer getFileWriteParallelism();
+
+  /**
    * @return remote schema URLs
    */
   List<String> getSchemaUrls();

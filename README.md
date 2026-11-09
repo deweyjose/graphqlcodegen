@@ -617,6 +617,21 @@ graphql-dgs-codegen-core 8.5.0.
 <generatedAnnotationType>javax.annotation.processing.Generated</generatedAnnotationType>
 ```
 
+### fileWriteParallelism
+
+Maximum number of generated source files written concurrently. When unset, graphql-dgs-codegen-core
+uses its default (`min(availableProcessors, 8)`). Set to `1` for serial writes. This is a
+performance knob only; it does not change the generated output. Added in graphql-dgs-codegen-core
+8.8.0.
+
+- Type: int
+- Required: false
+- Default: (unset — codegen default `min(availableProcessors, 8)`)
+
+```xml
+<fileWriteParallelism>1</fileWriteParallelism>
+```
+
 ### addDeprecatedAnnotation
 
 Add `@Deprecated` to generated members for schema fields marked `@deprecated`.

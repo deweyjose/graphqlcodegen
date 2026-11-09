@@ -192,6 +192,9 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   @Parameter(property = "generatedAnnotationType")
   private String generatedAnnotationType;
 
+  @Parameter(property = "fileWriteParallelism")
+  private Integer fileWriteParallelism;
+
   @Parameter(property = "autoAddSource", defaultValue = "true")
   private boolean autoAddSource;
 

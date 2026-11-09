@@ -62,6 +62,7 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   private Map<String, ParameterMap> includeClassImports = new HashMap<>();
   private boolean disableDatesInGeneratedAnnotation = false;
   private String generatedAnnotationType = null;
+  private Integer fileWriteParallelism = null;
   private List<String> schemaUrls = Collections.emptyList();
   private boolean autoAddSource = true;
   private List<IntrospectionRequest> introspectionRequests = Collections.emptyList();
@@ -342,6 +343,15 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   @Override
   public Set<String> getJacksonVersions() {
     return jacksonVersions;
+  }
+
+  public void setFileWriteParallelism(Integer fileWriteParallelism) {
+    this.fileWriteParallelism = fileWriteParallelism;
+  }
+
+  @Override
+  public Integer getFileWriteParallelism() {
+    return fileWriteParallelism;
   }
 
   @Override
