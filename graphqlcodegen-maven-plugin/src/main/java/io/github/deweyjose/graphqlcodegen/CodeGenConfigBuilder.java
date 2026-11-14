@@ -106,6 +106,13 @@ public class CodeGenConfigBuilder {
 
   private Set<JacksonVersion> jacksonVersions = Collections.emptySet();
 
+  /**
+   * Null leaves the codegen default ({@code min(availableProcessors, 8)}). Applied after
+   * construction because {@code fileWriteParallelism} is not a {@link CodeGenConfig} constructor
+   * argument.
+   */
+  private Integer fileWriteParallelism;
+
   public CodeGenConfigBuilder setSchemas(Set<String> schemas) {
     this.schemas = schemas;
     return this;
@@ -340,51 +347,61 @@ public class CodeGenConfigBuilder {
     return this;
   }
 
+  public CodeGenConfigBuilder setFileWriteParallelism(Integer fileWriteParallelism) {
+    this.fileWriteParallelism = fileWriteParallelism;
+    return this;
+  }
+
   public CodeGenConfig build() {
-    return new CodeGenConfig(
-        schemas,
-        schemaFiles,
-        schemaJarFilesFromDependencies,
-        outputDir,
-        examplesOutputDir,
-        writeToFiles,
-        packageName,
-        subPackageNameClient,
-        subPackageNameDatafetchers,
-        subPackageNameTypes,
-        subPackageNameDocs,
-        language,
-        generateBoxedTypes,
-        generateIsGetterForPrimitiveBooleanFields,
-        generateClientApi,
-        generateInterfaces,
-        generateKotlinNullableClasses,
-        generateKotlinClosureProjections,
-        typeMapping,
-        includeQueries,
-        includeMutations,
-        includeSubscriptions,
-        skipEntityQueries,
-        shortProjectionNames,
-        generateDataTypes,
-        kotlinAllFieldsOptional,
-        snakeCaseConstantNames,
-        generateInterfaceSetters,
-        generateInterfaceMethodsForInterfaceFields,
-        generateDocs,
-        generatedDocsFolder,
-        includeImports,
-        includeEnumImports,
-        includeClassImports,
-        generateCustomAnnotations,
-        javaGenerateAllConstructor,
-        implementSerializable,
-        addGeneratedAnnotation,
-        disableDatesInGeneratedAnnotation,
-        generatedAnnotationType,
-        addDeprecatedAnnotation,
-        trackInputFieldSet,
-        generateJSpecifyAnnotations,
-        jacksonVersions);
+    CodeGenConfig config =
+        new CodeGenConfig(
+            schemas,
+            schemaFiles,
+            schemaJarFilesFromDependencies,
+            outputDir,
+            examplesOutputDir,
+            writeToFiles,
+            packageName,
+            subPackageNameClient,
+            subPackageNameDatafetchers,
+            subPackageNameTypes,
+            subPackageNameDocs,
+            language,
+            generateBoxedTypes,
+            generateIsGetterForPrimitiveBooleanFields,
+            generateClientApi,
+            generateInterfaces,
+            generateKotlinNullableClasses,
+            generateKotlinClosureProjections,
+            typeMapping,
+            includeQueries,
+            includeMutations,
+            includeSubscriptions,
+            skipEntityQueries,
+            shortProjectionNames,
+            generateDataTypes,
+            kotlinAllFieldsOptional,
+            snakeCaseConstantNames,
+            generateInterfaceSetters,
+            generateInterfaceMethodsForInterfaceFields,
+            generateDocs,
+            generatedDocsFolder,
+            includeImports,
+            includeEnumImports,
+            includeClassImports,
+            generateCustomAnnotations,
+            javaGenerateAllConstructor,
+            implementSerializable,
+            addGeneratedAnnotation,
+            disableDatesInGeneratedAnnotation,
+            generatedAnnotationType,
+            addDeprecatedAnnotation,
+            trackInputFieldSet,
+            generateJSpecifyAnnotations,
+            jacksonVersions);
+    if (fileWriteParallelism != null) {
+      config.setFileWriteParallelism(fileWriteParallelism);
+    }
+    return config;
   }
 }

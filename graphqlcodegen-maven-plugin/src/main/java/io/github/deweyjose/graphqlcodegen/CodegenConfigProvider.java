@@ -60,6 +60,12 @@ public interface CodegenConfigProvider {
   boolean isWriteToFiles();
 
   /**
+   * @return maximum generated source files written concurrently, or null to keep the codegen
+   *     default ({@code min(availableProcessors, 8)})
+   */
+  Integer getFileWriteParallelism();
+
+  /**
    * @return package name
    */
   String getPackageName();

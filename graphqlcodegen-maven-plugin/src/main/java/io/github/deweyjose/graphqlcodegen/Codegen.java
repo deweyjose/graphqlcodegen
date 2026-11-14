@@ -69,6 +69,14 @@ public class Codegen extends AbstractMojo implements CodegenConfigProvider {
   @Parameter(property = "writeToFiles", defaultValue = "true")
   private boolean writeToFiles;
 
+  /**
+   * Maximum number of generated source files written at once. Unset keeps the codegen default,
+   * {@code min(availableProcessors, 8)}. {@code 1} writes files one at a time. This does not change
+   * generated source.
+   */
+  @Parameter(property = "fileWriteParallelism")
+  private Integer fileWriteParallelism;
+
   @Parameter(property = "packageName", defaultValue = "")
   private String packageName;
 

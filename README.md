@@ -304,6 +304,18 @@ Write generated sources to disk. Disabling this effectively turns codegen into a
 <writeToFiles>true</writeToFiles>
 ```
 
+### fileWriteParallelism
+
+Maximum number of generated source files written at the same time. Does not change generated source. Leave it unset to keep the codegen default, `min(availableProcessors, 8)`. Set `1` to write files one at a time. Values must be greater than zero.
+
+- Type: Integer
+- Required: false
+- Default: unset (codegen default)
+
+```xml
+<fileWriteParallelism>1</fileWriteParallelism>
+```
+
 ## Sub-package names
 
 ### subPackageNameClient
