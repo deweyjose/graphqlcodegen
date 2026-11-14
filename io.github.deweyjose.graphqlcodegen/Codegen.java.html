@@ -69,6 +69,14 @@ import org.apache.maven.project.MavenProject;
   @Parameter(property = &quot;writeToFiles&quot;, defaultValue = &quot;true&quot;)
   private boolean writeToFiles;
 
+  /**
+   * Maximum number of generated source files written at once. Unset keeps the codegen default,
+   * {@code min(availableProcessors, 8)}. {@code 1} writes files one at a time. This does not change
+   * generated source.
+   */
+  @Parameter(property = &quot;fileWriteParallelism&quot;)
+  private Integer fileWriteParallelism;
+
   @Parameter(property = &quot;packageName&quot;, defaultValue = &quot;&quot;)
   private String packageName;
 
@@ -200,26 +208,26 @@ import org.apache.maven.project.MavenProject;
 
   @Override
   public void execute() {
-<span class="fc" id="L203">    Logger logger = new MavenLogger(getLog());</span>
+<span class="fc" id="L211">    Logger logger = new MavenLogger(getLog());</span>
 
-<span class="pc bpc" id="L205" title="1 of 2 branches missed.">    if (skip) {</span>
-<span class="nc" id="L206">      logger.info(&quot;Skipping code generation as requested (skip=true)&quot;);</span>
-<span class="nc" id="L207">      return;</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">    if (skip) {</span>
+<span class="nc" id="L214">      logger.info(&quot;Skipping code generation as requested (skip=true)&quot;);</span>
+<span class="nc" id="L215">      return;</span>
     }
 
-<span class="fc" id="L210">    SchemaManifestService manifest =</span>
-<span class="fc" id="L211">        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());</span>
-<span class="fc" id="L212">    TypeMappingService typeMappingService = new TypeMappingService();</span>
-<span class="fc" id="L213">    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest, logger);</span>
+<span class="fc" id="L218">    SchemaManifestService manifest =</span>
+<span class="fc" id="L219">        new SchemaManifestService(schemaManifestOutputDir, project.getBasedir());</span>
+<span class="fc" id="L220">    TypeMappingService typeMappingService = new TypeMappingService();</span>
+<span class="fc" id="L221">    SchemaFileService schemaFileService = new SchemaFileService(outputDir, manifest, logger);</span>
 
-<span class="fc" id="L215">    Set&lt;Artifact&gt; artifacts = project.getArtifacts();</span>
+<span class="fc" id="L223">    Set&lt;Artifact&gt; artifacts = project.getArtifacts();</span>
 
-<span class="fc" id="L217">    var executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);</span>
-<span class="fc" id="L218">    executor.execute(this, artifacts, project.getBasedir());</span>
+<span class="fc" id="L225">    var executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);</span>
+<span class="fc" id="L226">    executor.execute(this, artifacts, project.getBasedir());</span>
 
-<span class="fc bfc" id="L220" title="All 2 branches covered.">    if (autoAddSource) {</span>
-<span class="fc" id="L221">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">    if (autoAddSource) {</span>
+<span class="fc" id="L229">      project.addCompileSourceRoot(outputDir.getAbsolutePath());</span>
     }
-<span class="fc" id="L223">  }</span>
+<span class="fc" id="L231">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

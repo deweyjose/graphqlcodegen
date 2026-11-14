@@ -47,7 +47,7 @@ public class CodegenExecutor {
    * @param artifacts the artifacts
    * @param projectBaseDir the project base directory
    */
-<span class="pc" id="L50">  @SneakyThrows</span>
+<span class="fc" id="L50">  @SneakyThrows</span>
   public void execute(CodegenConfigProvider request, Set&lt;Artifact&gt; artifacts, File projectBaseDir) {
     // get the schema paths that might have changed or all of them.
 <span class="fc bfc" id="L53" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
@@ -134,21 +134,22 @@ public class CodegenExecutor {
 <span class="fc" id="L134">            .setTrackInputFieldSet(request.isTrackInputFieldSet())</span>
 <span class="fc" id="L135">            .setGenerateJSpecifyAnnotations(request.isGenerateJSpecifyAnnotations())</span>
 <span class="fc" id="L136">            .setJacksonVersions(toJacksonVersions(request.getJacksonVersions()))</span>
-<span class="fc" id="L137">            .build();</span>
+<span class="fc" id="L137">            .setFileWriteParallelism(request.getFileWriteParallelism())</span>
+<span class="fc" id="L138">            .build();</span>
 
-<span class="pc bpc" id="L139" title="1 of 2 branches missed.">    if (request.isOmitNullInputFields()) {</span>
-<span class="nc" id="L140">      logger.warn(</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">    if (request.isOmitNullInputFields()) {</span>
+<span class="nc" id="L141">      logger.warn(</span>
           &quot;omitNullInputFields is no longer supported by graphql-dgs-codegen-core &gt;= 8.2.1; ignoring.&quot;);
     }
 
-<span class="fc" id="L144">    logger.info(&quot;Codegen config: \n{}&quot;, config);</span>
-<span class="fc" id="L145">    final CodeGen codeGen = new CodeGen(config);</span>
-<span class="fc" id="L146">    codeGen.generate();</span>
+<span class="fc" id="L145">    logger.info(&quot;Codegen config: \n{}&quot;, config);</span>
+<span class="fc" id="L146">    final CodeGen codeGen = new CodeGen(config);</span>
+<span class="fc" id="L147">    codeGen.generate();</span>
 
-<span class="fc bfc" id="L148" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
-<span class="fc" id="L149">      schemaFileService.syncManifest();</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">    if (request.isOnlyGenerateChanged()) {</span>
+<span class="fc" id="L150">      schemaFileService.syncManifest();</span>
     }
-<span class="fc" id="L151">  }</span>
+<span class="fc" id="L152">  }</span>
 
   /**
    * Converts a map of ParameterMap to a map of string-to-string maps.
@@ -157,12 +158,12 @@ public class CodegenExecutor {
    * @return a map of string to string maps
    */
   public static Map&lt;String, Map&lt;String, String&gt;&gt; toMap(Map&lt;String, ParameterMap&gt; m) {
-<span class="fc bfc" id="L160" title="All 2 branches covered.">    if (m == null) return Collections.emptyMap();</span>
-<span class="fc" id="L161">    return m.entrySet().stream()</span>
-<span class="fc" id="L162">        .collect(</span>
-<span class="fc" id="L163">            Collectors.toMap(</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">    if (m == null) return Collections.emptyMap();</span>
+<span class="fc" id="L162">    return m.entrySet().stream()</span>
+<span class="fc" id="L163">        .collect(</span>
+<span class="fc" id="L164">            Collectors.toMap(</span>
                 Map.Entry::getKey,
-<span class="pc bpc" id="L165" title="1 of 2 branches missed.">                e -&gt; e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">                e -&gt; e.getValue() == null ? Collections.emptyMap() : e.getValue().getProperties()));</span>
   }
 
   /**
@@ -174,12 +175,12 @@ public class CodegenExecutor {
    * @return the corresponding set of {@link JacksonVersion}
    */
   public static Set&lt;JacksonVersion&gt; toJacksonVersions(Set&lt;String&gt; versions) {
-<span class="fc bfc" id="L177" title="All 4 branches covered.">    if (versions == null || versions.isEmpty()) {</span>
-<span class="fc" id="L178">      return Collections.emptySet();</span>
+<span class="fc bfc" id="L178" title="All 4 branches covered.">    if (versions == null || versions.isEmpty()) {</span>
+<span class="fc" id="L179">      return Collections.emptySet();</span>
     }
-<span class="fc" id="L180">    return versions.stream()</span>
-<span class="fc" id="L181">        .map(JacksonVersion.Companion::fromString)</span>
-<span class="fc" id="L182">        .collect(Collectors.toCollection(LinkedHashSet::new));</span>
+<span class="fc" id="L181">    return versions.stream()</span>
+<span class="fc" id="L182">        .map(JacksonVersion.Companion::fromString)</span>
+<span class="fc" id="L183">        .collect(Collectors.toCollection(LinkedHashSet::new));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
