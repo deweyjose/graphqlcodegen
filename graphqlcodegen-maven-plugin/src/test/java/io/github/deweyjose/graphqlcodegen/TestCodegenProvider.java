@@ -65,6 +65,7 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   private List<String> schemaUrls = Collections.emptyList();
   private boolean autoAddSource = true;
   private List<IntrospectionRequest> introspectionRequests = Collections.emptyList();
+  private Integer fileWriteParallelism;
 
   // Setters for test customization
   public void setSchemaPaths(Set<File> schemaPaths) {
@@ -110,6 +111,10 @@ public class TestCodegenProvider implements CodegenConfigProvider {
 
   public void setGenerateKotlinNullableClasses(boolean generateKotlinNullableClasses) {
     this.generateKotlinNullableClasses = generateKotlinNullableClasses;
+  }
+
+  public void setFileWriteParallelism(Integer fileWriteParallelism) {
+    this.fileWriteParallelism = fileWriteParallelism;
   }
 
   // Add more setters as needed
@@ -382,5 +387,10 @@ public class TestCodegenProvider implements CodegenConfigProvider {
   @Override
   public List<IntrospectionRequest> getIntrospectionRequests() {
     return introspectionRequests;
+  }
+
+  @Override
+  public Integer getFileWriteParallelism() {
+    return fileWriteParallelism;
   }
 }

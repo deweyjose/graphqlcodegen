@@ -134,6 +134,7 @@ public class CodegenExecutor {
             .setTrackInputFieldSet(request.isTrackInputFieldSet())
             .setGenerateJSpecifyAnnotations(request.isGenerateJSpecifyAnnotations())
             .setJacksonVersions(toJacksonVersions(request.getJacksonVersions()))
+            .setFileWriteParallelism(request.getFileWriteParallelism())
             .build();
 
     if (request.isOmitNullInputFields()) {

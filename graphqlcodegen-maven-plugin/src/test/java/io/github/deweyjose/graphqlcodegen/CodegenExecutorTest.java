@@ -382,6 +382,76 @@ class CodegenExecutorTest {
         "Should generate ActorsDatafetcher file");
   }
 
+  @Test
+  void fileWriteParallelismIsForwardedToCodegen() {
+    File schemaFile = TestUtils.getFile("schema/test-schema.graphqls");
+    TestCodegenProvider config = new TestCodegenProvider();
+    config.setSchemaPaths(Set.of(schemaFile));
+    config.setOutputDir(outputDir);
+    config.setSchemaManifestOutputDir(outputDir);
+    config.setFileWriteParallelism(1);
+
+    SchemaManifestService manifestService = new SchemaManifestService(outputDir, outputDir);
+    schemaFileService =
+        new SchemaFileService(
+            outputDir, manifestService, remoteSchemaService, schemaTransformationService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);
+
+    executor.execute(config, new HashSet<>(), new File("."));
+
+    assertTrue(
+        new File(outputDir, "com/example/datafetchers/HelloDatafetcher.java").exists(),
+        "Serial writes should still produce generated sources");
+  }
+
+  @Test
+  void nonPositiveFileWriteParallelismFails() {
+    File schemaFile = TestUtils.getFile("schema/test-schema.graphqls");
+    TestCodegenProvider config = new TestCodegenProvider();
+    config.setSchemaPaths(Set.of(schemaFile));
+    config.setOutputDir(outputDir);
+    config.setSchemaManifestOutputDir(outputDir);
+    config.setFileWriteParallelism(0);
+
+    SchemaManifestService manifestService = new SchemaManifestService(outputDir, outputDir);
+    schemaFileService =
+        new SchemaFileService(
+            outputDir, manifestService, remoteSchemaService, schemaTransformationService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);
+
+    IllegalArgumentException thrown =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> executor.execute(config, new HashSet<>(), new File(".")));
+    assertTrue(thrown.getMessage().contains("File write parallelism must be greater than zero"));
+  }
+
+  @Test
+  void collidingFieldNamesKeepLegacyProjectionAndAddOperationQualifiedRoot() {
+    File schemaFile = TestUtils.getFile("schema/field-name-collision.graphqls");
+    TestCodegenProvider config = new TestCodegenProvider();
+    config.setSchemaPaths(Set.of(schemaFile));
+    config.setOutputDir(outputDir);
+    config.setSchemaManifestOutputDir(outputDir);
+    config.setFileWriteParallelism(1);
+
+    SchemaManifestService manifestService = new SchemaManifestService(outputDir, outputDir);
+    schemaFileService =
+        new SchemaFileService(
+            outputDir, manifestService, remoteSchemaService, schemaTransformationService);
+    executor = new CodegenExecutor(schemaFileService, typeMappingService, logger);
+
+    executor.execute(config, new HashSet<>(), new File("."));
+
+    File legacyRoot = new File(outputDir, "com/example/client/ItemProjectionRoot.java");
+    File queryRoot = new File(outputDir, "com/example/client/ItemGraphQLQueryProjectionRoot.java");
+    File mutationRoot =
+        new File(outputDir, "com/example/client/ItemGraphQLMutationProjectionRoot.java");
+    assertTrue(legacyRoot.exists(), "8.7.0 legacy projection root should still be written");
+    assertTrue(queryRoot.exists(), "The dropped colliding root should be written under a new name");
+    assertFalse(mutationRoot.exists(), "The legacy name stays with the 8.7.0 last-writer winner");
+  }
+
   private void deleteDirectory(File directory) {
     File[] files = directory.listFiles();
     if (files != null) {

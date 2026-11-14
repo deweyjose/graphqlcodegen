@@ -1,0 +1,18 @@
+type Query {
+    item(id: ID): Item
+    ping: String
+}
+
+type Mutation {
+    item(id: ID!, title: String): ItemDetail
+}
+
+type Item {
+    id: ID
+    name: String
+}
+
+type ItemDetail {
+    id: ID
+    title: String
+}
