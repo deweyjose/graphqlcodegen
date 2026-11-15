@@ -417,8 +417,16 @@ class CodegenExecutorTest {
     Map<String, String> parallel = generatedSources(parallelDir);
 
     assertTrue(
-        serial.size() >= 3,
-        "Expected enough generated files for parallelism 3 to write more than one");
+        serial.containsKey("com/example/types/User.java"),
+        "User type should be generated so parallelism 3 has a type file to write");
+    assertTrue(
+        serial.containsKey("com/example/datafetchers/HelloDatafetcher.java"),
+        "Hello datafetcher should be generated");
+    assertTrue(
+        serial.containsKey("com/example/datafetchers/UserDatafetcher.java"),
+        "User datafetcher should be generated");
+    assertTrue(
+        serial.containsKey("com/example/DgsConstants.java"), "Constants should be generated");
     assertEquals(serial, parallel);
   }
 
