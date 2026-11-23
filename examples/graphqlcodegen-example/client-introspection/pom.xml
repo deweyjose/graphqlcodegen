@@ -55,6 +55,8 @@
           <generateBoxedTypes>true</generateBoxedTypes>
           <generateClientApi>true</generateClientApi>
           <writeToFiles>true</writeToFiles>
+          <!-- This module writes the most generated files in the harness. -->
+          <fileWriteParallelism>3</fileWriteParallelism>
           <includeQueries>
             <param>shows</param>
             <param>theaters</param>
