@@ -405,6 +405,32 @@ class CodegenExecutorTest {
   }
 
   @Test
+  void fileWriteParallelismThreeMatchesSerialOutput() throws IOException {
+    File schemaFile = TestUtils.getFile("schema/test-schema-with-user.graphqls");
+    File serialDir = new File(outputDir, "serial");
+    File parallelDir = new File(outputDir, "parallel");
+
+    generate(schemaFile, serialDir, 1);
+    generate(schemaFile, parallelDir, 3);
+
+    Map<String, String> serial = generatedSources(serialDir);
+    Map<String, String> parallel = generatedSources(parallelDir);
+
+    assertTrue(
+        serial.containsKey("com/example/types/User.java"),
+        "User type should be generated so parallelism 3 has a type file to write");
+    assertTrue(
+        serial.containsKey("com/example/datafetchers/HelloDatafetcher.java"),
+        "Hello datafetcher should be generated");
+    assertTrue(
+        serial.containsKey("com/example/datafetchers/UserDatafetcher.java"),
+        "User datafetcher should be generated");
+    assertTrue(
+        serial.containsKey("com/example/DgsConstants.java"), "Constants should be generated");
+    assertEquals(serial, parallel);
+  }
+
+  @Test
   void nonPositiveFileWriteParallelismFails() {
     File schemaFile = TestUtils.getFile("schema/test-schema.graphqls");
     TestCodegenProvider config = new TestCodegenProvider();
@@ -450,6 +476,32 @@ class CodegenExecutorTest {
     assertTrue(legacyRoot.exists(), "8.7.0 legacy projection root should still be written");
     assertTrue(queryRoot.exists(), "The dropped colliding root should be written under a new name");
     assertFalse(mutationRoot.exists(), "The legacy name stays with the 8.7.0 last-writer winner");
+  }
+
+  private void generate(File schemaFile, File dir, int fileWriteParallelism) {
+    dir.mkdirs();
+    TestCodegenProvider config = new TestCodegenProvider();
+    config.setSchemaPaths(Set.of(schemaFile));
+    config.setOutputDir(dir);
+    config.setSchemaManifestOutputDir(dir);
+    config.setFileWriteParallelism(fileWriteParallelism);
+
+    SchemaManifestService manifestService = new SchemaManifestService(dir, dir);
+    SchemaFileService files =
+        new SchemaFileService(
+            dir, manifestService, remoteSchemaService, schemaTransformationService);
+    new CodegenExecutor(files, typeMappingService, logger)
+        .execute(config, new HashSet<>(), new File("."));
+  }
+
+  private static Map<String, String> generatedSources(File root) throws IOException {
+    Map<String, String> sources = new HashMap<>();
+    try (var paths = Files.walk(root.toPath())) {
+      for (var path : paths.filter(Files::isRegularFile).toList()) {
+        sources.put(root.toPath().relativize(path).toString(), Files.readString(path));
+      }
+    }
+    return sources;
   }
 
   private void deleteDirectory(File directory) {
